@@ -1,0 +1,3 @@
+[submodule "operators/flash_mla/target"]
+	path = operators/flash_mla/target
+	url = https://github.com/deepseek-ai/FlashMLA.git

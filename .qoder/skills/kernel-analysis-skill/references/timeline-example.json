@@ -1,0 +1,26 @@
+{
+  "title": "Warp-group pipeline",
+  "time_label": "logical time",
+  "lanes": [
+    {
+      "label": "Warp group 0",
+      "events": [
+        {"start": 1, "end": 3, "label": "WGMMA[0]", "kind": "compute"},
+        {"start": 3, "end": 4, "label": "softmax[0]", "kind": "epilogue"},
+        {"start": 4, "end": 6, "label": "WGMMA[1]", "kind": "compute"}
+      ]
+    },
+    {
+      "label": "Warp group 1",
+      "events": [
+        {"start": 0, "end": 1, "label": "TMA K/V[0]", "kind": "transfer"},
+        {"start": 2, "end": 3, "label": "TMA K/V[1]", "kind": "transfer"},
+        {"start": 4, "end": 5, "label": "TMA K/V[2]", "kind": "transfer"}
+      ]
+    }
+  ],
+  "sync": [
+    {"time": 1, "label": "K/V[0] ready (mbarrier)"},
+    {"time": 4, "label": "accumulator ready (wait_group)"}
+  ]
+}

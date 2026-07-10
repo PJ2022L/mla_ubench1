@@ -1,0 +1,39 @@
+{
+  "title": "FlashMLA V3.2 sparse decode: inter-warp-group pipeline",
+  "time_label": "logical time (not measured cycles)",
+  "lanes": [
+    {
+      "label": "WG2 producer",
+      "events": [
+        {"start": 0.0, "end": 2.0, "label": "LD+CVT+ST[0]/buf0", "kind": "transfer"},
+        {"start": 2.0, "end": 4.0, "label": "LD+CVT+ST[1]/buf1", "kind": "transfer"},
+        {"start": 7.4, "end": 9.4, "label": "LD+CVT+ST[2]/buf0", "kind": "transfer"}
+      ]
+    },
+    {
+      "label": "WG0 consumer-main",
+      "events": [
+        {"start": 2.0, "end": 4.0, "label": "QK WGMMA[0]", "kind": "compute"},
+        {"start": 4.0, "end": 5.0, "label": "softmax[0]", "kind": "epilogue"},
+        {"start": 5.0, "end": 7.0, "label": "PV-RS[0]", "kind": "compute"},
+        {"start": 7.0, "end": 9.0, "label": "QK WGMMA[1]", "kind": "compute"},
+        {"start": 9.0, "end": 10.0, "label": "softmax[1]", "kind": "epilogue"},
+        {"start": 10.0, "end": 12.0, "label": "PV-RS[1]", "kind": "compute"}
+      ]
+    },
+    {
+      "label": "WG1 consumer-remote",
+      "events": [
+        {"start": 5.2, "end": 7.4, "label": "scale+PV-SS[0]", "kind": "compute"},
+        {"start": 10.2, "end": 12.4, "label": "scale+PV-SS[1]", "kind": "compute"}
+      ]
+    }
+  ],
+  "sync": [
+    {"time": 2.0, "label": "K[0] ready"},
+    {"time": 4.0, "label": "K[1] ready / wait_group"},
+    {"time": 5.2, "label": "S[0] ready"},
+    {"time": 7.4, "label": "buf0 free"},
+    {"time": 10.2, "label": "S[1] ready"}
+  ]
+}

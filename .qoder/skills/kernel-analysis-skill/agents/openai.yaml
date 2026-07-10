@@ -1,0 +1,4 @@
+interface:
+  display_name: "CUDA Kernel Analysis"
+  short_description: "Document CUDA CTA, warp-group, and instruction pipelines."
+  default_prompt: "Use $kernel-analysis-skill to write an evidence-based implementation analysis and logical pipeline diagram for this CUDA kernel path."

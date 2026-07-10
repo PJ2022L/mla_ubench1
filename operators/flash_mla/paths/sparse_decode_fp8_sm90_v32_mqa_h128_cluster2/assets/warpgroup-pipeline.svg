@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1220" height="392" viewBox="0 0 1220 392" role="img">
+<defs><marker id="arrow" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><path d="M0,0 L9,3.5 L0,7 Z" fill="#111"/></marker></defs>
+<rect width="100%" height="100%" fill="white"/>
+<style>text { font-family: Arial, &quot;Microsoft YaHei&quot;, sans-serif; fill: #151515; } .label { font-size: 16px; font-weight: 600; } .event { font-size: 14px; } .small { font-size: 12px; } .sync { stroke: #202020; stroke-width: 1.5; stroke-dasharray: 7 6; }</style>
+<text x="205" y="29" class="label">FlashMLA V3.2 sparse decode: inter-warp-group pipeline</text>
+<rect x="475" y="15" width="14" height="14" rx="2" fill="#c9e6f5" stroke="#222"/>
+<text x="495" y="27" class="small">data movement</text>
+<rect x="645" y="15" width="14" height="14" rx="2" fill="#f4c7c3" stroke="#222"/>
+<text x="665" y="27" class="small">tensor/core compute</text>
+<rect x="815" y="15" width="14" height="14" rx="2" fill="#d8e8c6" stroke="#222"/>
+<text x="835" y="27" class="small">vector / reduction / epilogue</text>
+<rect x="985" y="15" width="14" height="14" rx="2" fill="#f7deb5" stroke="#222"/>
+<text x="1005" y="27" class="small">other work</text>
+<line x1="359.8" y1="47" x2="359.8" y2="299" class="sync"/>
+<text x="364.8" y="60" class="small">K[0] ready</text>
+<line x1="514.7" y1="47" x2="514.7" y2="299" class="sync"/>
+<text x="519.7" y="60" class="small">K[1] ready / wait_group</text>
+<line x1="607.6" y1="47" x2="607.6" y2="299" class="sync"/>
+<text x="612.6" y="60" class="small">S[0] ready</text>
+<line x1="777.9" y1="47" x2="777.9" y2="299" class="sync"/>
+<text x="782.9" y="60" class="small">buf0 free</text>
+<line x1="994.7" y1="47" x2="994.7" y2="299" class="sync"/>
+<text x="999.7" y="60" class="small">S[1] ready</text>
+<text x="190" y="97" text-anchor="end" class="label">WG2 producer</text>
+<line x1="205" y1="104" x2="1165" y2="104" stroke="#dedede"/>
+<rect x="205.0" y="72" width="154.8" height="48" rx="2" fill="#c9e6f5" stroke="#222" stroke-width="1.2"/>
+<text x="282.4" y="101" text-anchor="middle" class="event">LD+CVT+ST[0]/buf0</text>
+<rect x="359.8" y="72" width="154.8" height="48" rx="2" fill="#c9e6f5" stroke="#222" stroke-width="1.2"/>
+<text x="437.3" y="101" text-anchor="middle" class="event">LD+CVT+ST[1]/buf1</text>
+<rect x="777.9" y="72" width="154.8" height="48" rx="2" fill="#c9e6f5" stroke="#222" stroke-width="1.2"/>
+<text x="855.3" y="101" text-anchor="middle" class="event">LD+CVT+ST[2]/buf0</text>
+<text x="190" y="171" text-anchor="end" class="label">WG0 consumer-main</text>
+<line x1="205" y1="178" x2="1165" y2="178" stroke="#dedede"/>
+<rect x="359.8" y="146" width="154.8" height="48" rx="2" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
+<text x="437.3" y="175" text-anchor="middle" class="event">QK WGMMA[0]</text>
+<rect x="514.7" y="146" width="77.4" height="48" rx="2" fill="#d8e8c6" stroke="#222" stroke-width="1.2"/>
+<text x="553.4" y="175" text-anchor="middle" class="event">softmax[0]</text>
+<rect x="592.1" y="146" width="154.8" height="48" rx="2" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
+<text x="669.5" y="175" text-anchor="middle" class="event">PV-RS[0]</text>
+<rect x="746.9" y="146" width="154.8" height="48" rx="2" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
+<text x="824.4" y="175" text-anchor="middle" class="event">QK WGMMA[1]</text>
+<rect x="901.8" y="146" width="77.4" height="48" rx="2" fill="#d8e8c6" stroke="#222" stroke-width="1.2"/>
+<text x="940.5" y="175" text-anchor="middle" class="event">softmax[1]</text>
+<rect x="979.2" y="146" width="154.8" height="48" rx="2" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
+<text x="1056.6" y="175" text-anchor="middle" class="event">PV-RS[1]</text>
+<text x="190" y="245" text-anchor="end" class="label">WG1 consumer-remote</text>
+<line x1="205" y1="252" x2="1165" y2="252" stroke="#dedede"/>
+<rect x="607.6" y="220" width="170.3" height="48" rx="2" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
+<text x="692.7" y="249" text-anchor="middle" class="event">scale+PV-SS[0]</text>
+<rect x="994.7" y="220" width="170.3" height="48" rx="2" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
+<text x="1079.8" y="249" text-anchor="middle" class="event">scale+PV-SS[1]</text>
+<line x1="205" y1="309" x2="1177" y2="309" stroke="#111" stroke-width="1.5" marker-end="url(#arrow)"/>
+<text x="685.0" y="340" text-anchor="middle" class="label">logical time (not measured cycles)</text>
+</svg>

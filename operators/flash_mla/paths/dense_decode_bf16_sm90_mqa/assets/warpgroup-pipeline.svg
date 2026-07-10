@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1220" height="392" viewBox="0 0 1220 392" role="img">
+<defs><marker id="arrow" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><path d="M0,0 L9,3.5 L0,7 Z" fill="#111"/></marker></defs>
+<rect width="100%" height="100%" fill="white"/>
+<style>text { font-family: Arial, &quot;Microsoft YaHei&quot;, sans-serif; fill: #151515; } .label { font-size: 16px; font-weight: 600; } .event { font-size: 14px; } .small { font-size: 12px; } .sync { stroke: #202020; stroke-width: 1.5; stroke-dasharray: 7 6; }</style>
+<text x="205" y="29" class="label">FlashMLA dense BF16 decode: inter-warp-group page-pair schedule</text>
+<rect x="475" y="15" width="14" height="14" rx="2" fill="#c9e6f5" stroke="#222"/>
+<text x="495" y="27" class="small">data movement</text>
+<rect x="645" y="15" width="14" height="14" rx="2" fill="#f4c7c3" stroke="#222"/>
+<text x="665" y="27" class="small">tensor/core compute</text>
+<rect x="815" y="15" width="14" height="14" rx="2" fill="#d8e8c6" stroke="#222"/>
+<text x="835" y="27" class="small">vector / reduction / epilogue</text>
+<rect x="985" y="15" width="14" height="14" rx="2" fill="#f7deb5" stroke="#222"/>
+<text x="1005" y="27" class="small">other work</text>
+<line x1="340.5" y1="47" x2="340.5" y2="299" class="sync"/>
+<text x="345.5" y="60" class="small">sScale0Ready</text>
+<line x1="476.1" y1="47" x2="476.1" y2="299" class="sync"/>
+<text x="481.1" y="60" class="small">sScale1Ready</text>
+<line x1="634.2" y1="47" x2="634.2" y2="299" class="sync"/>
+<text x="639.2" y="60" class="small">sP0Ready / remote PV</text>
+<line x1="826.2" y1="47" x2="826.2" y2="299" class="sync"/>
+<text x="831.2" y="60" class="small">PV waits / next QK</text>
+<text x="190" y="97" text-anchor="end" class="label">WG0 even / O-left</text>
+<line x1="205" y1="104" x2="1165" y2="104" stroke="#dedede"/>
+<rect x="205.0" y="72" width="135.5" height="48" rx="2" fill="#d8e8c6" stroke="#222" stroke-width="1.2"/>
+<text x="272.8" y="101" text-anchor="middle" class="event">softmax even[i]</text>
+<rect x="340.5" y="72" width="203.3" height="48" rx="2" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
+<text x="442.2" y="101" text-anchor="middle" class="event">PV-RS even[i]</text>
+<rect x="543.8" y="72" width="90.4" height="48" rx="2" fill="#c9e6f5" stroke="#222" stroke-width="1.2"/>
+<text x="589.0" y="101" text-anchor="middle" class="event">STSM P-even[i]</text>
+<rect x="634.2" y="72" width="192.0" height="48" rx="2" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
+<text x="730.2" y="101" text-anchor="middle" class="event">PV-SS odd[i]</text>
+<rect x="826.2" y="72" width="338.8" height="48" rx="2" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
+<text x="995.6" y="101" text-anchor="middle" class="event">QK even[i+1]</text>
+<text x="190" y="171" text-anchor="end" class="label">WG1 odd / O-right</text>
+<line x1="205" y1="178" x2="1165" y2="178" stroke="#dedede"/>
+<rect x="340.5" y="146" width="135.5" height="48" rx="2" fill="#d8e8c6" stroke="#222" stroke-width="1.2"/>
+<text x="408.3" y="175" text-anchor="middle" class="event">softmax odd[i]</text>
+<rect x="476.1" y="146" width="90.4" height="48" rx="2" fill="#c9e6f5" stroke="#222" stroke-width="1.2"/>
+<text x="521.2" y="175" text-anchor="middle" class="event">STSM P-odd[i]</text>
+<rect x="476.1" y="146" width="203.3" height="48" rx="2" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
+<text x="577.7" y="175" text-anchor="middle" class="event">PV-RS odd[i]</text>
+<rect x="634.2" y="146" width="192.0" height="48" rx="2" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
+<text x="730.2" y="175" text-anchor="middle" class="event">PV-SS even[i]</text>
+<rect x="826.2" y="146" width="338.8" height="48" rx="2" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
+<text x="995.6" y="175" text-anchor="middle" class="event">QK odd[i+1]</text>
+<text x="190" y="245" text-anchor="end" class="label">TMA K engine</text>
+<line x1="205" y1="252" x2="1165" y2="252" stroke="#dedede"/>
+<rect x="521.2" y="220" width="225.9" height="48" rx="2" fill="#c9e6f5" stroke="#222" stroke-width="1.2"/>
+<text x="634.2" y="249" text-anchor="middle" class="event">K even[i+1] tiles</text>
+<rect x="747.1" y="220" width="248.5" height="48" rx="2" fill="#c9e6f5" stroke="#222" stroke-width="1.2"/>
+<text x="871.4" y="249" text-anchor="middle" class="event">K odd[i+1] tiles</text>
+<line x1="205" y1="309" x2="1177" y2="309" stroke="#111" stroke-width="1.5" marker-end="url(#arrow)"/>
+<text x="685.0" y="340" text-anchor="middle" class="label">logical time (not measured cycles)</text>
+</svg>

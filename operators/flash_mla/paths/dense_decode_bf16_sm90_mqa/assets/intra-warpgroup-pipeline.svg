@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1220" height="466" viewBox="0 0 1220 466" role="img">
+<defs><marker id="arrow" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><path d="M0,0 L9,3.5 L0,7 Z" fill="#111"/></marker></defs>
+<rect width="100%" height="100%" fill="white"/>
+<style>text { font-family: Arial, &quot;Microsoft YaHei&quot;, sans-serif; fill: #151515; } .label { font-size: 16px; font-weight: 600; } .event { font-size: 14px; } .small { font-size: 12px; } .sync { stroke: #202020; stroke-width: 1.5; stroke-dasharray: 7 6; }</style>
+<text x="205" y="29" class="label">FlashMLA dense BF16 decode: intra-warp-group TMA/WGMMA overlap</text>
+<rect x="475" y="15" width="14" height="14" rx="2" fill="#c9e6f5" stroke="#222"/>
+<text x="495" y="27" class="small">data movement</text>
+<rect x="645" y="15" width="14" height="14" rx="2" fill="#f4c7c3" stroke="#222"/>
+<text x="665" y="27" class="small">tensor/core compute</text>
+<rect x="815" y="15" width="14" height="14" rx="2" fill="#d8e8c6" stroke="#222"/>
+<text x="835" y="27" class="small">vector / reduction / epilogue</text>
+<rect x="985" y="15" width="14" height="14" rx="2" fill="#f7deb5" stroke="#222"/>
+<text x="1005" y="27" class="small">other work</text>
+<line x1="415.7" y1="47" x2="415.7" y2="373" class="sync"/>
+<text x="420.7" y="60" class="small">wait_group 0 (local PV)</text>
+<line x1="673.3" y1="47" x2="673.3" y2="373" class="sync"/>
+<text x="678.3" y="60" class="small">wait_group 4 / QK phase0</text>
+<line x1="884.0" y1="47" x2="884.0" y2="373" class="sync"/>
+<text x="889.0" y="60" class="small">tile barriers / QK phase2</text>
+<line x1="1165.0" y1="47" x2="1165.0" y2="373" class="sync"/>
+<text x="1170.0" y="60" class="small">wait_group 0</text>
+<text x="190" y="97" text-anchor="end" class="label">TMA K tiles</text>
+<line x1="205" y1="104" x2="1165" y2="104" stroke="#dedede"/>
+<rect x="205.0" y="72" width="327.8" height="48" rx="2" fill="#c9e6f5" stroke="#222" stroke-width="1.2"/>
+<text x="368.9" y="101" text-anchor="middle" class="event">TMA K[0..3]</text>
+<rect x="649.9" y="72" width="351.2" height="48" rx="2" fill="#c9e6f5" stroke="#222" stroke-width="1.2"/>
+<text x="825.5" y="101" text-anchor="middle" class="event">TMA K[4..8]</text>
+<text x="190" y="171" text-anchor="end" class="label">PV WGMMA</text>
+<line x1="205" y1="178" x2="1165" y2="178" stroke="#dedede"/>
+<rect x="205.0" y="146" width="210.7" height="48" rx="2" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
+<text x="310.4" y="175" text-anchor="middle" class="event">PV-local[i]</text>
+<rect x="532.8" y="146" width="234.1" height="48" rx="2" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
+<text x="649.9" y="175" text-anchor="middle" class="event">PV-remote[i]</text>
+<text x="190" y="245" text-anchor="end" class="label">QK WGMMA</text>
+<line x1="205" y1="252" x2="1165" y2="252" stroke="#dedede"/>
+<rect x="673.3" y="220" width="210.7" height="48" rx="2" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
+<text x="778.7" y="249" text-anchor="middle" class="event">QK tiles 0..3[i+1]</text>
+<rect x="884.0" y="220" width="281.0" height="48" rx="2" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
+<text x="1024.5" y="249" text-anchor="middle" class="event">QK tiles 4..8[i+1]</text>
+<text x="190" y="319" text-anchor="end" class="label">vector / exchange</text>
+<line x1="205" y1="326" x2="1165" y2="326" stroke="#dedede"/>
+<rect x="415.7" y="294" width="117.1" height="48" rx="2" fill="#d8e8c6" stroke="#222" stroke-width="1.2"/>
+<text x="474.3" y="323" text-anchor="middle" class="event">rescale + STSM P[i]</text>
+<line x1="205" y1="383" x2="1177" y2="383" stroke="#111" stroke-width="1.5" marker-end="url(#arrow)"/>
+<text x="685.0" y="414" text-anchor="middle" class="label">logical time (not measured cycles)</text>
+</svg>
