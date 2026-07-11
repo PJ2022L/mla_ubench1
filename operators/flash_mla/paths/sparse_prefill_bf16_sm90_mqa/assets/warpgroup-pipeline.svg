@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1220" height="392" viewBox="0 0 1220 392" role="img">
+<defs><marker id="arrow" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><path d="M0,0 L9,3.5 L0,7 Z" fill="#111"/></marker></defs>
+<rect width="100%" height="100%" fill="white"/>
+<style>text { font-family: Arial, &quot;Microsoft YaHei&quot;, sans-serif; fill: #151515; } .label { font-size: 16px; font-weight: 600; } .event { font-size: 14px; } .small { font-size: 12px; } .sync { stroke: #202020; stroke-width: 1.5; stroke-dasharray: 7 6; }</style>
+<text x="205" y="29" class="label">Sparse BF16 prefill: inter-warpgroup pipeline</text>
+<rect x="475" y="15" width="14" height="14" rx="2" fill="#c9e6f5" stroke="#222"/>
+<text x="495" y="27" class="small">data movement</text>
+<rect x="645" y="15" width="14" height="14" rx="2" fill="#f4c7c3" stroke="#222"/>
+<text x="665" y="27" class="small">tensor/core compute</text>
+<rect x="815" y="15" width="14" height="14" rx="2" fill="#d8e8c6" stroke="#222"/>
+<text x="835" y="27" class="small">vector / reduction / epilogue</text>
+<rect x="985" y="15" width="14" height="14" rx="2" fill="#f7deb5" stroke="#222"/>
+<text x="1005" y="27" class="small">other work</text>
+<line x1="301.0" y1="47" x2="301.0" y2="299" class="sync"/>
+<text x="306.0" y="60" class="small">Q + K0L ready</text>
+<line x1="397.0" y1="47" x2="397.0" y2="299" class="sync"/>
+<text x="402.0" y="60" class="small">K1R ready</text>
+<line x1="493.0" y1="47" x2="493.0" y2="299" class="sync"/>
+<text x="498.0" y="60" class="small">K0R ready</text>
+<line x1="589.0" y1="47" x2="589.0" y2="299" class="sync"/>
+<text x="594.0" y="60" class="small">K1L ready</text>
+<line x1="685.0" y1="47" x2="685.0" y2="299" class="sync"/>
+<text x="690.0" y="60" class="small">WG0 max ready</text>
+<line x1="781.0" y1="47" x2="781.0" y2="299" class="sync"/>
+<text x="786.0" y="60" class="small">WG1 max ready</text>
+<line x1="973.0" y1="47" x2="973.0" y2="299" class="sync"/>
+<text x="978.0" y="60" class="small">pair0 buffers released</text>
+<text x="190" y="97" text-anchor="end" class="label">WG0 (even block / O-left)</text>
+<line x1="205" y1="104" x2="1165" y2="104" stroke="#dedede"/>
+<rect x="205.0" y="72" width="96.0" height="48" rx="2" fill="#c9e6f5" stroke="#222" stroke-width="1.2"/>
+<text x="253.0" y="101" text-anchor="middle" class="event">TMA Q</text>
+<rect x="301.0" y="72" width="96.0" height="48" rx="2" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
+<text x="349.0" y="101" text-anchor="middle" class="event">QK K0-left[p0]</text>
+<rect x="493.0" y="72" width="96.0" height="48" rx="2" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
+<text x="541.0" y="101" text-anchor="middle" class="event">QK K0-right[p0]</text>
+<rect x="589.0" y="72" width="96.0" height="48" rx="2" fill="#d8e8c6" stroke="#222" stroke-width="1.2"/>
+<text x="637.0" y="101" text-anchor="middle" class="event">softmax K0[p0]</text>
+<rect x="685.0" y="72" width="96.0" height="48" rx="2" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
+<text x="733.0" y="101" text-anchor="middle" class="event">PV K0-left[p0]</text>
+<rect x="781.0" y="72" width="96.0" height="48" rx="2" fill="#d8e8c6" stroke="#222" stroke-width="1.2"/>
+<text x="829.0" y="101" text-anchor="middle" class="event">merge max / S0</text>
+<rect x="877.0" y="72" width="96.0" height="48" rx="2" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
+<text x="925.0" y="101" text-anchor="middle" class="event">PV K1-left[p0]</text>
+<rect x="973.0" y="72" width="96.0" height="48" rx="2" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
+<text x="1021.0" y="101" text-anchor="middle" class="event">QK K2-left[p1]</text>
+<text x="190" y="171" text-anchor="end" class="label">WG1 (odd block / O-right)</text>
+<line x1="205" y1="178" x2="1165" y2="178" stroke="#dedede"/>
+<rect x="397.0" y="146" width="96.0" height="48" rx="2" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
+<text x="445.0" y="175" text-anchor="middle" class="event">QK K1-right[p0]</text>
+<rect x="589.0" y="146" width="96.0" height="48" rx="2" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
+<text x="637.0" y="175" text-anchor="middle" class="event">QK K1-left[p0]</text>
+<rect x="685.0" y="146" width="96.0" height="48" rx="2" fill="#d8e8c6" stroke="#222" stroke-width="1.2"/>
+<text x="733.0" y="175" text-anchor="middle" class="event">merge softmax K1[p0]</text>
+<rect x="781.0" y="146" width="96.0" height="48" rx="2" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
+<text x="829.0" y="175" text-anchor="middle" class="event">PV K1-right[p0]</text>
+<rect x="877.0" y="146" width="96.0" height="48" rx="2" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
+<text x="925.0" y="175" text-anchor="middle" class="event">PV K0-right[p0]</text>
+<rect x="1069.0" y="146" width="96.0" height="48" rx="2" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
+<text x="1117.0" y="175" text-anchor="middle" class="event">QK K3-right[p1]</text>
+<text x="190" y="245" text-anchor="end" class="label">WG2 (indexed cp.async)</text>
+<line x1="205" y1="252" x2="1165" y2="252" stroke="#dedede"/>
+<rect x="205.0" y="220" width="96.0" height="48" rx="2" fill="#c9e6f5" stroke="#222" stroke-width="1.2"/>
+<text x="253.0" y="249" text-anchor="middle" class="event">load K0-left[p0]</text>
+<rect x="301.0" y="220" width="96.0" height="48" rx="2" fill="#c9e6f5" stroke="#222" stroke-width="1.2"/>
+<text x="349.0" y="249" text-anchor="middle" class="event">load K1-right[p0]</text>
+<rect x="397.0" y="220" width="96.0" height="48" rx="2" fill="#c9e6f5" stroke="#222" stroke-width="1.2"/>
+<text x="445.0" y="249" text-anchor="middle" class="event">load K0-right[p0]</text>
+<rect x="493.0" y="220" width="96.0" height="48" rx="2" fill="#c9e6f5" stroke="#222" stroke-width="1.2"/>
+<text x="541.0" y="249" text-anchor="middle" class="event">load K1-left[p0]</text>
+<rect x="781.0" y="220" width="96.0" height="48" rx="2" fill="#c9e6f5" stroke="#222" stroke-width="1.2"/>
+<text x="829.0" y="249" text-anchor="middle" class="event">load K2-left[p1]</text>
+<rect x="877.0" y="220" width="96.0" height="48" rx="2" fill="#c9e6f5" stroke="#222" stroke-width="1.2"/>
+<text x="925.0" y="249" text-anchor="middle" class="event">load K3-right[p1]</text>
+<rect x="973.0" y="220" width="96.0" height="48" rx="2" fill="#c9e6f5" stroke="#222" stroke-width="1.2"/>
+<text x="1021.0" y="249" text-anchor="middle" class="event">load K2-right[p1]</text>
+<rect x="1069.0" y="220" width="96.0" height="48" rx="2" fill="#c9e6f5" stroke="#222" stroke-width="1.2"/>
+<text x="1117.0" y="249" text-anchor="middle" class="event">load K3-left[p1]</text>
+<line x1="205" y1="309" x2="1177" y2="309" stroke="#111" stroke-width="1.5" marker-end="url(#arrow)"/>
+<text x="685.0" y="340" text-anchor="middle" class="label">logical time (not measured cycles)</text>
+</svg>

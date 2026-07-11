@@ -1,129 +1,145 @@
-# 03 — Reconstructing e2e performance
+# 03 — Reconstructing sparse-decode performance
 
-模型只使用三种组合语义：
+模型分三层，禁止混用粒度：
 
-- `A + B`：B 对 A 有数据或同步依赖，串行相加。
-- `max(A, B)`：A/B 在不同 WG/管线并行，慢者决定阶段完成时间。
-- `N × T`：同一指令或 loop body 重复 N 次。
+1. 一个 CTA/cluster 对一个 scheduler request segment 的 cycles；
+2. persistent `partition_idx` 的多个 segment 累积及 main-grid critical partition；
+3. 独立 combine grid 与 public API e2e wall interval。
 
-所有输入先归一成 `cycle / CTA / 64-token block`；不同粒度不能直接相加。
+## 1. Per-block producer
 
-## 1. Build per-block atoms
-
-microbench 可直接报告 block geometry 的时间，也可由单指令吞吐换算：
-
-```text
-T_x_block = N_x × t_x_instruction
-```
-
-对于 global/shared/DSM 指令，优先让 benchmark 直接复现完整 128-thread block geometry，避免把 per-thread source call 错当成硬件 issue 数。
-
-生产者 WG2 的依赖顺序为 load → convert → local/peer store：
+统一主循环原子为 `cycle / CTA / 64-token block`。优先使用完整 128-thread
+producer geometry 的直接测量：
 
 ```text
-T_P = T_ld_block
-    + T_cvt_block
-    + T_st_shared_block
-    + I(cluster2) × T_st_dsm_block
+T_P = T_producer_direct
 ```
 
-这是可解释的 first-order 模型。global load 的 memory-level parallelism、convert 与 store 的硬件管线重叠会通过 e2e 标定残差体现；只有 trace 能证明时才把内部 `+` 改成 `max`。
-
-## 2. Reconstruct the consumer branches
-
-WG0 主链：
+仅在没有 direct 值时使用分解上界：
 
 ```text
-T_QK       = 36 × t_wgmma_qk_ss
-T_PV_local =  4 × t_wgmma_pv_rs
+T_P = T_ld_block + T_cvt_block + T_st_shared_block + T_st_dsm_block
 ```
 
-WG1 在 WG0 softmax 发布 `sS/sScale` 后启动 remote PV：
+这里每 CTA 只生产 32 token，并同时写 local + peer DSM，使 cluster 两 CTA 都得到
+完整 64-token block。单 instruction latency 不能直接乘 128-thread source-call 数；
+应由 full-geometry benchmark 吸收 coalescing、MLP 和 instruction issue。
+
+## 2. Per-block consumer
 
 ```text
-T_PV_remote = T_handoff + T_remote_scale + 4 × t_wgmma_pv_ss
+T_QK       = 36 * t_wgmma_qk_ss
+T_PV_local =  4 * t_wgmma_pv_rs
+T_PV_score = T_handoff + T_score_scale + 4 * t_wgmma_pv_ss
 ```
 
-local/remote PV 在两个 WG 上并行，consumer block 完成时间是：
+两支 PV 的同步关系允许并行推进，但共享 Tensor Core。首选 dual-WG harness 的
+直接 stage time：
 
 ```text
-T_C = T_QK
-    + T_softmax
-    + max(T_PV_local, T_PV_remote)
+T_PV = T_pv_dual_wg
 ```
 
-这里不能简单丢掉 WG1；K buffer 的最终 release 需要两条 PV 分支都推进到对应 arrive。
-
-## 3. Two-buffer pipeline
-
-令 `B = topk / 64`。Q 的 TMA load 在 common prologue 发起，WG2 可同时生产首个 K block，因此首个 consumer 的就绪时间为：
+缺少 direct 值时，只能使用带 aggregate-throughput floor 的近似：
 
 ```text
-T_first_ready = max(T_qload, T_P)
+T_PV = max(T_PV_local, T_PV_score, T_pv_aggregate_floor)
 ```
 
-完整 main-kernel 模型必须包括最后一个 consumer drain：
+其中 `T_pv_aggregate_floor` 来自两个 resident WG 共 8 个 WGMMA 的 SM aggregate
+throughput。若把两个单 WG latency 直接 `max`，该 floor 缺失，结果不是可信下界。
 
 ```text
-T_main = T_first_ready
-       + (B - 1) × max(T_P, T_C)
-       + T_C
-       + T_tma_store
+T_C = T_QK + T_softmax + T_PV
 ```
 
-例如 `topk=2048` 时 `B=32`。原模型若只写 `T_P + 31×max(P,C)+store`，会漏掉最后一个 `T_C`；在 `B=1` 时错误尤其明显。
+## 3. One scheduler segment
 
-split-KV 时再加 combine kernel：
+令 `B = end_block_idx - start_block_idx`。Q TMA 与首个 K producer 可并行；双
+K-buffer 的 reuse 依赖两个 PV consumer 都 release：
 
 ```text
-T_e2e_model = T_main + T_splitkv_reduce(num_splits)
+T_first  = max(T_qload, T_P)
+T_steady = max(T_P, T_C)
+
+T_segment = T_first + (B - 1) * T_steady + T_C + T_epilogue
 ```
 
-只有 trace 证明 combine 与 main kernel 通过 PDL/stream 发生有效重叠时，才把这个 `+` 改成相应的 `max` 或分段 pipeline。
-
-## 4. Bounds and calibration
-
-理想双缓冲下界使用上面的 `max` 模型。保守全串行上界为：
+最后一个 `T_C` 是 drain，不能省略。epilogue 根据 scheduler 的 split flag 二选一：
 
 ```text
-T_serial = T_qload + B × (T_P + T_C) + T_tma_store + T_splitkv_reduce
+non-split: T_epilogue = T_output_store_bf16_5d
+split:     T_epilogue = T_partial_store_f32_bulk
 ```
 
-应检查：
+全串行上界：
 
 ```text
-T_model_lower <= T_measured_e2e <= T_serial
-rho = T_model_lower / T_measured_e2e
+T_segment_serial = T_qload + B * (T_P + T_C) + T_epilogue
 ```
 
-`rho` 是模型/重叠标定比，不是纯硬件利用率。`rho<1` 表示模型漏掉同步、调度、cache 或尾部成本；`rho>1` 通常表示原子独立测量高估、粒度换算错误，或融合 kernel 出现了模型未表达的内部 overlap。
+`compose.py` 实现这一层。`--split-kv` 会要求 `T_partial_store`，不会再误用 BF16
+TMA-store cycle；它也不会把 combine 的不同 grid 粒度硬加到 CTA segment。
 
-## 5. Bottleneck and DSM ablation
+## 4. Persistent partitions and main grid
 
-稳态瓶颈直接来自：
+SM90 public dispatch 设置：
 
 ```text
-T_P > T_C  -> producer / memory-convert bound
-T_C >= T_P -> consumer / tensor-softmax bound
+num_sm_parts = max(num_sms / s_q / (h_q/64), 1)
+grid = (2, s_q, num_sm_parts), cluster=(2,1,1)
 ```
 
-DSM crossover 的消融使用相同 CTA/block 粒度：
+每个 `partition_idx` 的 cluster 按 `DecodingSchedMeta` 顺序处理一个或多个 request
+segment。对 partition `p`：
 
 ```text
-T_P_cross   = T_ld(32 tok) + T_cvt(32 tok) + T_sts(32 tok) + T_dsm(32 tok)
-T_P_nocross = T_ld(64 tok) + T_cvt(64 tok) + T_sts(64 tok)
-gain        = T_P_nocross - T_P_cross
+T_partition[p] ~= sum(segment r assigned to p, T_segment[p,r])
+T_main_grid     ~= max_p T_partition[p]
 ```
 
-只有 `gain>0` 且 e2e 同方向改善，才能说 cluster2 crossover 有净收益。
+相邻 request 的 Q load 在前一 request epilogue 前发起，所以上式的简单 `sum`
+偏保守；精确模型应从 metadata 导出 segment 列表，并把 `Q[r+1]` 与 request `r`
+的 reduction/store 建依赖 DAG。默认 `b=128,s_q=2,h_q=128` 在 H800 上不是
+“一个 CTA 处理 32 blocks”，而是每个 persistent partition 通常处理多个 requests。
 
-## 6. Required validation output
+## 5. Split-KV combine and PDL
 
-最终报告至少包含：
+public API 总会 launch combine grid；`my_num_splits==1` 的 combine CTA 立即返回。
+split request 的 main kernel 先写 FP32 `o_accum/lse_accum`，combine 再读所有
+partials、做 LSE scaling/accumulation并写 BF16 O。
 
-1. 每个指令级原子的 cycle、吞吐、动态计数和 ncu 隔离证据；
-2. `T_P`、`T_C`、local/remote PV 两支、`max` 的胜出分支；
-3. `T_main`、split tail、全串行上界和 e2e 实测；
-4. `rho`、DSM A/B，以及误差最大的未建模项。
+combine 通过 `cudaLaunchKernelEx` 启用 PDL，kernel 内调用
+`cudaGridDependencySynchronize()`；main 在最终 request 的 epilogue 前调用
+`cudaTriggerProgrammaticLaunchCompletion()`。因此 e2e 用：
 
-`compose.py` 是上述公式的可执行版本；日志解析仍待各 benchmark 输出格式稳定后实现。
+```text
+T_e2e = T_main_grid + T_combine_grid - T_pdl_overlap
+0 <= T_pdl_overlap <= min(T_main_grid, T_combine_grid)
+```
+
+`T_pdl_overlap` 只能由 Kineto/ncu/trace 的 wall interval 得到。保守上界取 0；
+不能因为源码启用 PDL 就把 main/combine 改成 `max`。
+
+combine microbench 的 `cycle/row` 必须按 combine grid
+`(b*s_q, 1, ceil(h_q/8))`、256 threads/CTA、实际 `num_splits` 与 waves 转换成
+`T_combine_grid`，再与 `T_main_grid` 相加。
+
+## 6. Bounds and validation
+
+每层分别对拍：
+
+```text
+T_segment_model <=? T_segment_measured <= T_segment_serial
+T_main_model    <=? T_main_kernel_wall
+T_e2e_model     <=? T_public_api_wall
+```
+
+问号表示 atom independence、cache contention 和 scheduler overlap 仍需验证，不把
+解析式宣称成严格硬件下界。最终报告至少包含：
+
+1. producer full geometry、QK/softmax、dual-WG PV、两种 epilogue cycles；
+2. metadata 导出的每 partition request/block 分配和 critical partition；
+3. main/combine 各自 kernel interval、PDL wall overlap 与完整 e2e；
+4. DSM crossover A/B、WGMMA aggregate throughput、HBM/L2 与 barrier stall；
+5. atom model、serial bound、实测及残差最大的未建模项。

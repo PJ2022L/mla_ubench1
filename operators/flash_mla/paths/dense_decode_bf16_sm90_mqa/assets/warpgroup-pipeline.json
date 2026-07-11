@@ -1,30 +1,49 @@
 {
-  "title": "FlashMLA dense BF16 decode: inter-warp-group page-pair schedule",
-  "time_label": "logical time (not measured cycles)",
+  "title": "FlashMLA dense BF16 decode: source-level page-pair schedule",
+  "time_label": "logical order / outstanding window (not measured cycles)",
   "lanes": [
-    {"label":"WG0 even / O-left","events":[
-      {"start":0,"end":1.2,"label":"softmax even[i]","kind":"epilogue"},
-      {"start":1.2,"end":3.0,"label":"PV-RS even[i]","kind":"compute"},
-      {"start":3.0,"end":3.8,"label":"STSM P-even[i]","kind":"transfer"},
-      {"start":3.8,"end":5.5,"label":"PV-SS odd[i]","kind":"compute"},
-      {"start":5.5,"end":8.5,"label":"QK even[i+1]","kind":"compute"}
-    ]},
-    {"label":"WG1 odd / O-right","events":[
-      {"start":1.2,"end":2.4,"label":"softmax odd[i]","kind":"epilogue"},
-      {"start":2.4,"end":3.2,"label":"STSM P-odd[i]","kind":"transfer"},
-      {"start":2.4,"end":4.2,"label":"PV-RS odd[i]","kind":"compute"},
-      {"start":3.8,"end":5.5,"label":"PV-SS even[i]","kind":"compute"},
-      {"start":5.5,"end":8.5,"label":"QK odd[i+1]","kind":"compute"}
-    ]},
-    {"label":"TMA K engine","events":[
-      {"start":2.8,"end":4.8,"label":"K even[i+1] tiles","kind":"transfer"},
-      {"start":4.8,"end":7.0,"label":"K odd[i+1] tiles","kind":"transfer"}
-    ]}
+    {
+      "label": "WG0 even / O-left",
+      "events": [
+        {"start": 0.0, "end": 1.0, "label": "softmax even[i]", "kind": "epilogue"},
+        {"start": 1.0, "end": 2.6, "label": "PV-local even[i] + wait0", "kind": "compute"},
+        {"start": 2.6, "end": 3.4, "label": "rescale + STSM P-even[i]", "kind": "epilogue"},
+        {"start": 3.8, "end": 4.4, "label": "rescale O + issue PV-remote odd[i]", "kind": "compute"},
+        {"start": 4.4, "end": 6.0, "label": "QK even[i+1] tiles 0..3", "kind": "compute"},
+        {"start": 6.0, "end": 8.4, "label": "QK even[i+1] tiles 4..8", "kind": "compute"}
+      ]
+    },
+    {
+      "label": "WG1 odd / O-right",
+      "events": [
+        {"start": 1.0, "end": 2.2, "label": "softmax odd[i]", "kind": "epilogue"},
+        {"start": 2.2, "end": 2.8, "label": "STSM P-odd[i]", "kind": "transfer"},
+        {"start": 2.8, "end": 4.0, "label": "issue PV-local odd[i]", "kind": "compute"},
+        {"start": 3.4, "end": 3.8, "label": "issue PV-remote even[i]", "kind": "compute"},
+        {"start": 5.0, "end": 8.4, "label": "QK odd[i+1] per-tile waits", "kind": "compute"}
+      ]
+    },
+    {
+      "label": "TMA issued by WG0",
+      "events": [
+        {"start": 2.6, "end": 3.4, "label": "next-even K[0..3]", "kind": "transfer"},
+        {"start": 6.0, "end": 6.8, "label": "next-odd K[0..3]", "kind": "transfer"}
+      ]
+    },
+    {
+      "label": "TMA issued by WG1",
+      "events": [
+        {"start": 4.0, "end": 4.8, "label": "next-odd K[4..8]", "kind": "transfer"},
+        {"start": 4.8, "end": 5.6, "label": "next-even K[4..8]", "kind": "transfer"}
+      ]
+    }
   ],
-  "sync":[
-    {"time":1.2,"label":"sScale0Ready"},
-    {"time":2.4,"label":"sScale1Ready"},
-    {"time":3.8,"label":"sP0Ready / remote PV"},
-    {"time":5.5,"label":"PV waits / next QK"}
+  "sync": [
+    {"time": 1.0, "label": "sScale0Ready"},
+    {"time": 2.6, "label": "local PV wait0 + sScale1Ready"},
+    {"time": 3.4, "label": "sP0Ready"},
+    {"time": 3.8, "label": "remote even-P issued"},
+    {"time": 6.0, "label": "WG0 wait_group<4>"},
+    {"time": 8.4, "label": "QK wait_group<0>"}
   ]
 }

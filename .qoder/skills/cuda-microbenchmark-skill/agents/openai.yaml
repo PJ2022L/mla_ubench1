@@ -1,0 +1,4 @@
+interface:
+  display_name: "CUDA Microbenchmark Design"
+  short_description: "设计并验证 CUDA GPU 硬件延迟与吞吐 micro-benchmark"
+  default_prompt: "使用 $cuda-microbenchmark-skill 为目标 GPU 硬件能力设计可验证的延迟或吞吐 micro-benchmark。"

@@ -13,9 +13,33 @@ FlashMLA dense MLA decode 的 BF16、SM90a、MQA 主路径。默认性能 shape 
 
 ## Documents and tools
 
-1. [`01-kernel-implementation.md`](01-kernel-implementation.md)：2-WG CTA、page-pair 调度、TMA/WGMMA/softmax 流水。
-2. [`02-atom-decomposition.md`](02-atom-decomposition.md)：显著的公共指令级原子与动态计数。
-3. [`03-performance-modeling.md`](03-performance-modeling.md)：page-pair event DAG 与 `max / + / ×` 模型。
-4. [`e2e/`](e2e/)：公开 API 的稳态 main+combine 延时、TFLOPS、GB/s。
+1. [`00-config.md`](00-config.md)：固定的 dtype/head dimension/page/kernel geometry，以及可扫描的 batch、sequence、head 和 scheduler 参数。
+2. [`01-kernel-implementation.md`](01-kernel-implementation.md)：2-WG CTA、首 page/steady page 差异、半页覆盖的 page-pair 调度与同步边。
+3. [`02-atom-decomposition.md`](02-atom-decomposition.md)：可独立测量的公共原子、动态计数，以及必须保留的组合扫描。
+4. [`03-performance-modeling.md`](03-performance-modeling.md)：以源码控制流为骨架的 prologue/transition/drain 模型；独立原子只作诊断，不把未测 overlap 写成事实。
+5. [`e2e/`](e2e/)：公开 API 的稳态 main+combine 延时和 effective TFLOPS/GB/s。
 
-分析基于上游 commit `9241ae3ef9bac614dd25e45e507e089f888280e0`。当前没有保存 PTX/SASS/ncu，因此 CUTLASS type 只作为 source evidence，不冒充已观察到的机器指令。
+分析基于上游 commit `9241ae3ef9bac614dd25e45e507e089f888280e0`。当前没有保存 PTX/SASS/ncu，因此 CUTLASS type 只作为 source evidence，不冒充已观察到的机器指令；源码允许异步工作同时 outstanding，也不等同于已经测得硬件执行 overlap。
+
+## Model vs Measured
+
+| Accepted run | Case / model | Predicted cycles | Measured composite cycles | Cycle error | Predicted e2e (ms) | Measured e2e (ms) | E2E error | Provenance |
+|---|---|---:|---:|---:|---:|---:|---:|---|
+| 尚无 accepted H800 run | - | - | - | - | - | - | - | - |
+
+模型归档保存在本目录 `result/runs/<run_id>/`：`cycles.json` 是 `compose.py` 可直接读取的原子/composite 输入，`provenance.json` 将每个输入字段定位到具体 micro-benchmark run 和 JSON 字段，`predictions.jsonl` 保存各 `N_page/num_splits` case，`comparison.csv` 保存预测与实测对比，`run.log` 和 `metadata.json` 保存重建命令与环境。`result/summary.csv` 由不可变 runs 重建。
+
+`comparison.csv` 固定列为：
+
+```text
+case_id,model_kind,n_page,num_splits,
+predicted_cycles,measured_composite_cycles,cycle_error_pct,
+predicted_e2e_ms,measured_e2e_ms,e2e_error_pct,
+microbench_run_ids,e2e_run_id,notes
+```
+
+只有作用域和单位一致时才填写误差。per-CTA `%clock64` cycle 不能用名义 SM 时钟换成 public API 的 CUDA-event ms；没有 event-level 预测时，`predicted_e2e_ms` 和 `e2e_error_pct` 留空。accepted run 必须在本表链接 model run、micro-benchmark provenance 和对应 e2e run。
+
+归档 model run 时必须同时提供 `cycles.json`、逐字段可验证的 `provenance.json` 和固定表头的 comparison 输入 CSV。输入表填写 case、实际测量和来源 run ID；runner 从 compose JSON 补全预测字段与同单位 signed error，成功后写入不可变 run 的 `comparison.csv`。
+
+composite 实测 cycle 必须通过 `T_measured`（多 case 使用 `T_measured__<case_id>`）回溯到成功 micro run；e2e 实测必须通过 `e2e_run_id` 回溯到本 path 的成功 e2e `latency_ms`。多 case 输出必须显式携带唯一 `case_id`。

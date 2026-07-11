@@ -1,0 +1,28 @@
+# Keep text experiment records (JSON/JSONL/CSV/log/metadata) in Git, but leave
+# generated binaries, disassembly, and profiler captures out of result trees.
+__pycache__/
+*.py[cod]
+
+microbench/*/*/*/benchmark
+microbench/*/*/*/*.ptx
+microbench/*/*/*/*.cubin
+microbench/*/*/*/*.sass
+microbench/*/*/*/log
+
+**/result/**/*.ptx
+**/result/**/*.cubin
+**/result/**/*.sass
+**/result/**/*.fatbin
+**/result/**/*.o
+**/result/**/*.obj
+**/result/**/*.a
+**/result/**/*.so
+**/result/**/*.so.*
+**/result/**/*.bin
+**/result/**/*.exe
+**/result/**/*.elf
+**/result/**/benchmark
+**/result/**/benchmark_*
+**/result/**/*.ncu-rep
+**/result/**/*.nsys-rep
+**/result/**/*.qdrep

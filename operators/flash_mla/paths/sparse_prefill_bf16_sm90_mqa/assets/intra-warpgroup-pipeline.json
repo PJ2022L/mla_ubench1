@@ -1,0 +1,38 @@
+{
+  "title": "Sparse BF16 prefill: WG1 asynchronous issue",
+  "time_label": "logical time (not measured cycles)",
+  "lanes": [
+    {
+      "label": "QK WGMMA group",
+      "events": [
+        {"start": 0, "end": 2, "label": "QK K1[p0]", "kind": "compute"}
+      ]
+    },
+    {
+      "label": "PV local group",
+      "events": [
+        {"start": 3, "end": 5, "label": "PV K1-right[p0] in flight", "kind": "compute"}
+      ]
+    },
+    {
+      "label": "Vector / score handoff",
+      "events": [
+        {"start": 2, "end": 3, "label": "merge softmax K1[p0]", "kind": "epilogue"},
+        {"start": 3.4, "end": 4.3, "label": "STSM S1[p0]", "kind": "transfer"}
+      ]
+    },
+    {
+      "label": "PV cross group",
+      "events": [
+        {"start": 4.3, "end": 6, "label": "PV K0-right[p0] in flight", "kind": "compute"}
+      ]
+    }
+  ],
+  "sync": [
+    {"time": 2, "label": "QK wait_group 0"},
+    {"time": 3, "label": "WG0 max consumed"},
+    {"time": 4.3, "label": "S0/S1 handoff"},
+    {"time": 5, "label": "wait_group 1"},
+    {"time": 6, "label": "wait_group 0 / buffers free"}
+  ]
+}

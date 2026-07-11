@@ -1,44 +1,162 @@
-// cvt_fp8x8_bf16x8 conversion micro-benchmark. SM90 scaffold.
-// Inputs are preloaded; the timed body excludes shared/DSM stores.
-// 范式：ref_ubench shared_bw + MaxFlops —— 单 SM %%clock；测反量化吞吐(token/clk) 与 smem 写带宽。
-//
-// Source helper: operators/flash_mla/target/csrc/sm90/decode/sparse_fp8/components/dequant.h.
-// deep-dive：H800 上 e4m3→bf16 需 4 步 ~50cyc/token（可能 dequant-bound）—— 本原子量化它。
+// FlashMLA FP8 e4m3 x8 + scale -> BF16 x8 conversion throughput.
 
-#include <cstdio>
 #include <cstdint>
+#include <exception>
+#include <iostream>
+#include <numeric>
+#include <vector>
+
 #include <cuda_runtime.h>
+
+#include "benchmark_utils.hpp"
 #include "clock.cuh"
-#include "gpu_check.h"
-#include "attention_shapes.h"
-// #include "sparse_fp8/components/dequant.h"   // TODO: FlashMLA cvt_fp8x8_bf16x8
+#include "sm90/decode/sparse_fp8/components/dequant.h"
 
-using namespace microbench;
+namespace {
 
-#define BLOCKS_NUM 1
-#define THREADS_PER_BLOCK 128
-#define REPEAT 512
+using microbench::CliArgs;
+using microbench::DeviceBuffer;
+using sm90::decode::sparse_fp8::cvt_fp8x8_bf16x8;
+using sm90::decode::sparse_fp8::fp8x8;
 
-__global__ void a2_dequant(uint32_t* startClk, uint32_t* stopClk, uint32_t* dsink) {
-    __shared__ uint8_t raw_fp8[shape::TOPK_BLOCK * shape::D_NOPE];   // 预置的 raw
-    // TODO(impl): 预填 raw_fp8 + scales（随机）
-    uint32_t uid = blockIdx.x * blockDim.x + threadIdx.x;
-    uint32_t start = 0, stop = 0, acc = 0;
+constexpr int kThreads = 128;
+constexpr int kCallsPerThread = 16;
 
+union Fp8Bits {
+    uint64_t bits;
+    fp8x8 value;
+};
+
+union Bf16Bits {
+    uint4 words;
+    bf16x8 value;
+};
+
+static_assert(sizeof(Fp8Bits) == sizeof(uint64_t));
+static_assert(sizeof(Bf16Bits) == sizeof(uint4));
+
+__global__ void convert_kernel(const uint64_t* __restrict__ inputs,
+                               uint64_t* __restrict__ starts,
+                               uint64_t* __restrict__ stops,
+                               uint4* __restrict__ sink,
+                               int repeat) {
+    const int tid = threadIdx.x;
+    uint64_t states[kCallsPerThread];
+#pragma unroll
+    for (int i = 0; i < kCallsPerThread; ++i) {
+        states[i] = inputs[tid * kCallsPerThread + i];
+    }
+    const __nv_bfloat162 scale = __floats2bfloat162_rn(0.75f, 0.75f);
+    Bf16Bits outputs[kCallsPerThread];
+
+    uint64_t start = 0;
+    uint64_t stop = 0;
     CLK_START(start);
-    #pragma unroll 1
-    for (int j = 0; j < REPEAT; ++j) {
-        // TODO(impl): 每线程负责若干 8-elem chunk：
-        //   fp8x8 in = load raw_fp8[...];
-        //   bf16x8 out = cvt_fp8x8_bf16x8(in, scale_bf162);   // 纯反量化
-        //   fold one output register into acc; shared/DSM stores are separate benchmarks.
+#pragma unroll 1
+    for (int iteration = 0; iteration < repeat; ++iteration) {
+#pragma unroll
+        for (int i = 0; i < kCallsPerThread; ++i) {
+            // Empty read/write asm is a compiler dependency only. It keeps the
+            // conversion in the loop without adding a GPU instruction.
+            asm volatile("" : "+l"(states[i]));
+            Fp8Bits input;
+            input.bits = states[i];
+            outputs[i].value = cvt_fp8x8_bf16x8(input.value, scale);
+            asm volatile(""
+                         : "+r"(outputs[i].words.x),
+                           "+r"(outputs[i].words.y),
+                           "+r"(outputs[i].words.z),
+                           "+r"(outputs[i].words.w));
+        }
     }
     CLK_STOP(stop);
-    startClk[uid] = start; stopClk[uid] = stop; dsink[uid] = acc;
+
+    starts[tid] = start;
+    stops[tid] = stop;
+#pragma unroll
+    for (int i = 0; i < kCallsPerThread; ++i) {
+        sink[tid * kCallsPerThread + i] = outputs[i].words;
+    }
 }
 
-int main() {
-    // TODO(impl): launch + cycles → token/clk（= TOPK_BLOCK*REPEAT/cycles）+ smem byte/clk。
-    printf("[TODO] convert/fp8x8_to_bf16x8_sm90 scaffold\n");
-    return 0;
+uint64_t make_fp8_bits(int tid, int lane) {
+    uint64_t result = 0;
+    for (int byte = 0; byte < 8; ++byte) {
+        // Restrict values to finite, normal e4m3 encodings.
+        const uint8_t encoded = static_cast<uint8_t>(0x20 +
+            ((tid * 13 + lane * 7 + byte * 3) % 0x38));
+        result |= static_cast<uint64_t>(encoded) << (byte * 8);
+    }
+    return result;
+}
+
+}  // namespace
+
+int main(int argc, char** argv) {
+    try {
+        const CliArgs args(argc, argv);
+        const int repeat = args.get_int("repeat", 512, 1, 1 << 24);
+        const int warmup = args.get_int("warmup", 5, 0, 1000);
+        const int samples = args.get_int("samples", 20, 1, 10000);
+        const auto device = microbench::require_sm90(args.get_int("device", 0));
+
+        std::vector<uint64_t> host_inputs(kThreads * kCallsPerThread);
+        for (int tid = 0; tid < kThreads; ++tid) {
+            for (int i = 0; i < kCallsPerThread; ++i) {
+                host_inputs[tid * kCallsPerThread + i] = make_fp8_bits(tid, i);
+            }
+        }
+
+        DeviceBuffer<uint64_t> inputs(host_inputs.size());
+        DeviceBuffer<uint64_t> starts(kThreads);
+        DeviceBuffer<uint64_t> stops(kThreads);
+        DeviceBuffer<uint4> sink(kThreads * kCallsPerThread);
+        inputs.copy_from_host(host_inputs);
+
+        auto measure_once = [&]() -> double {
+            convert_kernel<<<1, kThreads>>>(inputs.data(), starts.data(),
+                                            stops.data(), sink.data(), repeat);
+            microbench::throw_if_cuda_error(cudaGetLastError(), "convert_kernel launch");
+            microbench::throw_if_cuda_error(cudaDeviceSynchronize(),
+                                             "convert_kernel synchronize");
+            const auto host_starts = starts.copy_to_host();
+            const auto host_stops = stops.copy_to_host();
+            return static_cast<double>(microbench::reduce_cycles(
+                host_starts.data(), host_stops.data(), host_starts.size()));
+        };
+
+        const auto series = microbench::run_samples(warmup, samples, measure_once);
+        const auto summary = series.summary();
+        const auto host_sink = sink.copy_to_host();
+        uint64_t checksum = 0;
+        for (const uint4& value : host_sink) {
+            checksum += value.x;
+            checksum += value.y;
+            checksum += value.z;
+            checksum += value.w;
+        }
+        if (checksum == 0) {
+            throw std::runtime_error("conversion sink is zero; target work may have been removed");
+        }
+
+        const double calls_per_warpgroup =
+            static_cast<double>(kThreads) * kCallsPerThread * repeat;
+        microbench::JsonLine json;
+        json.add("benchmark", "convert/fp8x8_to_bf16x8_sm90")
+            .add("gpu", device.properties.name)
+            .add("repeat", repeat)
+            .add("threads", kThreads)
+            .add("calls_per_thread", kCallsPerThread)
+            .add("checksum", checksum);
+        microbench::add_measurement_summary(json, summary);
+        json.add("cycle_per_cvt_thread", summary.median /
+                    (static_cast<double>(repeat) * kCallsPerThread))
+            .add("cvt_per_clk_sm", calls_per_warpgroup / summary.median)
+            .add("element_per_clk_sm", 8.0 * calls_per_warpgroup / summary.median)
+            .print();
+        return 0;
+    } catch (const std::exception& error) {
+        std::cerr << "convert benchmark error: " << error.what() << '\n';
+        return 1;
+    }
 }

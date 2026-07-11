@@ -55,16 +55,18 @@ cluster = (2, 1, 1)
 |---|---:|---|---|---|
 | CTA x=0/1 | 384 / 12 | 输出 `[64 heads, 512]`；cluster 合计 128 heads | dynamic smem `SharedMemoryPlan` | peer CTA via cluster/DSM |
 | WG0 | 128 / 4 | QK → online softmax → local half PV；写 O 左 256 列 | `rP/rS/rO_L`, 192-reg allocation | WG2 K-ready；WG1 S-ready/free |
-| WG1 | 128 / 4 | scale O → remote half PV；写 O 右 256 列 | `sS/rO_R`, 160-reg deallocation setting | WG0 S handoff；WG2 K-buffer release |
+| WG1 | 128 / 4 | scale O → shared-score half PV；写 O 右 256 列 | `sS/rO_R`, 160-reg deallocation setting | WG0 S handoff；WG2 K-buffer release |
 | WG2 | 128 / 4 | index/load → FP8 convert → local shared store → peer DSM store | two K buffers, 152-reg deallocation setting | WG0/WG1 buffer availability |
 
-WG0 对每个 KV block 发射 36 个 `m64n64k16` QK WGMMA，因为 `576/16=36`。softmax 后，WG0 和 WG1 分别发射 4 个 `m64n256k16` PV WGMMA，因为 reduction K 为 `64/16=4`。
+WG0 对每个 KV block 发射 36 个 `m64n64k16` QK WGMMA，因为 `576/16=36`。softmax 后，WG0 和 WG1 分别发射 4 个 `m64n256k16` PV WGMMA，因为 reduction K 为 `64/16=4`。源码类型名中的 `RemoteP` 指 WG1 从 CTA shared-memory 的 `sS` 读取 WG0 发布的 score operand，不表示该 PV 从 peer CTA 的 DSM 读取；DSM 只出现在 WG2 的 K/V crossover。
+
+该 kernel 是 persistent scheduler：`blockIdx.z=partition_idx` 读取一个 `DecodingSchedMeta`，同一 cluster 可顺序处理多个 batch request，首尾 request 还可能只处理一段 KV blocks。因而“一 CTA × 一个 64-token block”的原子粒度适合主循环建模，但“一 request 的 32 blocks”不自动等于整个 main-kernel grid latency。
 
 ## 2. Pipeline and overlap
 
 ![FlashMLA sparse decode warp-group pipeline](assets/warpgroup-pipeline.svg)
 
-图的横轴是**逻辑时间**，方块宽度只表达顺序和 overlap，不是 cycle。可确认的外层流水是：WG2 生产 block `i+1`，同时 WG0/WG1 消费 block `i`；K buffer 以 `buf0/buf1` 双缓冲轮换。buffer 只有在 local PV 与 remote PV 都完成相应 arrive 后才能复用。
+图的横轴是**逻辑时间**，方块宽度只表达顺序和 overlap，不是 cycle。可确认的外层流水是：WG2 生产 block `i+1`，同时 WG0/WG1 消费 block `i`；K buffer 以 `buf0/buf1` 双缓冲轮换。buffer 只有在 local PV 与 shared-score PV 都完成相应 arrive 后才能复用。
 
 与给定的 FlashAttention-3 风格 WG 内 overlap 参考图不同，这个实例没有确认到 `QK(i+1)` 与 `softmax(i)` 在同一 WG 内交错：
 
@@ -95,9 +97,10 @@ QK(i) -- warpgroup_wait<0> --> softmax(i) --> PV-local(i) -- warpgroup_wait<0> -
 | 128-bit local shared store | Confirmed source | registers → CTA shared | 写本地 K/V tile | 与 convert 有数据依赖 |
 | `st.async.weak.shared::cluster...` | Confirmed inline PTX helper | registers → peer DSM | cluster2 crossover | 只在 `CLUSTER_SIZE=2` |
 | `MMA_64x64x16_F32BF16BF16_SS` | Confirmed CUTLASS type, count Derived | shared Q/K → FP32 rP | QK | emitted WGMMA 待 PTX/SASS |
-| `MMA_64x256x16_*` RS/SS | Confirmed CUTLASS type, count Derived | reg/shared S × shared V | local/remote PV | WG0 与 WG1 operand source 不同 |
+| `MMA_64x256x16_*` RS/SS | Confirmed CUTLASS type, count Derived | reg/shared S × shared V | local/shared-score PV | 两 WG 共享 Tensor Core throughput；独立 latency 不能直接视为无争用 overlap |
 | `exp2f` + shuffle reduction | Confirmed source | registers/warp | online softmax 与 O rescale | 作为紧耦合原子测量 |
-| `SM90_TMA_STORE_5D` | Confirmed source API | shared → GMEM O | 写 `[64,512]` BF16 输出 | split 时写 FP32 accum 的路径不同 |
+| `SM90_TMA_STORE_5D` | Confirmed source API | shared → GMEM O | non-split 写 `[64,512]` BF16 输出 | split path 不执行该 store |
+| shared FP32 staging + `SM90_BULK_COPY_S2G` | Confirmed source API | registers → shared → `o_accum` | split request 写 `[64,512]` FP32 partial | 64 次 2-KiB row bulk copy，另写 LSE partial |
 
 ## Correctness check and open evidence
 
@@ -105,5 +108,6 @@ QK(i) -- warpgroup_wait<0> --> softmax(i) --> PV-local(i) -- warpgroup_wait<0> -
 - cluster2 下每 CTA 生产 32 token，并通过 local+peer store 让两个 CTA 都拥有完整 64-token block。
 - 每个 K buffer 有 producer wait、local/remote ready、两个 consumer release，复用关系闭合。
 - WG0/WG1 分别负责输出的 256 列，最终覆盖 `D_V=512`。
+- non-split request 直接写 BF16 O/LSE；split request 写 FP32 O/LSE partial，随后 public API 总会 launch combine（`num_splits==1` 的 CTA 早退）。combine 使用 PDL launch，main 在最终 request epilogue 前调用 `cudaTriggerProgrammaticLaunchCompletion()`；实际 overlap 大小仍需 trace。
 
 仍需补充：固定 CUDA/CUTLASS 版本生成的 PTX/SASS、实际动态指令计数、H800 ncu 的 tensor/DSM/HBM 指标，以及逻辑时间图对应的 measured cycle 比例。

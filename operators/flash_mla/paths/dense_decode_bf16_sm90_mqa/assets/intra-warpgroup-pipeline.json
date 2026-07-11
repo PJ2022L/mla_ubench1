@@ -1,27 +1,35 @@
 {
-  "title": "FlashMLA dense BF16 decode: intra-warp-group TMA/WGMMA overlap",
-  "time_label": "logical time (not measured cycles)",
+  "title": "FlashMLA dense BF16 decode: WG0 steady async issue order",
+  "time_label": "logical issue / outstanding window (not measured cycles)",
   "lanes": [
-    {"label":"TMA K tiles","events":[
-      {"start":0.0,"end":2.8,"label":"TMA K[0..3]","kind":"transfer"},
-      {"start":3.8,"end":6.8,"label":"TMA K[4..8]","kind":"transfer"}
-    ]},
-    {"label":"PV WGMMA","events":[
-      {"start":0.0,"end":1.8,"label":"PV-local[i]","kind":"compute"},
-      {"start":2.8,"end":4.8,"label":"PV-remote[i]","kind":"compute"}
-    ]},
-    {"label":"QK WGMMA","events":[
-      {"start":4.0,"end":5.8,"label":"QK tiles 0..3[i+1]","kind":"compute"},
-      {"start":5.8,"end":8.2,"label":"QK tiles 4..8[i+1]","kind":"compute"}
-    ]},
-    {"label":"vector / exchange","events":[
-      {"start":1.8,"end":2.8,"label":"rescale + STSM P[i]","kind":"epilogue"}
-    ]}
+    {
+      "label": "TMA next-even K",
+      "events": [
+        {"start": 0.0, "end": 2.8, "label": "K[i+1] tiles 0..3", "kind": "transfer"},
+        {"start": 3.6, "end": 6.8, "label": "K[i+1] tiles 4..8", "kind": "transfer"}
+      ]
+    },
+    {
+      "label": "WG0 WGMMA issue",
+      "events": [
+        {"start": 0.8, "end": 1.4, "label": "PV-remote[i] commit", "kind": "compute"},
+        {"start": 1.4, "end": 3.4, "label": "QK tiles 0..3[i+1]", "kind": "compute"},
+        {"start": 3.8, "end": 6.8, "label": "QK tiles 4..8[i+1]", "kind": "compute"}
+      ]
+    },
+    {
+      "label": "WG0 vector/control",
+      "events": [
+        {"start": 0.0, "end": 0.8, "label": "rescale O[i]", "kind": "epilogue"},
+        {"start": 3.4, "end": 3.8, "label": "wait4 / launch peer-half TMA", "kind": "other"},
+        {"start": 6.8, "end": 7.2, "label": "wait_group<0>", "kind": "other"}
+      ]
+    }
   ],
-  "sync":[
-    {"time":1.8,"label":"wait_group 0 (local PV)"},
-    {"time":4.0,"label":"wait_group 4 / QK phase0"},
-    {"time":5.8,"label":"tile barriers / QK phase2"},
-    {"time":8.2,"label":"wait_group 0"}
+  "sync": [
+    {"time": 1.4, "label": "K tile0 ready (mbarrier)"},
+    {"time": 3.4, "label": "after QK 0..3: wait_group<4>"},
+    {"time": 3.8, "label": "K tile4 ready (mbarrier)"},
+    {"time": 6.8, "label": "all QK issued / wait_group<0>"}
   ]
 }

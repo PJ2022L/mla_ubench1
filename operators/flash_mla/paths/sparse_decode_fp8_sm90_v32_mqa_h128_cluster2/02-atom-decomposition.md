@@ -18,10 +18,11 @@
 | M1 | indexed 128-bit global load | thread: `1 scale + 8 NoPE + 2 RoPE`; block: `128×11` source calls | [`128b_nc_l2_sm90`](../../../../microbench/memory/global_load/128b_nc_l2_sm90/) | sparse gather、L2 hint、地址分布可能主导 |
 | M2 | 128-bit local shared store | thread: `16 NoPE + 2 RoPE`; block: `128×18` | [`128b_sm90`](../../../../microbench/memory/shared_store/128b_sm90/) | convert 结果必须落入 WGMMA layout |
 | M3 | 128-bit peer DSM async store | cluster2: 与 M2 同 geometry | [`128b_cluster2_sm90`](../../../../microbench/memory/dsm_store/128b_cluster2_sm90/) | crossover 的额外代价 |
-| M4 | output STSM + 5D TMA store | request: `64×512×2 = 65,536 B` / CTA | [`m64n256_b16_x4_sm90`](../../../../microbench/memory/stmatrix/m64n256_b16_x4_sm90/) + [`tile64x512_bf16_5d_sm90`](../../../../microbench/memory/tma_store/tile64x512_bf16_5d_sm90/) | main-kernel epilogue; TMA consumes staged tile |
-| M5 | split-KV partial read/reduce | `num_splits×512×4 B` / row | [`dv512_f32_sm90`](../../../../microbench/memory/splitkv_reduce/dv512_f32_sm90/) | 仅 split path，HBM 流量显著 |
+| M4a | non-split output STSM + 5D TMA store | request: `64×512×2 = 65,536 B` / CTA | [`m64n256_b16_x4_sm90`](../../../../microbench/memory/stmatrix/m64n256_b16_x4_sm90/) + [`tile64x512_bf16_5d_sm90`](../../../../microbench/memory/tma_store/tile64x512_bf16_5d_sm90/) | 只用于 direct BF16 O path |
+| M4b | split FP32 partial staging + bulk S2G | request: `64×512×4 = 131,072 B` / CTA | [`tile64x512_f32_sm90`](../../../../microbench/memory/bulk_store/tile64x512_f32_sm90/) | split path；不能用 M4a 的 TMA-store cycle 替代 |
+| M5 | split-KV partial read/reduce | per output row 约 `num_splits×512×4 B` read + BF16 write | [`dv512_f32_sm90`](../../../../microbench/memory/splitkv_reduce/dv512_f32_sm90/) | combine grid；必须按其独立 grid/waves 转换成 kernel latency |
 
-M1 不把 index arithmetic 单独拆开；benchmark 用 sequential/local/random index 分布和工作集大小扫描 L2 命中率，使同一个 `ld.global` 原子可服务 sparse decode、sparse prefill 和其他 gather kernel。
+M1 不把 index arithmetic 单独拆开；benchmark 用 sequential/local/random index 分布和工作集大小扫描 L2 命中率。它可服务使用同类 `ld.global.nc` register load 的 gather kernel，但不能替代 sparse prefill 的 `cp.async` GMEM→SMEM 路径。
 
 ## Compute atoms
 
@@ -31,14 +32,19 @@ M1 不把 index arithmetic 单独拆开；benchmark 用 sequential/local/random 
 | C1 | QK WGMMA SS `m64n64k16` | `576/16 = 36` / block | [`m64n64k16_bf16_rs_ss_sm90`](../../../../microbench/compute/wgmma/m64n64k16_bf16_rs_ss_sm90/) SS mode | WG0 Tensor Core 主工作 |
 | C2 | online softmax chain | 1 × `[64,64]` / block | [`online_m64n64_exp2_shfl_sm90`](../../../../microbench/compute/softmax/online_m64n64_exp2_shfl_sm90/) | max/exp2/sum/rescale 有强依赖，继续拆会失真 |
 | C3a | local PV WGMMA RS `m64n256k16` | `64/16 = 4` / block | [`m64n256k16_bf16_rs_ss_sm90`](../../../../microbench/compute/wgmma/m64n256k16_bf16_rs_ss_sm90/) | WG0 输出左半 |
-| C3b | remote PV WGMMA SS `m64n256k16` | `64/16 = 4` / block | 同上，SS mode | WG1 输出右半，与 local PV overlap |
+| C3b | shared-score PV WGMMA SS `m64n256k16` | `64/16 = 4` / block | 同上，SS mode | WG1 输出右半；A operand 来自 WG0 发布的 CTA shared S |
+
+WG0/WG1 的两支 PV 虽在不同 warpgroup 发射，仍共享一个 SM 的 Tensor Core
+执行资源。WGMMA benchmark 必须提供 `resident_wg=2` aggregate stage cycles；模型
+只有在该数已包含争用时才可对两支取 `max`。单 WG `cycle/inst` 的两个结果直接
+`max` 会系统性低估 PV 阶段。
 
 ## Explicit exclusions
 
 - token/page 的整数除法和模：先留在 M1 的真实地址生成路径，不单建 ALU benchmark。
 - `is_kv_valid`、tail mask、LSE 单次写：相对主循环工作量轻。
 - NamedBarrier/mbarrier 的 arrive bookkeeping：同步等待时间由 e2e/model calibration 体现；只有出现显著 barrier throughput 问题时再单测。
-- WG0/WG1 的少量 scale multiply：保留在 C2/C3 或 remote handoff correction 中。
+- WG0/WG1 的少量 scale multiply：保留在 C2/C3 或 shared-score handoff correction 中。
 
 ## Measurement contract
 
