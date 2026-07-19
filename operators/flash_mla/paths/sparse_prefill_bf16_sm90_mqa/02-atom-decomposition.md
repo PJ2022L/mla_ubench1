@@ -4,6 +4,9 @@
 为主循环计数粒度。代表 shape `topk=2048` 有 16 个 pair。计数是源码级调用数，
 最终 SASS issue 数必须在 H800 编译产物中确认。
 
+旧 sparse benchmark registry 已移除；当前 `microbench/manifest.json` 只交付
+dense decode。下表中的 legacy 名称保留为分析需求，不表示当前已有可运行 leaf。
+
 ## Exact producer geometry
 
 WG2 把 128 threads 分成 16 个 8-thread group；每组负责每个 64-row block 的
@@ -25,13 +28,13 @@ bytes / 64-token block          = 73,728 B
 
 | ID | Significant operation | Dynamic work | Reusable benchmark | Assessment |
 |---|---|---:|---|---|
-| M0 | Q TMA load | 1/CTA；`64*576*2 = 73,728 B` | [`tile64x576_bf16_sm90`](../../../../microbench/memory/tma_load/tile64x576_bf16_sm90/) | 可直接复用；需 EVICT_FIRST + real swizzle |
-| M1 | indexed BF16 `cp.async` G2S | 9,216 calls / pair；147,456 B | [`gather64x576_bf16_sm90`](../../../../microbench/memory/cp_async_g2s/gather64x576_bf16_sm90/) | exact 16-B instruction、random indices、4/5/5/4 order、mbarrier |
-| M2 | score STSM handoff | 2 × `[64,64]` BF16 / pair | [`m64n64_b16_x4_sm90`](../../../../microbench/memory/stmatrix/m64n64_b16_x4_sm90/) | 可复用；要测两 resident WG 和真实 swizzle |
-| M3 | output STSM staging | 1 × `[64,512]` / CTA，由两 WG 各 `[64,256]` | [`m64n256_b16_x4_sm90`](../../../../microbench/memory/stmatrix/m64n256_b16_x4_sm90/) | 可复用；两 WG 并行写 union O buffer |
-| M4 | 3D TMA output store | 8 × `[64,64]` / CTA；总 65,536 B | [`tile64x64_bf16_3d_sm90`](../../../../microbench/memory/tma_store/tile64x64_bf16_3d_sm90/) | 不能用 decode 的单次 5D 64x512 结果替代 |
+| M0 | Q TMA load | 1/CTA；`64*576*2 = 73,728 B` | `tile64x576_bf16_sm90` (legacy; not in current dense-only suite) | 可直接复用；需 EVICT_FIRST + real swizzle |
+| M1 | indexed BF16 `cp.async` G2S | 9,216 calls / pair；147,456 B | `gather64x576_bf16_sm90` (legacy; not in current dense-only suite) | exact 16-B instruction、random indices、4/5/5/4 order、mbarrier |
+| M2 | score STSM handoff | 2 × `[64,64]` BF16 / pair | `m64n64_b16_x4_sm90` (legacy; not in current dense-only suite) | 可复用；要测两 resident WG 和真实 swizzle |
+| M3 | output STSM staging | 1 × `[64,512]` / CTA，由两 WG 各 `[64,256]` | `m64n256_b16_x4_sm90` (legacy; not in current dense-only suite) | 可复用；两 WG 并行写 union O buffer |
+| M4 | 3D TMA output store | 8 × `[64,64]` / CTA；总 65,536 B | `tile64x64_bf16_3d_sm90` (legacy; not in current dense-only suite) | 不能用 decode 的单次 5D 64x512 结果替代 |
 
-现有 [`128b_nc_l2_sm90`](../../../../microbench/memory/global_load/128b_nc_l2_sm90/)
+现有 `128b_nc_l2_sm90` (legacy; not in current dense-only suite)
 测的是 `ld.global.nc` 到 register，不能代表本 kernel 的 `cp.async` GMEM→SMEM
 数据路径、commit/mbarrier 或 16-B granularity。
 
@@ -39,9 +42,9 @@ bytes / 64-token block          = 73,728 B
 
 | ID | Significant operation | Dynamic count / pair | Reusable benchmark | Assessment |
 |---|---|---:|---|---|
-| C0 | QK WGMMA SS `m64n64k16` | 36/block，72/pair | [`m64n64k16_bf16_rs_ss_sm90`](../../../../microbench/compute/wgmma/m64n64k16_bf16_rs_ss_sm90/) SS | 必须增加 `resident_wg=2` 和 source-like 16/20、20/16 issue batch |
-| C1 | two-block online softmax | WG0 local tile + WG1 merged tile | [`online_m64n64_exp2_shfl_sm90`](../../../../microbench/compute/softmax/online_m64n64_exp2_shfl_sm90/) | 需要 local 与 cross-WG shared-max/handoff 两种模式；单 WG softmax 不足 |
-| C2 | PV WGMMA RS | 4/block-half，8/pair | [`m64n256k16_bf16_rs_ss_sm90`](../../../../microbench/compute/wgmma/m64n256k16_bf16_rs_ss_sm90/) RS | 两 WG 各发 4；报告 aggregate stage cycles |
+| C0 | QK WGMMA SS `m64n64k16` | 36/block，72/pair | `m64n64k16_bf16_rs_ss_sm90` (legacy; not in current dense-only suite) SS | 必须增加 `resident_wg=2` 和 source-like 16/20、20/16 issue batch |
+| C1 | two-block online softmax | WG0 local tile + WG1 merged tile | `online_m64n64_exp2_shfl_sm90` (legacy; not in current dense-only suite) | 需要 local 与 cross-WG shared-max/handoff 两种模式；单 WG softmax 不足 |
+| C2 | PV WGMMA RS | 4/block-half，8/pair | `m64n256k16_bf16_rs_ss_sm90` (legacy; not in current dense-only suite) RS | 两 WG 各发 4；报告 aggregate stage cycles |
 | C3 | cross-score PV WGMMA SS | 4/block-half，8/pair | 同一 WGMMA family 的 SS mode | 与 RS batch、STSM handoff 交错；报告 dual-WG contention |
 
 `resident_wg=2` 不是可选美化：WG0/WG1 同时使用同一 SM 的 Tensor Core pipeline。

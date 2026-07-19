@@ -13,8 +13,13 @@ e2e_dir="$repo_root/operators/flash_mla/paths/sparse_decode_fp8_sm90_v32_mqa_h12
 python "$e2e_dir/benchmark.py" --validate-only --batch 128 --s-q 2 --s-k 32768 --topk 2048
 
 # Run only on the remote H800 host after installing target/ and its test dependencies.
-python "$repo_root/tools/result_tool.py" run --result-dir "$e2e_dir/result" --kind e2e -- \
-  python "$e2e_dir/benchmark.py" --batch 128 --s-q 2 --s-k 32768 --topk 2048 --iters 100
+run_id="$(date +%Y%m%d-%H%M%S)-$(hostname)"
+run_dir="$e2e_dir/result/runs/$run_id"
+mkdir -p "$run_dir"
+/usr/bin/time -f 'command=%C\nwall_seconds=%e\nexit_status=%x' \
+  python "$e2e_dir/benchmark.py" \
+    --batch 128 --s-q 2 --s-k 32768 --topk 2048 --iters 100 \
+  >"$run_dir/results.jsonl" 2>"$run_dir/run.log"
 ```
 
 脚本复用 `target/tests/lib.py` 的 V3.2 cache quantization 和 FLOPS/bytes 统计，所以还需要上游 test 依赖 `kernelkit`。输出 latency/TFLOPS/GB/s；main/combine 分解使用 Kineto/ncu。
@@ -27,4 +32,7 @@ python "$repo_root/tools/result_tool.py" run --result-dir "$e2e_dir/result" --ki
 |---|---|---|---:|---|---|
 | 尚无 accepted H800 run | - | - | - | - | - |
 
-完整结果保存在本目录 `result/runs/<run_id>/`，包含 `metadata.json`、`result.jsonl` 和 `run.log`；`result/summary.csv` 由这些不可变 runs 重建。accepted run 必须链接到本表，并记录完整 sparse shape、reference correctness、实际 scheduler split/partition，以及 profiler 确认的 main/combine 边界。
+完整结果保存在本目录 `result/runs/<run_id>/`：`results.jsonl` 只保留正式结果，
+`run.log` 保留 args、命令、wall time 和错误。accepted run 必须链接到本表，
+并记录完整 sparse shape、reference correctness、实际 scheduler split/partition，
+以及 profiler 确认的 main/combine 边界。

@@ -1,45 +1,65 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="1220" height="466" viewBox="0 0 1220 466" role="img">
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="558" viewBox="0 0 1440 558" role="img">
 <defs><marker id="arrow" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><path d="M0,0 L9,3.5 L0,7 Z" fill="#111"/></marker></defs>
 <rect width="100%" height="100%" fill="white"/>
-<style>text { font-family: Arial, &quot;Microsoft YaHei&quot;, sans-serif; fill: #151515; } .label { font-size: 16px; font-weight: 600; } .event { font-size: 14px; } .small { font-size: 12px; } .sync { stroke: #202020; stroke-width: 1.5; stroke-dasharray: 7 6; }</style>
-<text x="205" y="29" class="label">Sparse BF16 prefill: WG1 asynchronous issue</text>
-<rect x="475" y="15" width="14" height="14" rx="2" fill="#c9e6f5" stroke="#222"/>
-<text x="495" y="27" class="small">data movement</text>
-<rect x="645" y="15" width="14" height="14" rx="2" fill="#f4c7c3" stroke="#222"/>
-<text x="665" y="27" class="small">tensor/core compute</text>
-<rect x="815" y="15" width="14" height="14" rx="2" fill="#d8e8c6" stroke="#222"/>
-<text x="835" y="27" class="small">vector / reduction / epilogue</text>
-<rect x="985" y="15" width="14" height="14" rx="2" fill="#f7deb5" stroke="#222"/>
-<text x="1005" y="27" class="small">other work</text>
-<line x1="525.0" y1="47" x2="525.0" y2="373" class="sync"/>
-<text x="530.0" y="60" class="small">QK wait_group 0</text>
-<line x1="685.0" y1="47" x2="685.0" y2="373" class="sync"/>
-<text x="690.0" y="60" class="small">WG0 max consumed</text>
-<line x1="893.0" y1="47" x2="893.0" y2="373" class="sync"/>
-<text x="898.0" y="60" class="small">S0/S1 handoff</text>
-<line x1="1005.0" y1="47" x2="1005.0" y2="373" class="sync"/>
-<text x="1010.0" y="60" class="small">wait_group 1</text>
-<line x1="1165.0" y1="47" x2="1165.0" y2="373" class="sync"/>
-<text x="1170.0" y="60" class="small">wait_group 0 / buffers free</text>
-<text x="190" y="97" text-anchor="end" class="label">QK WGMMA group</text>
-<line x1="205" y1="104" x2="1165" y2="104" stroke="#dedede"/>
-<rect x="205.0" y="72" width="320.0" height="48" rx="2" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
-<text x="365.0" y="101" text-anchor="middle" class="event">QK K1[p0]</text>
-<text x="190" y="171" text-anchor="end" class="label">PV local group</text>
-<line x1="205" y1="178" x2="1165" y2="178" stroke="#dedede"/>
-<rect x="685.0" y="146" width="320.0" height="48" rx="2" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
-<text x="845.0" y="175" text-anchor="middle" class="event">PV K1-right[p0] in flight</text>
-<text x="190" y="245" text-anchor="end" class="label">Vector / score handoff</text>
-<line x1="205" y1="252" x2="1165" y2="252" stroke="#dedede"/>
-<rect x="525.0" y="220" width="160.0" height="48" rx="2" fill="#d8e8c6" stroke="#222" stroke-width="1.2"/>
-<text x="605.0" y="249" text-anchor="middle" class="event">merge softmax K1[p0]</text>
-<rect x="749.0" y="220" width="144.0" height="48" rx="2" fill="#c9e6f5" stroke="#222" stroke-width="1.2"/>
-<text x="821.0" y="249" text-anchor="middle" class="event">STSM S1[p0]</text>
-<text x="190" y="319" text-anchor="end" class="label">PV cross group</text>
-<line x1="205" y1="326" x2="1165" y2="326" stroke="#dedede"/>
-<rect x="893.0" y="294" width="272.0" height="48" rx="2" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
-<text x="1029.0" y="323" text-anchor="middle" class="event">PV K0-right[p0] in flight</text>
-<line x1="205" y1="383" x2="1177" y2="383" stroke="#111" stroke-width="1.5" marker-end="url(#arrow)"/>
-<text x="685.0" y="414" text-anchor="middle" class="label">logical time (not measured cycles)</text>
+<style>text { font-family: Arial, &quot;Microsoft YaHei&quot;, sans-serif; fill: #151515; letter-spacing: 0; } .title { font-size: 17px; font-weight: 600; } .label { font-size: 15px; font-weight: 600; } .small { font-size: 12px; } .sync-label { font-size: 12px; } .sync { stroke: #202020; stroke-width: 1.4; stroke-dasharray: 7 6; }</style>
+<text x="225" y="27" class="title">Sparse BF16 prefill: WG1 asynchronous issue</text>
+<rect x="225" y="42" width="14" height="14" rx="2" fill="#c9e6f5" stroke="#222"/>
+<text x="245" y="54" class="small">data movement</text>
+<rect x="435" y="42" width="14" height="14" rx="2" fill="#f4c7c3" stroke="#222"/>
+<text x="455" y="54" class="small">tensor/core compute</text>
+<rect x="645" y="42" width="14" height="14" rx="2" fill="#d8e8c6" stroke="#222"/>
+<text x="665" y="54" class="small">vector / reduction / epilogue</text>
+<rect x="855" y="42" width="14" height="14" rx="2" fill="#f7deb5" stroke="#222"/>
+<text x="875" y="54" class="small">other work</text>
+<line x1="610.0" y1="66" x2="610.0" y2="465" class="sync"/>
+<rect x="614.0" y="69" width="111.0" height="17" rx="2" fill="white" fill-opacity="0.94"/>
+<text x="617.0" y="82" text-anchor="start" class="sync-label">QK wait_group 0</text>
+<line x1="802.5" y1="66" x2="802.5" y2="465" class="sync"/>
+<rect x="806.5" y="69" width="118.0" height="17" rx="2" fill="white" fill-opacity="0.94"/>
+<text x="809.5" y="82" text-anchor="start" class="sync-label">WG0 max consumed</text>
+<line x1="1052.8" y1="66" x2="1052.8" y2="465" class="sync"/>
+<rect x="1056.8" y="69" width="97.0" height="17" rx="2" fill="white" fill-opacity="0.94"/>
+<text x="1059.8" y="82" text-anchor="start" class="sync-label">S0/S1 handoff</text>
+<line x1="1187.5" y1="66" x2="1187.5" y2="465" class="sync"/>
+<rect x="1191.5" y="69" width="90.0" height="17" rx="2" fill="white" fill-opacity="0.94"/>
+<text x="1194.5" y="82" text-anchor="start" class="sync-label">wait_group 1</text>
+<line x1="1380.0" y1="66" x2="1380.0" y2="465" class="sync"/>
+<rect x="1181.0" y="87" width="195.0" height="17" rx="2" fill="white" fill-opacity="0.94"/>
+<text x="1373.0" y="100" text-anchor="end" class="sync-label">wait_group 0 / buffers free</text>
+<text x="210" y="163" text-anchor="end" class="label">QK WGMMA group</text>
+<line x1="225" y1="168" x2="1380" y2="168" stroke="#dedede"/>
+<clipPath id="event-clip-0"><rect x="228.0" y="135" width="379.0" height="48" rx="1"/></clipPath>
+<g><title>QK K1[p0]</title><rect x="225.0" y="132" width="385.0" height="54" rx="3" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
+<text x="417.5" y="161.0" text-anchor="middle" font-size="13px" clip-path="url(#event-clip-0)">
+<tspan x="417.5" dy="0">QK K1[p0]</tspan>
+</text></g>
+<text x="210" y="245" text-anchor="end" class="label">PV local group</text>
+<line x1="225" y1="250" x2="1380" y2="250" stroke="#dedede"/>
+<clipPath id="event-clip-1"><rect x="805.5" y="217" width="379.0" height="48" rx="1"/></clipPath>
+<g><title>PV K1-right[p0] in flight</title><rect x="802.5" y="214" width="385.0" height="54" rx="3" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
+<text x="995.0" y="243.0" text-anchor="middle" font-size="13px" clip-path="url(#event-clip-1)">
+<tspan x="995.0" dy="0">PV K1-right[p0] in flight</tspan>
+</text></g>
+<text x="210" y="327" text-anchor="end" class="label">Vector / score handoff</text>
+<line x1="225" y1="332" x2="1380" y2="332" stroke="#dedede"/>
+<clipPath id="event-clip-2"><rect x="613.0" y="299" width="186.5" height="48" rx="1"/></clipPath>
+<g><title>merge softmax K1[p0]</title><rect x="610.0" y="296" width="192.5" height="54" rx="3" fill="#d8e8c6" stroke="#222" stroke-width="1.2"/>
+<text x="706.2" y="325.0" text-anchor="middle" font-size="13px" clip-path="url(#event-clip-2)">
+<tspan x="706.2" dy="0">merge softmax K1[p0]</tspan>
+</text></g>
+<clipPath id="event-clip-3"><rect x="882.5" y="299" width="167.2" height="48" rx="1"/></clipPath>
+<g><title>STSM S1[p0]</title><rect x="879.5" y="296" width="173.2" height="54" rx="3" fill="#c9e6f5" stroke="#222" stroke-width="1.2"/>
+<text x="966.1" y="325.0" text-anchor="middle" font-size="13px" clip-path="url(#event-clip-3)">
+<tspan x="966.1" dy="0">STSM S1[p0]</tspan>
+</text></g>
+<text x="210" y="409" text-anchor="end" class="label">PV cross group</text>
+<line x1="225" y1="414" x2="1380" y2="414" stroke="#dedede"/>
+<clipPath id="event-clip-4"><rect x="1055.8" y="381" width="321.3" height="48" rx="1"/></clipPath>
+<g><title>PV K0-right[p0] in flight</title><rect x="1052.8" y="378" width="327.3" height="54" rx="3" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
+<text x="1216.4" y="407.0" text-anchor="middle" font-size="13px" clip-path="url(#event-clip-4)">
+<tspan x="1216.4" dy="0">PV K0-right[p0] in flight</tspan>
+</text></g>
+<line x1="225" y1="475" x2="1392" y2="475" stroke="#111" stroke-width="1.5" marker-end="url(#arrow)"/>
+<text x="802.5" y="506" text-anchor="middle" class="label">logical time (not measured cycles)</text>
 </svg>

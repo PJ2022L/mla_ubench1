@@ -1,0 +1,24 @@
+{
+  "case_id": "bf16-b128-sq1-sk4096",
+  "dtype": "bf16",
+  "batch_size": 128,
+  "seqlen_q": 1,
+  "num_heads_q": 128,
+  "num_heads_kv": 1,
+  "head_dim_qk": 576,
+  "head_dim_v": 512,
+  "page_size": 64,
+  "seqlens_k_distribution": {
+    "kind": "fixed",
+    "value": 4096,
+    "seed": 0
+  },
+  "causal": false,
+  "metadata_mode": "generate",
+  "cache_mode": "warm",
+  "block_table_pattern": "contiguous",
+  "block_table_distribution": {
+    "kind": "contiguous",
+    "seed": 0
+  }
+}

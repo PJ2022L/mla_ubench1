@@ -13,8 +13,12 @@ e2e_dir="$repo_root/operators/flash_mla/paths/dense_decode_bf16_sm90_mqa/e2e"
 python "$e2e_dir/benchmark.py" --validate-only --batch 128 --s-q 1 --s-k 4097 --causal
 
 # Run only in the FlashMLA environment on the remote H800 host.
-python "$repo_root/tools/result_tool.py" run --result-dir "$e2e_dir/result" --kind e2e -- \
-  python "$e2e_dir/benchmark.py" --batch 128 --s-q 1 --s-k 4096 --iters 100
+run_id="$(date +%Y%m%d-%H%M%S)-$(hostname)"
+run_dir="$e2e_dir/result/runs/$run_id"
+mkdir -p "$run_dir"
+/usr/bin/time -f 'command=%C\nwall_seconds=%e\nexit_status=%x' \
+  python "$e2e_dir/benchmark.py" --batch 128 --s-q 1 --s-k 4096 --iters 100 \
+  >"$run_dir/results.jsonl" 2>"$run_dir/run.log"
 ```
 
 前置条件：在 H800/SM90a、CUDA 12.8+ 环境中，从仓库根目录执行 `git -C "$repo_root/operators/flash_mla/target" submodule update --init --recursive` 和 `python -m pip install -v "$repo_root/operators/flash_mla/target"`。
@@ -27,4 +31,7 @@ python "$repo_root/tools/result_tool.py" run --result-dir "$e2e_dir/result" --ki
 |---|---|---|---:|---|---|
 | 尚无 accepted H800 run | - | - | - | - | - |
 
-完整结果保存在本目录 `result/runs/<run_id>/`，包含 `metadata.json`、`result.jsonl` 和 `run.log`；`result/summary.csv` 由这些不可变 runs 重建。accepted run 必须链接到本表，并记录 requested/effective causal、page/tail、实际 `num_splits`、output/LSE correctness，以及 profiler 确认的 main/combine 边界。
+完整结果保存在本目录 `result/runs/<run_id>/`：`results.jsonl` 只保留正式
+correctness/latency 结果，`run.log` 保留 args、命令、wall time 和错误。accepted
+run 必须链接到本表，并记录 requested/effective causal、page/tail、实际
+`num_splits`、output/LSE correctness，以及 profiler 确认的 main/combine 边界。

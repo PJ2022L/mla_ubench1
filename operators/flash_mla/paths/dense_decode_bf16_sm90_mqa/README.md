@@ -27,7 +27,10 @@ FlashMLA dense MLA decode 的 BF16、SM90a、MQA 主路径。默认性能 shape 
 |---|---|---:|---:|---:|---:|---:|---:|---|
 | 尚无 accepted H800 run | - | - | - | - | - | - | - | - |
 
-模型归档保存在本目录 `result/runs/<run_id>/`：`cycles.json` 是 `compose.py` 可直接读取的原子/composite 输入，`provenance.json` 将每个输入字段定位到具体 micro-benchmark run 和 JSON 字段，`predictions.jsonl` 保存各 `N_page/num_splits` case，`comparison.csv` 保存预测与实测对比，`run.log` 和 `metadata.json` 保存重建命令与环境。`result/summary.csv` 由不可变 runs 重建。
+当前正式模型与结果统一放在根目录 `microbench/results/<run_id>/`。full atom 和
+calibration 的 `results.jsonl` 是 profile 输入，`run.log` 保存 args、命令和
+wall time，`h800-profile.json`、held-out `results.jsonl` 与 `validation.json` 是
+最终交付。不要再生成旧的 summary CSV/metadata/provenance 归档层。
 
 `comparison.csv` 固定列为：
 

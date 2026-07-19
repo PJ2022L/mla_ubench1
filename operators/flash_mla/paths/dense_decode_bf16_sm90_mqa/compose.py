@@ -7,7 +7,13 @@ import argparse
 import json
 import math
 from pathlib import Path
+import sys
 from typing import Mapping
+
+
+REPO_ROOT = Path(__file__).resolve().parents[4]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
 
 def _cost(costs: Mapping[str, float], key: str) -> float:
@@ -195,6 +201,31 @@ def compose(
 
 
 def main(argv: list[str] | None = None) -> None:
+    arguments = list(argv) if argv is not None else sys.argv[1:]
+    if "--profile" in arguments or "--workload" in arguments:
+        from microbench.model.dense_decode.profile import load_profile
+        from microbench.model.dense_decode.schema import load_workload
+        from microbench.model.dense_decode.simulator import predict
+
+        model_parser = argparse.ArgumentParser(
+            description="Compatibility entry point for the microbench dense-decode model"
+        )
+        model_parser.add_argument("--profile", required=True, type=Path)
+        model_parser.add_argument("--workload", required=True, type=Path)
+        model_parser.add_argument("--bootstrap", type=int, default=0)
+        model_args = model_parser.parse_args(arguments)
+        if model_args.bootstrap < 0:
+            model_parser.error("--bootstrap must be non-negative")
+        profile = load_profile(model_args.profile)
+        workload_value = json.loads(model_args.workload.read_text(encoding="utf-8"))
+        if not isinstance(workload_value, dict):
+            raise ValueError("workload JSON must contain an object")
+        result = predict(
+            profile, load_workload(workload_value), bootstrap=model_args.bootstrap
+        ).result
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--cycles-json", required=True, type=Path)
     pages = parser.add_mutually_exclusive_group(required=True)
@@ -205,7 +236,7 @@ def main(argv: list[str] | None = None) -> None:
         help="full-sequence convenience only; invalid when the scheduler splits a request",
     )
     parser.add_argument("--split-kv", action="store_true")
-    args = parser.parse_args(argv)
+    args = parser.parse_args(arguments)
 
     if args.n_page is not None:
         n_page = args.n_page

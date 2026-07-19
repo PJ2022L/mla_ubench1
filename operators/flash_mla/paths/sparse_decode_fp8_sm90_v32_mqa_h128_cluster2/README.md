@@ -28,7 +28,8 @@
 |---|---|---:|---:|---:|---:|---:|---:|---|
 | 尚无 accepted H800 run | - | - | - | - | - | - | - | - |
 
-模型归档保存在本目录 `result/runs/<run_id>/`：`cycles.json` 是 `compose.py` 可直接读取的原子/composite 输入，`provenance.json` 将每个输入字段定位到具体 micro-benchmark run 和 JSON 字段，`predictions.jsonl` 保存各 scheduler assignment/`num_splits` case，`comparison.csv` 保存预测与实测对比，`run.log` 和 `metadata.json` 保存重建命令与环境。`result/summary.csv` 由不可变 runs 重建。
+该 sparse path 当前只保留分析文档，不属于本次 dense-only `microbench/`
+交付。已有 E2E run 仅保留 `results.jsonl` 与包含 args/runtime 的 `run.log`。
 
 `comparison.csv` 固定列为：
 

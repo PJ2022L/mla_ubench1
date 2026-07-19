@@ -11,8 +11,13 @@ e2e_dir="$repo_root/operators/flash_mla/paths/sparse_prefill_bf16_sm90_mqa/e2e"
 python "$e2e_dir/benchmark.py" --validate-only --s-q 2 --s-kv 256 --topk 512
 
 # Run only on the remote H800 host after installing target/ and its test dependencies.
-python "$repo_root/tools/result_tool.py" run --result-dir "$e2e_dir/result" --kind e2e -- \
-  python "$e2e_dir/benchmark.py" --s-q 4096 --s-kv 8192 --topk 2048 --iters 50
+run_id="$(date +%Y%m%d-%H%M%S)-$(hostname)"
+run_dir="$e2e_dir/result/runs/$run_id"
+mkdir -p "$run_dir"
+/usr/bin/time -f 'command=%C\nwall_seconds=%e\nexit_status=%x' \
+  python "$e2e_dir/benchmark.py" \
+    --s-q 4096 --s-kv 8192 --topk 2048 --iters 50 \
+  >"$run_dir/results.jsonl" 2>"$run_dir/run.log"
 ```
 
 数据/indices 生成不计时。脚本复用上游 `target/tests/lib.py` 以保证布局和 FLOPS/bytes 口径一致。
@@ -25,4 +30,7 @@ python "$repo_root/tools/result_tool.py" run --result-dir "$e2e_dir/result" --ki
 |---|---|---|---:|---|---|
 | 尚无 accepted H800 run | - | - | - | - | - |
 
-完整结果保存在本目录 `result/runs/<run_id>/`，包含 `metadata.json`、`result.jsonl` 和 `run.log`；`result/summary.csv` 由这些不可变 runs 重建。accepted run 必须链接到本表，并记录完整 sparse shape、reference correctness 和 profiler 确认的 kernel 边界。此 path 没有 split-KV combine，不得套用 decode 的 main/combine 字段。
+完整结果保存在本目录 `result/runs/<run_id>/`：`results.jsonl` 只保留正式结果，
+`run.log` 保留 args、命令、wall time 和错误。accepted run 必须链接到本表，
+并记录完整 sparse shape、reference correctness 和 profiler 确认的 kernel 边界。
+此 path 没有 split-KV combine，不得套用 decode 的 main/combine 字段。

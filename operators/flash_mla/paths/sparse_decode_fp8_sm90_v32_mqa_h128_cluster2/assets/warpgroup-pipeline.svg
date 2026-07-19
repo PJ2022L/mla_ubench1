@@ -1,55 +1,93 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="1220" height="392" viewBox="0 0 1220 392" role="img">
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="476" viewBox="0 0 1440 476" role="img">
 <defs><marker id="arrow" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><path d="M0,0 L9,3.5 L0,7 Z" fill="#111"/></marker></defs>
 <rect width="100%" height="100%" fill="white"/>
-<style>text { font-family: Arial, &quot;Microsoft YaHei&quot;, sans-serif; fill: #151515; } .label { font-size: 16px; font-weight: 600; } .event { font-size: 14px; } .small { font-size: 12px; } .sync { stroke: #202020; stroke-width: 1.5; stroke-dasharray: 7 6; }</style>
-<text x="205" y="29" class="label">FlashMLA V3.2 sparse decode: inter-warp-group pipeline</text>
-<rect x="475" y="15" width="14" height="14" rx="2" fill="#c9e6f5" stroke="#222"/>
-<text x="495" y="27" class="small">data movement</text>
-<rect x="645" y="15" width="14" height="14" rx="2" fill="#f4c7c3" stroke="#222"/>
-<text x="665" y="27" class="small">tensor/core compute</text>
-<rect x="815" y="15" width="14" height="14" rx="2" fill="#d8e8c6" stroke="#222"/>
-<text x="835" y="27" class="small">vector / reduction / epilogue</text>
-<rect x="985" y="15" width="14" height="14" rx="2" fill="#f7deb5" stroke="#222"/>
-<text x="1005" y="27" class="small">other work</text>
-<line x1="359.8" y1="47" x2="359.8" y2="299" class="sync"/>
-<text x="364.8" y="60" class="small">K[0] ready</text>
-<line x1="514.7" y1="47" x2="514.7" y2="299" class="sync"/>
-<text x="519.7" y="60" class="small">K[1] ready / wait_group</text>
-<line x1="607.6" y1="47" x2="607.6" y2="299" class="sync"/>
-<text x="612.6" y="60" class="small">S[0] ready</text>
-<line x1="777.9" y1="47" x2="777.9" y2="299" class="sync"/>
-<text x="782.9" y="60" class="small">buf0 free</text>
-<line x1="994.7" y1="47" x2="994.7" y2="299" class="sync"/>
-<text x="999.7" y="60" class="small">S[1] ready</text>
-<text x="190" y="97" text-anchor="end" class="label">WG2 producer</text>
-<line x1="205" y1="104" x2="1165" y2="104" stroke="#dedede"/>
-<rect x="205.0" y="72" width="154.8" height="48" rx="2" fill="#c9e6f5" stroke="#222" stroke-width="1.2"/>
-<text x="282.4" y="101" text-anchor="middle" class="event">LD+CVT+ST[0]/buf0</text>
-<rect x="359.8" y="72" width="154.8" height="48" rx="2" fill="#c9e6f5" stroke="#222" stroke-width="1.2"/>
-<text x="437.3" y="101" text-anchor="middle" class="event">LD+CVT+ST[1]/buf1</text>
-<rect x="777.9" y="72" width="154.8" height="48" rx="2" fill="#c9e6f5" stroke="#222" stroke-width="1.2"/>
-<text x="855.3" y="101" text-anchor="middle" class="event">LD+CVT+ST[2]/buf0</text>
-<text x="190" y="171" text-anchor="end" class="label">WG0 consumer-main</text>
-<line x1="205" y1="178" x2="1165" y2="178" stroke="#dedede"/>
-<rect x="359.8" y="146" width="154.8" height="48" rx="2" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
-<text x="437.3" y="175" text-anchor="middle" class="event">QK WGMMA[0]</text>
-<rect x="514.7" y="146" width="77.4" height="48" rx="2" fill="#d8e8c6" stroke="#222" stroke-width="1.2"/>
-<text x="553.4" y="175" text-anchor="middle" class="event">softmax[0]</text>
-<rect x="592.1" y="146" width="154.8" height="48" rx="2" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
-<text x="669.5" y="175" text-anchor="middle" class="event">PV-RS[0]</text>
-<rect x="746.9" y="146" width="154.8" height="48" rx="2" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
-<text x="824.4" y="175" text-anchor="middle" class="event">QK WGMMA[1]</text>
-<rect x="901.8" y="146" width="77.4" height="48" rx="2" fill="#d8e8c6" stroke="#222" stroke-width="1.2"/>
-<text x="940.5" y="175" text-anchor="middle" class="event">softmax[1]</text>
-<rect x="979.2" y="146" width="154.8" height="48" rx="2" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
-<text x="1056.6" y="175" text-anchor="middle" class="event">PV-RS[1]</text>
-<text x="190" y="245" text-anchor="end" class="label">WG1 consumer-remote</text>
-<line x1="205" y1="252" x2="1165" y2="252" stroke="#dedede"/>
-<rect x="607.6" y="220" width="170.3" height="48" rx="2" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
-<text x="692.7" y="249" text-anchor="middle" class="event">scale+PV-SS[0]</text>
-<rect x="994.7" y="220" width="170.3" height="48" rx="2" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
-<text x="1079.8" y="249" text-anchor="middle" class="event">scale+PV-SS[1]</text>
-<line x1="205" y1="309" x2="1177" y2="309" stroke="#111" stroke-width="1.5" marker-end="url(#arrow)"/>
-<text x="685.0" y="340" text-anchor="middle" class="label">logical time (not measured cycles)</text>
+<style>text { font-family: Arial, &quot;Microsoft YaHei&quot;, sans-serif; fill: #151515; letter-spacing: 0; } .title { font-size: 17px; font-weight: 600; } .label { font-size: 15px; font-weight: 600; } .small { font-size: 12px; } .sync-label { font-size: 12px; } .sync { stroke: #202020; stroke-width: 1.4; stroke-dasharray: 7 6; }</style>
+<text x="225" y="27" class="title">FlashMLA V3.2 sparse decode: inter-warp-group pipeline</text>
+<rect x="225" y="42" width="14" height="14" rx="2" fill="#c9e6f5" stroke="#222"/>
+<text x="245" y="54" class="small">data movement</text>
+<rect x="435" y="42" width="14" height="14" rx="2" fill="#f4c7c3" stroke="#222"/>
+<text x="455" y="54" class="small">tensor/core compute</text>
+<rect x="645" y="42" width="14" height="14" rx="2" fill="#d8e8c6" stroke="#222"/>
+<text x="665" y="54" class="small">vector / reduction / epilogue</text>
+<rect x="855" y="42" width="14" height="14" rx="2" fill="#f7deb5" stroke="#222"/>
+<text x="875" y="54" class="small">other work</text>
+<line x1="411.3" y1="66" x2="411.3" y2="383" class="sync"/>
+<rect x="415.3" y="69" width="76.0" height="17" rx="2" fill="white" fill-opacity="0.94"/>
+<text x="418.3" y="82" text-anchor="start" class="sync-label">K[0] ready</text>
+<line x1="597.6" y1="66" x2="597.6" y2="383" class="sync"/>
+<rect x="601.6" y="69" width="167.0" height="17" rx="2" fill="white" fill-opacity="0.94"/>
+<text x="604.6" y="82" text-anchor="start" class="sync-label">K[1] ready / wait_group</text>
+<line x1="709.4" y1="66" x2="709.4" y2="383" class="sync"/>
+<rect x="713.4" y="87" width="76.0" height="17" rx="2" fill="white" fill-opacity="0.94"/>
+<text x="716.4" y="100" text-anchor="start" class="sync-label">S[0] ready</text>
+<line x1="914.3" y1="66" x2="914.3" y2="383" class="sync"/>
+<rect x="918.3" y="69" width="69.0" height="17" rx="2" fill="white" fill-opacity="0.94"/>
+<text x="921.3" y="82" text-anchor="start" class="sync-label">buf0 free</text>
+<line x1="1175.1" y1="66" x2="1175.1" y2="383" class="sync"/>
+<rect x="1179.1" y="69" width="76.0" height="17" rx="2" fill="white" fill-opacity="0.94"/>
+<text x="1182.1" y="82" text-anchor="start" class="sync-label">S[1] ready</text>
+<text x="210" y="163" text-anchor="end" class="label">WG2 producer</text>
+<line x1="225" y1="168" x2="1380" y2="168" stroke="#dedede"/>
+<clipPath id="event-clip-0"><rect x="228.0" y="135" width="180.3" height="48" rx="1"/></clipPath>
+<g><title>LD+CVT+ST[0]/buf0</title><rect x="225.0" y="132" width="186.3" height="54" rx="3" fill="#c9e6f5" stroke="#222" stroke-width="1.2"/>
+<text x="318.1" y="161.0" text-anchor="middle" font-size="13px" clip-path="url(#event-clip-0)">
+<tspan x="318.1" dy="0">LD+CVT+ST[0]/buf0</tspan>
+</text></g>
+<clipPath id="event-clip-1"><rect x="414.3" y="135" width="180.3" height="48" rx="1"/></clipPath>
+<g><title>LD+CVT+ST[1]/buf1</title><rect x="411.3" y="132" width="186.3" height="54" rx="3" fill="#c9e6f5" stroke="#222" stroke-width="1.2"/>
+<text x="504.4" y="161.0" text-anchor="middle" font-size="13px" clip-path="url(#event-clip-1)">
+<tspan x="504.4" dy="0">LD+CVT+ST[1]/buf1</tspan>
+</text></g>
+<clipPath id="event-clip-2"><rect x="917.3" y="135" width="180.3" height="48" rx="1"/></clipPath>
+<g><title>LD+CVT+ST[2]/buf0</title><rect x="914.3" y="132" width="186.3" height="54" rx="3" fill="#c9e6f5" stroke="#222" stroke-width="1.2"/>
+<text x="1007.4" y="161.0" text-anchor="middle" font-size="13px" clip-path="url(#event-clip-2)">
+<tspan x="1007.4" dy="0">LD+CVT+ST[2]/buf0</tspan>
+</text></g>
+<text x="210" y="245" text-anchor="end" class="label">WG0 consumer-main</text>
+<line x1="225" y1="250" x2="1380" y2="250" stroke="#dedede"/>
+<clipPath id="event-clip-3"><rect x="414.3" y="217" width="180.3" height="48" rx="1"/></clipPath>
+<g><title>QK WGMMA[0]</title><rect x="411.3" y="214" width="186.3" height="54" rx="3" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
+<text x="504.4" y="243.0" text-anchor="middle" font-size="13px" clip-path="url(#event-clip-3)">
+<tspan x="504.4" dy="0">QK WGMMA[0]</tspan>
+</text></g>
+<clipPath id="event-clip-4"><rect x="600.6" y="217" width="87.1" height="48" rx="1"/></clipPath>
+<g><title>softmax[0]</title><rect x="597.6" y="214" width="93.1" height="54" rx="3" fill="#d8e8c6" stroke="#222" stroke-width="1.2"/>
+<text x="644.2" y="243.0" text-anchor="middle" font-size="12px" clip-path="url(#event-clip-4)">
+<tspan x="644.2" dy="0">softmax[0]</tspan>
+</text></g>
+<clipPath id="event-clip-5"><rect x="693.7" y="217" width="180.3" height="48" rx="1"/></clipPath>
+<g><title>PV-RS[0]</title><rect x="690.7" y="214" width="186.3" height="54" rx="3" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
+<text x="783.9" y="243.0" text-anchor="middle" font-size="13px" clip-path="url(#event-clip-5)">
+<tspan x="783.9" dy="0">PV-RS[0]</tspan>
+</text></g>
+<clipPath id="event-clip-6"><rect x="880.0" y="217" width="180.3" height="48" rx="1"/></clipPath>
+<g><title>QK WGMMA[1]</title><rect x="877.0" y="214" width="186.3" height="54" rx="3" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
+<text x="970.2" y="243.0" text-anchor="middle" font-size="13px" clip-path="url(#event-clip-6)">
+<tspan x="970.2" dy="0">QK WGMMA[1]</tspan>
+</text></g>
+<clipPath id="event-clip-7"><rect x="1066.3" y="217" width="87.1" height="48" rx="1"/></clipPath>
+<g><title>softmax[1]</title><rect x="1063.3" y="214" width="93.1" height="54" rx="3" fill="#d8e8c6" stroke="#222" stroke-width="1.2"/>
+<text x="1109.9" y="243.0" text-anchor="middle" font-size="12px" clip-path="url(#event-clip-7)">
+<tspan x="1109.9" dy="0">softmax[1]</tspan>
+</text></g>
+<clipPath id="event-clip-8"><rect x="1159.5" y="217" width="180.3" height="48" rx="1"/></clipPath>
+<g><title>PV-RS[1]</title><rect x="1156.5" y="214" width="186.3" height="54" rx="3" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
+<text x="1249.6" y="243.0" text-anchor="middle" font-size="13px" clip-path="url(#event-clip-8)">
+<tspan x="1249.6" dy="0">PV-RS[1]</tspan>
+</text></g>
+<text x="210" y="327" text-anchor="end" class="label">WG1 consumer-remote</text>
+<line x1="225" y1="332" x2="1380" y2="332" stroke="#dedede"/>
+<clipPath id="event-clip-9"><rect x="712.4" y="299" width="198.9" height="48" rx="1"/></clipPath>
+<g><title>scale+PV-SS[0]</title><rect x="709.4" y="296" width="204.9" height="54" rx="3" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
+<text x="811.8" y="325.0" text-anchor="middle" font-size="13px" clip-path="url(#event-clip-9)">
+<tspan x="811.8" dy="0">scale+PV-SS[0]</tspan>
+</text></g>
+<clipPath id="event-clip-10"><rect x="1178.1" y="299" width="198.9" height="48" rx="1"/></clipPath>
+<g><title>scale+PV-SS[1]</title><rect x="1175.1" y="296" width="204.9" height="54" rx="3" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
+<text x="1277.5" y="325.0" text-anchor="middle" font-size="13px" clip-path="url(#event-clip-10)">
+<tspan x="1277.5" dy="0">scale+PV-SS[1]</tspan>
+</text></g>
+<line x1="225" y1="393" x2="1392" y2="393" stroke="#111" stroke-width="1.5" marker-end="url(#arrow)"/>
+<text x="802.5" y="424" text-anchor="middle" class="label">logical time (not measured cycles)</text>
 </svg>

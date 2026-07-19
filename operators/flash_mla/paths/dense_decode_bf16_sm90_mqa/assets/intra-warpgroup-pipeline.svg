@@ -1,47 +1,78 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="1220" height="392" viewBox="0 0 1220 392" role="img">
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="476" viewBox="0 0 1440 476" role="img">
 <defs><marker id="arrow" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><path d="M0,0 L9,3.5 L0,7 Z" fill="#111"/></marker></defs>
 <rect width="100%" height="100%" fill="white"/>
-<style>text { font-family: Arial, &quot;Microsoft YaHei&quot;, sans-serif; fill: #151515; } .label { font-size: 16px; font-weight: 600; } .event { font-size: 14px; } .small { font-size: 12px; } .sync { stroke: #202020; stroke-width: 1.5; stroke-dasharray: 7 6; }</style>
-<text x="205" y="29" class="label">FlashMLA dense BF16 decode: WG0 steady async issue order</text>
-<rect x="475" y="15" width="14" height="14" rx="2" fill="#c9e6f5" stroke="#222"/>
-<text x="495" y="27" class="small">data movement</text>
-<rect x="645" y="15" width="14" height="14" rx="2" fill="#f4c7c3" stroke="#222"/>
-<text x="665" y="27" class="small">tensor/core compute</text>
-<rect x="815" y="15" width="14" height="14" rx="2" fill="#d8e8c6" stroke="#222"/>
-<text x="835" y="27" class="small">vector / reduction / epilogue</text>
-<rect x="985" y="15" width="14" height="14" rx="2" fill="#f7deb5" stroke="#222"/>
-<text x="1005" y="27" class="small">other work</text>
-<line x1="391.7" y1="47" x2="391.7" y2="299" class="sync"/>
-<text x="396.7" y="60" class="small">K tile0 ready (mbarrier)</text>
-<line x1="658.3" y1="47" x2="658.3" y2="299" class="sync"/>
-<text x="663.3" y="60" class="small">after QK 0..3: wait_group&lt;4&gt;</text>
-<line x1="711.7" y1="47" x2="711.7" y2="299" class="sync"/>
-<text x="716.7" y="60" class="small">K tile4 ready (mbarrier)</text>
-<line x1="1111.7" y1="47" x2="1111.7" y2="299" class="sync"/>
-<text x="1116.7" y="60" class="small">all QK issued / wait_group&lt;0&gt;</text>
-<text x="190" y="97" text-anchor="end" class="label">TMA next-even K</text>
-<line x1="205" y1="104" x2="1165" y2="104" stroke="#dedede"/>
-<rect x="205.0" y="72" width="373.3" height="48" rx="2" fill="#c9e6f5" stroke="#222" stroke-width="1.2"/>
-<text x="391.7" y="101" text-anchor="middle" class="event">K[i+1] tiles 0..3</text>
-<rect x="685.0" y="72" width="426.7" height="48" rx="2" fill="#c9e6f5" stroke="#222" stroke-width="1.2"/>
-<text x="898.3" y="101" text-anchor="middle" class="event">K[i+1] tiles 4..8</text>
-<text x="190" y="171" text-anchor="end" class="label">WG0 WGMMA issue</text>
-<line x1="205" y1="178" x2="1165" y2="178" stroke="#dedede"/>
-<rect x="311.7" y="146" width="80.0" height="48" rx="2" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
-<text x="351.7" y="175" text-anchor="middle" class="event">PV-remote[i] commit</text>
-<rect x="391.7" y="146" width="266.7" height="48" rx="2" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
-<text x="525.0" y="175" text-anchor="middle" class="event">QK tiles 0..3[i+1]</text>
-<rect x="711.7" y="146" width="400.0" height="48" rx="2" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
-<text x="911.7" y="175" text-anchor="middle" class="event">QK tiles 4..8[i+1]</text>
-<text x="190" y="245" text-anchor="end" class="label">WG0 vector/control</text>
-<line x1="205" y1="252" x2="1165" y2="252" stroke="#dedede"/>
-<rect x="205.0" y="220" width="106.7" height="48" rx="2" fill="#d8e8c6" stroke="#222" stroke-width="1.2"/>
-<text x="258.3" y="249" text-anchor="middle" class="event">rescale O[i]</text>
-<rect x="658.3" y="220" width="53.3" height="48" rx="2" fill="#f7deb5" stroke="#222" stroke-width="1.2"/>
-<text x="685.0" y="249" text-anchor="middle" class="event">wait4 / launch peer-half TMA</text>
-<rect x="1111.7" y="220" width="53.3" height="48" rx="2" fill="#f7deb5" stroke="#222" stroke-width="1.2"/>
-<text x="1138.3" y="249" text-anchor="middle" class="event">wait_group&lt;0&gt;</text>
-<line x1="205" y1="309" x2="1177" y2="309" stroke="#111" stroke-width="1.5" marker-end="url(#arrow)"/>
-<text x="685.0" y="340" text-anchor="middle" class="label">logical issue / outstanding window (not measured cycles)</text>
+<style>text { font-family: Arial, &quot;Microsoft YaHei&quot;, sans-serif; fill: #151515; letter-spacing: 0; } .title { font-size: 17px; font-weight: 600; } .label { font-size: 15px; font-weight: 600; } .small { font-size: 12px; } .sync-label { font-size: 12px; } .sync { stroke: #202020; stroke-width: 1.4; stroke-dasharray: 7 6; }</style>
+<text x="225" y="27" class="title">FlashMLA dense BF16 decode: WG0 steady async issue order</text>
+<rect x="225" y="42" width="14" height="14" rx="2" fill="#c9e6f5" stroke="#222"/>
+<text x="245" y="54" class="small">data movement</text>
+<rect x="435" y="42" width="14" height="14" rx="2" fill="#f4c7c3" stroke="#222"/>
+<text x="455" y="54" class="small">tensor/core compute</text>
+<rect x="645" y="42" width="14" height="14" rx="2" fill="#d8e8c6" stroke="#222"/>
+<text x="665" y="54" class="small">vector / reduction / epilogue</text>
+<rect x="855" y="42" width="14" height="14" rx="2" fill="#f7deb5" stroke="#222"/>
+<text x="875" y="54" class="small">other work</text>
+<line x1="449.6" y1="66" x2="449.6" y2="383" class="sync"/>
+<rect x="453.6" y="69" width="174.0" height="17" rx="2" fill="white" fill-opacity="0.94"/>
+<text x="456.6" y="82" text-anchor="start" class="sync-label">K tile0 ready (mbarrier)</text>
+<line x1="770.4" y1="66" x2="770.4" y2="383" class="sync"/>
+<rect x="774.4" y="69" width="202.0" height="17" rx="2" fill="white" fill-opacity="0.94"/>
+<text x="777.4" y="82" text-anchor="start" class="sync-label">after QK 0..3: wait_group&lt;4&gt;</text>
+<line x1="834.6" y1="66" x2="834.6" y2="383" class="sync"/>
+<rect x="838.6" y="87" width="174.0" height="17" rx="2" fill="white" fill-opacity="0.94"/>
+<text x="841.6" y="100" text-anchor="start" class="sync-label">K tile4 ready (mbarrier)</text>
+<line x1="1315.8" y1="66" x2="1315.8" y2="383" class="sync"/>
+<rect x="1102.8" y="69" width="209.0" height="17" rx="2" fill="white" fill-opacity="0.94"/>
+<text x="1308.8" y="82" text-anchor="end" class="sync-label">all QK issued / wait_group&lt;0&gt;</text>
+<text x="210" y="163" text-anchor="end" class="label">TMA next-even K</text>
+<line x1="225" y1="168" x2="1380" y2="168" stroke="#dedede"/>
+<clipPath id="event-clip-0"><rect x="228.0" y="135" width="443.2" height="48" rx="1"/></clipPath>
+<g><title>K[i+1] tiles 0..3</title><rect x="225.0" y="132" width="449.2" height="54" rx="3" fill="#c9e6f5" stroke="#222" stroke-width="1.2"/>
+<text x="449.6" y="161.0" text-anchor="middle" font-size="13px" clip-path="url(#event-clip-0)">
+<tspan x="449.6" dy="0">K[i+1] tiles 0..3</tspan>
+</text></g>
+<clipPath id="event-clip-1"><rect x="805.5" y="135" width="507.3" height="48" rx="1"/></clipPath>
+<g><title>K[i+1] tiles 4..8</title><rect x="802.5" y="132" width="513.3" height="54" rx="3" fill="#c9e6f5" stroke="#222" stroke-width="1.2"/>
+<text x="1059.2" y="161.0" text-anchor="middle" font-size="13px" clip-path="url(#event-clip-1)">
+<tspan x="1059.2" dy="0">K[i+1] tiles 4..8</tspan>
+</text></g>
+<text x="210" y="245" text-anchor="end" class="label">WG0 WGMMA issue</text>
+<line x1="225" y1="250" x2="1380" y2="250" stroke="#dedede"/>
+<clipPath id="event-clip-2"><rect x="356.3" y="217" width="90.2" height="48" rx="1"/></clipPath>
+<g><title>PV-remote[i] commit</title><rect x="353.3" y="214" width="96.2" height="54" rx="3" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
+<text x="401.5" y="236.0" text-anchor="middle" font-size="12px" clip-path="url(#event-clip-2)">
+<tspan x="401.5" dy="0">PV-remote[i]</tspan>
+<tspan x="401.5" dy="14">commit</tspan>
+</text></g>
+<clipPath id="event-clip-3"><rect x="452.6" y="217" width="314.8" height="48" rx="1"/></clipPath>
+<g><title>QK tiles 0..3[i+1]</title><rect x="449.6" y="214" width="320.8" height="54" rx="3" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
+<text x="610.0" y="243.0" text-anchor="middle" font-size="13px" clip-path="url(#event-clip-3)">
+<tspan x="610.0" dy="0">QK tiles 0..3[i+1]</tspan>
+</text></g>
+<clipPath id="event-clip-4"><rect x="837.6" y="217" width="475.2" height="48" rx="1"/></clipPath>
+<g><title>QK tiles 4..8[i+1]</title><rect x="834.6" y="214" width="481.2" height="54" rx="3" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
+<text x="1075.2" y="243.0" text-anchor="middle" font-size="13px" clip-path="url(#event-clip-4)">
+<tspan x="1075.2" dy="0">QK tiles 4..8[i+1]</tspan>
+</text></g>
+<text x="210" y="327" text-anchor="end" class="label">WG0 vector/control</text>
+<line x1="225" y1="332" x2="1380" y2="332" stroke="#dedede"/>
+<clipPath id="event-clip-5"><rect x="228.0" y="299" width="122.3" height="48" rx="1"/></clipPath>
+<g><title>rescale O[i]</title><rect x="225.0" y="296" width="128.3" height="54" rx="3" fill="#d8e8c6" stroke="#222" stroke-width="1.2"/>
+<text x="289.2" y="325.0" text-anchor="middle" font-size="13px" clip-path="url(#event-clip-5)">
+<tspan x="289.2" dy="0">rescale O[i]</tspan>
+</text></g>
+<clipPath id="event-clip-6"><rect x="773.4" y="299" width="58.2" height="48" rx="1"/></clipPath>
+<g><title>wait4 / launch peer-half TMA</title><rect x="770.4" y="296" width="64.2" height="54" rx="3" fill="#f7deb5" stroke="#222" stroke-width="1.2"/>
+<text x="802.5" y="319.0" text-anchor="middle" font-size="10px" clip-path="url(#event-clip-6)">
+<tspan x="802.5" dy="0">wait4 /</tspan>
+<tspan x="802.5" dy="12">launch...</tspan>
+</text></g>
+<clipPath id="event-clip-7"><rect x="1318.8" y="299" width="58.2" height="48" rx="1"/></clipPath>
+<g><title>wait_group&lt;0&gt;</title><rect x="1315.8" y="296" width="64.2" height="54" rx="3" fill="#f7deb5" stroke="#222" stroke-width="1.2"/>
+<text x="1347.9" y="319.0" text-anchor="middle" font-size="10px" clip-path="url(#event-clip-7)">
+<tspan x="1347.9" dy="0">wait_gro</tspan>
+<tspan x="1347.9" dy="12">up&lt;0&gt;</tspan>
+</text></g>
+<line x1="225" y1="393" x2="1392" y2="393" stroke="#111" stroke-width="1.5" marker-end="url(#arrow)"/>
+<text x="802.5" y="424" text-anchor="middle" class="label">logical issue / outstanding window (not measured cycles)</text>
 </svg>

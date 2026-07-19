@@ -66,6 +66,8 @@ block = (256,1,1) = 2 warp groups × 128 threads
 
 ![Dense decode inter-warpgroup pipeline](assets/warpgroup-pipeline.svg)
 
+图的左端从当前 page pair 的 QK 开始，而不是从 softmax 截断。首个 pair 的 even QK 是 prologue 中的 36 SS non-pipelined 路径；进入 steady loop 后，图左端的 `QK[i]` 实际在上一轮 subroutine 尾部发射并完成，随后当前轮才能读取 accumulator 做 softmax。把它画在当前 pair 的输入阶段，是为了完整表达 `QK -> softmax -> PV` 数据依赖；横轴仍是源码逻辑顺序，不是实测 cycle。
+
 WG0/WG1 不是简单 producer/consumer：两者各自计算一个 page 的 QK/softmax，同时各拥有一半输出列。online softmax 的共享 `sM` 强制 page 顺序为 even→odd：WG0 更新 even page 后发出 `sScale0Ready`，WG1 才能更新 odd page 并发出 `sScale1Ready`。随后每个有效 page 的 P 都保存到 shared，供另一个 WG 计算另一半输出列。
 
 **Confirmed (source)** 的一个跨 WG overlap 窗口是：WG0 发射 even local PV 后等待 `wait_group<0>`，同时 WG1 在收到 `sScale0Ready` 后执行 odd softmax；WG0 必须同时等 local PV 完成和 `sScale1Ready` 才能继续。因此该 join 可以建成 `max(T_PV_local_even, T_softmax_odd)`，但并发时的资源干扰仍需 H800 实测。

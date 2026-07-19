@@ -1,67 +1,139 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="1220" height="466" viewBox="0 0 1220 466" role="img">
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="558" viewBox="0 0 1440 558" role="img">
 <defs><marker id="arrow" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><path d="M0,0 L9,3.5 L0,7 Z" fill="#111"/></marker></defs>
 <rect width="100%" height="100%" fill="white"/>
-<style>text { font-family: Arial, &quot;Microsoft YaHei&quot;, sans-serif; fill: #151515; } .label { font-size: 16px; font-weight: 600; } .event { font-size: 14px; } .small { font-size: 12px; } .sync { stroke: #202020; stroke-width: 1.5; stroke-dasharray: 7 6; }</style>
-<text x="205" y="29" class="label">FlashMLA dense BF16 decode: source-level page-pair schedule</text>
-<rect x="475" y="15" width="14" height="14" rx="2" fill="#c9e6f5" stroke="#222"/>
-<text x="495" y="27" class="small">data movement</text>
-<rect x="645" y="15" width="14" height="14" rx="2" fill="#f4c7c3" stroke="#222"/>
-<text x="665" y="27" class="small">tensor/core compute</text>
-<rect x="815" y="15" width="14" height="14" rx="2" fill="#d8e8c6" stroke="#222"/>
-<text x="835" y="27" class="small">vector / reduction / epilogue</text>
-<rect x="985" y="15" width="14" height="14" rx="2" fill="#f7deb5" stroke="#222"/>
-<text x="1005" y="27" class="small">other work</text>
-<line x1="319.3" y1="47" x2="319.3" y2="373" class="sync"/>
-<text x="324.3" y="60" class="small">sScale0Ready</text>
-<line x1="502.1" y1="47" x2="502.1" y2="373" class="sync"/>
-<text x="507.1" y="60" class="small">local PV wait0 + sScale1Ready</text>
-<line x1="593.6" y1="47" x2="593.6" y2="373" class="sync"/>
-<text x="598.6" y="60" class="small">sP0Ready</text>
-<line x1="639.3" y1="47" x2="639.3" y2="373" class="sync"/>
-<text x="644.3" y="60" class="small">remote even-P issued</text>
-<line x1="890.7" y1="47" x2="890.7" y2="373" class="sync"/>
-<text x="895.7" y="60" class="small">WG0 wait_group&lt;4&gt;</text>
-<line x1="1165.0" y1="47" x2="1165.0" y2="373" class="sync"/>
-<text x="1170.0" y="60" class="small">QK wait_group&lt;0&gt;</text>
-<text x="190" y="97" text-anchor="end" class="label">WG0 even / O-left</text>
-<line x1="205" y1="104" x2="1165" y2="104" stroke="#dedede"/>
-<rect x="205.0" y="72" width="114.3" height="48" rx="2" fill="#d8e8c6" stroke="#222" stroke-width="1.2"/>
-<text x="262.1" y="101" text-anchor="middle" class="event">softmax even[i]</text>
-<rect x="319.3" y="72" width="182.9" height="48" rx="2" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
-<text x="410.7" y="101" text-anchor="middle" class="event">PV-local even[i] + wait0</text>
-<rect x="502.1" y="72" width="91.4" height="48" rx="2" fill="#d8e8c6" stroke="#222" stroke-width="1.2"/>
-<text x="547.9" y="101" text-anchor="middle" class="event">rescale + STSM P-even[i]</text>
-<rect x="639.3" y="72" width="68.6" height="48" rx="2" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
-<text x="673.6" y="101" text-anchor="middle" class="event">rescale O + issue PV-remote odd[i]</text>
-<rect x="707.9" y="72" width="182.9" height="48" rx="2" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
-<text x="799.3" y="101" text-anchor="middle" class="event">QK even[i+1] tiles 0..3</text>
-<rect x="890.7" y="72" width="274.3" height="48" rx="2" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
-<text x="1027.9" y="101" text-anchor="middle" class="event">QK even[i+1] tiles 4..8</text>
-<text x="190" y="171" text-anchor="end" class="label">WG1 odd / O-right</text>
-<line x1="205" y1="178" x2="1165" y2="178" stroke="#dedede"/>
-<rect x="319.3" y="146" width="137.1" height="48" rx="2" fill="#d8e8c6" stroke="#222" stroke-width="1.2"/>
-<text x="387.9" y="175" text-anchor="middle" class="event">softmax odd[i]</text>
-<rect x="456.4" y="146" width="68.6" height="48" rx="2" fill="#c9e6f5" stroke="#222" stroke-width="1.2"/>
-<text x="490.7" y="175" text-anchor="middle" class="event">STSM P-odd[i]</text>
-<rect x="525.0" y="146" width="137.1" height="48" rx="2" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
-<text x="593.6" y="175" text-anchor="middle" class="event">issue PV-local odd[i]</text>
-<rect x="593.6" y="146" width="45.7" height="48" rx="2" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
-<text x="616.4" y="175" text-anchor="middle" class="event">issue PV-remote even[i]</text>
-<rect x="776.4" y="146" width="388.6" height="48" rx="2" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
-<text x="970.7" y="175" text-anchor="middle" class="event">QK odd[i+1] per-tile waits</text>
-<text x="190" y="245" text-anchor="end" class="label">TMA issued by WG0</text>
-<line x1="205" y1="252" x2="1165" y2="252" stroke="#dedede"/>
-<rect x="502.1" y="220" width="91.4" height="48" rx="2" fill="#c9e6f5" stroke="#222" stroke-width="1.2"/>
-<text x="547.9" y="249" text-anchor="middle" class="event">next-even K[0..3]</text>
-<rect x="890.7" y="220" width="91.4" height="48" rx="2" fill="#c9e6f5" stroke="#222" stroke-width="1.2"/>
-<text x="936.4" y="249" text-anchor="middle" class="event">next-odd K[0..3]</text>
-<text x="190" y="319" text-anchor="end" class="label">TMA issued by WG1</text>
-<line x1="205" y1="326" x2="1165" y2="326" stroke="#dedede"/>
-<rect x="662.1" y="294" width="91.4" height="48" rx="2" fill="#c9e6f5" stroke="#222" stroke-width="1.2"/>
-<text x="707.9" y="323" text-anchor="middle" class="event">next-odd K[4..8]</text>
-<rect x="753.6" y="294" width="91.4" height="48" rx="2" fill="#c9e6f5" stroke="#222" stroke-width="1.2"/>
-<text x="799.3" y="323" text-anchor="middle" class="event">next-even K[4..8]</text>
-<line x1="205" y1="383" x2="1177" y2="383" stroke="#111" stroke-width="1.5" marker-end="url(#arrow)"/>
-<text x="685.0" y="414" text-anchor="middle" class="label">logical order / outstanding window (not measured cycles)</text>
+<style>text { font-family: Arial, &quot;Microsoft YaHei&quot;, sans-serif; fill: #151515; letter-spacing: 0; } .title { font-size: 17px; font-weight: 600; } .label { font-size: 15px; font-weight: 600; } .small { font-size: 12px; } .sync-label { font-size: 12px; } .sync { stroke: #202020; stroke-width: 1.4; stroke-dasharray: 7 6; }</style>
+<text x="225" y="27" class="title">Dense BF16 decode: complete steady page-pair handoff</text>
+<rect x="225" y="42" width="14" height="14" rx="2" fill="#c9e6f5" stroke="#222"/>
+<text x="245" y="54" class="small">data movement</text>
+<rect x="435" y="42" width="14" height="14" rx="2" fill="#f4c7c3" stroke="#222"/>
+<text x="455" y="54" class="small">tensor/core compute</text>
+<rect x="645" y="42" width="14" height="14" rx="2" fill="#d8e8c6" stroke="#222"/>
+<text x="665" y="54" class="small">vector / reduction / epilogue</text>
+<rect x="855" y="42" width="14" height="14" rx="2" fill="#f7deb5" stroke="#222"/>
+<text x="875" y="54" class="small">other work</text>
+<line x1="435.0" y1="66" x2="435.0" y2="465" class="sync"/>
+<rect x="439.0" y="69" width="153.0" height="17" rx="2" fill="white" fill-opacity="0.94"/>
+<text x="442.0" y="82" text-anchor="start" class="sync-label">even QK ready (wait0)</text>
+<line x1="540.0" y1="66" x2="540.0" y2="465" class="sync"/>
+<rect x="544.0" y="87" width="90.0" height="17" rx="2" fill="white" fill-opacity="0.94"/>
+<text x="547.0" y="100" text-anchor="start" class="sync-label">sScale0Ready</text>
+<line x1="723.8" y1="66" x2="723.8" y2="465" class="sync"/>
+<rect x="727.8" y="69" width="209.0" height="17" rx="2" fill="white" fill-opacity="0.94"/>
+<text x="730.8" y="82" text-anchor="start" class="sync-label">local PV wait0 + sScale1Ready</text>
+<line x1="815.6" y1="66" x2="815.6" y2="465" class="sync"/>
+<rect x="819.6" y="87" width="62.0" height="17" rx="2" fill="white" fill-opacity="0.94"/>
+<text x="822.6" y="100" text-anchor="start" class="sync-label">sP0Ready</text>
+<line x1="907.5" y1="66" x2="907.5" y2="465" class="sync"/>
+<rect x="911.5" y="87" width="146.0" height="17" rx="2" fill="white" fill-opacity="0.94"/>
+<text x="914.5" y="100" text-anchor="start" class="sync-label">remote even-P issued</text>
+<line x1="1156.9" y1="66" x2="1156.9" y2="465" class="sync"/>
+<rect x="1160.9" y="69" width="125.0" height="17" rx="2" fill="white" fill-opacity="0.94"/>
+<text x="1163.9" y="82" text-anchor="start" class="sync-label">WG0 wait_group&lt;4&gt;</text>
+<line x1="1380.0" y1="66" x2="1380.0" y2="465" class="sync"/>
+<rect x="1223.0" y="87" width="153.0" height="17" rx="2" fill="white" fill-opacity="0.94"/>
+<text x="1373.0" y="100" text-anchor="end" class="sync-label">next QK ready (wait0)</text>
+<text x="210" y="163" text-anchor="end" class="label">WG0 even / O-left</text>
+<line x1="225" y1="168" x2="1380" y2="168" stroke="#dedede"/>
+<clipPath id="event-clip-0"><rect x="228.0" y="135" width="204.0" height="48" rx="1"/></clipPath>
+<g><title>QK even[i] + wait0</title><rect x="225.0" y="132" width="210.0" height="54" rx="3" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
+<text x="330.0" y="161.0" text-anchor="middle" font-size="13px" clip-path="url(#event-clip-0)">
+<tspan x="330.0" dy="0">QK even[i] + wait0</tspan>
+</text></g>
+<clipPath id="event-clip-1"><rect x="438.0" y="135" width="99.0" height="48" rx="1"/></clipPath>
+<g><title>softmax even[i]</title><rect x="435.0" y="132" width="105.0" height="54" rx="3" fill="#d8e8c6" stroke="#222" stroke-width="1.2"/>
+<text x="487.5" y="154.0" text-anchor="middle" font-size="12px" clip-path="url(#event-clip-1)">
+<tspan x="487.5" dy="0">softmax</tspan>
+<tspan x="487.5" dy="14">even[i]</tspan>
+</text></g>
+<clipPath id="event-clip-2"><rect x="543.0" y="135" width="177.8" height="48" rx="1"/></clipPath>
+<g><title>PV even-L[i] + wait0</title><rect x="540.0" y="132" width="183.8" height="54" rx="3" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
+<text x="631.9" y="161.0" text-anchor="middle" font-size="13px" clip-path="url(#event-clip-2)">
+<tspan x="631.9" dy="0">PV even-L[i] + wait0</tspan>
+</text></g>
+<clipPath id="event-clip-3"><rect x="726.8" y="135" width="85.9" height="48" rx="1"/></clipPath>
+<g><title>scale + STSM P0</title><rect x="723.8" y="132" width="91.9" height="54" rx="3" fill="#d8e8c6" stroke="#222" stroke-width="1.2"/>
+<text x="769.7" y="154.0" text-anchor="middle" font-size="12px" clip-path="url(#event-clip-3)">
+<tspan x="769.7" dy="0">scale +</tspan>
+<tspan x="769.7" dy="14">STSM P0</tspan>
+</text></g>
+<clipPath id="event-clip-4"><rect x="910.5" y="135" width="85.9" height="48" rx="1"/></clipPath>
+<g><title>PV odd-L[i]</title><rect x="907.5" y="132" width="91.9" height="54" rx="3" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
+<text x="953.4" y="161.0" text-anchor="middle" font-size="12px" clip-path="url(#event-clip-4)">
+<tspan x="953.4" dy="0">PV odd-L[i]</tspan>
+</text></g>
+<clipPath id="event-clip-5"><rect x="1002.4" y="135" width="151.5" height="48" rx="1"/></clipPath>
+<g><title>QK even[i+1] 0..3</title><rect x="999.4" y="132" width="157.5" height="54" rx="3" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
+<text x="1078.1" y="161.0" text-anchor="middle" font-size="13px" clip-path="url(#event-clip-5)">
+<tspan x="1078.1" dy="0">QK even[i+1] 0..3</tspan>
+</text></g>
+<clipPath id="event-clip-6"><rect x="1159.9" y="135" width="217.1" height="48" rx="1"/></clipPath>
+<g><title>QK even[i+1] 4..8</title><rect x="1156.9" y="132" width="223.1" height="54" rx="3" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
+<text x="1268.4" y="161.0" text-anchor="middle" font-size="13px" clip-path="url(#event-clip-6)">
+<tspan x="1268.4" dy="0">QK even[i+1] 4..8</tspan>
+</text></g>
+<text x="210" y="245" text-anchor="end" class="label">WG1 odd / O-right</text>
+<line x1="225" y1="250" x2="1380" y2="250" stroke="#dedede"/>
+<clipPath id="event-clip-7"><rect x="228.0" y="217" width="243.4" height="48" rx="1"/></clipPath>
+<g><title>QK odd[i] + wait0</title><rect x="225.0" y="214" width="249.4" height="54" rx="3" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
+<text x="349.7" y="243.0" text-anchor="middle" font-size="13px" clip-path="url(#event-clip-7)">
+<tspan x="349.7" dy="0">QK odd[i] + wait0</tspan>
+</text></g>
+<clipPath id="event-clip-8"><rect x="543.0" y="217" width="99.0" height="48" rx="1"/></clipPath>
+<g><title>softmax odd[i]</title><rect x="540.0" y="214" width="105.0" height="54" rx="3" fill="#d8e8c6" stroke="#222" stroke-width="1.2"/>
+<text x="592.5" y="236.0" text-anchor="middle" font-size="12px" clip-path="url(#event-clip-8)">
+<tspan x="592.5" dy="0">softmax</tspan>
+<tspan x="592.5" dy="14">odd[i]</tspan>
+</text></g>
+<clipPath id="event-clip-9"><rect x="648.0" y="217" width="72.7" height="48" rx="1"/></clipPath>
+<g><title>STSM P1[i]</title><rect x="645.0" y="214" width="78.7" height="54" rx="3" fill="#c9e6f5" stroke="#222" stroke-width="1.2"/>
+<text x="684.4" y="243.0" text-anchor="middle" font-size="10px" clip-path="url(#event-clip-9)">
+<tspan x="684.4" dy="0">STSM P1[i]</tspan>
+</text></g>
+<clipPath id="event-clip-10"><rect x="726.8" y="217" width="112.1" height="48" rx="1"/></clipPath>
+<g><title>PV odd-R[i]</title><rect x="723.8" y="214" width="118.1" height="54" rx="3" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
+<text x="782.8" y="243.0" text-anchor="middle" font-size="12px" clip-path="url(#event-clip-10)">
+<tspan x="782.8" dy="0">PV odd-R[i]</tspan>
+</text></g>
+<clipPath id="event-clip-11"><rect x="844.9" y="217" width="59.6" height="48" rx="1"/></clipPath>
+<g><title>PV even-R[i]</title><rect x="841.9" y="214" width="65.6" height="54" rx="3" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
+<text x="874.7" y="237.0" text-anchor="middle" font-size="10px" clip-path="url(#event-clip-11)">
+<tspan x="874.7" dy="0">PV</tspan>
+<tspan x="874.7" dy="12">even-R[i]</tspan>
+</text></g>
+<clipPath id="event-clip-12"><rect x="1068.0" y="217" width="309.0" height="48" rx="1"/></clipPath>
+<g><title>QK odd[i+1] + wait0</title><rect x="1065.0" y="214" width="315.0" height="54" rx="3" fill="#f4c7c3" stroke="#222" stroke-width="1.2"/>
+<text x="1222.5" y="243.0" text-anchor="middle" font-size="13px" clip-path="url(#event-clip-12)">
+<tspan x="1222.5" dy="0">QK odd[i+1] + wait0</tspan>
+</text></g>
+<text x="210" y="327" text-anchor="end" class="label">TMA issued by WG0</text>
+<line x1="225" y1="332" x2="1380" y2="332" stroke="#dedede"/>
+<clipPath id="event-clip-13"><rect x="726.8" y="299" width="85.9" height="48" rx="1"/></clipPath>
+<g><title>K even+1 0..3</title><rect x="723.8" y="296" width="91.9" height="54" rx="3" fill="#c9e6f5" stroke="#222" stroke-width="1.2"/>
+<text x="769.7" y="318.0" text-anchor="middle" font-size="12px" clip-path="url(#event-clip-13)">
+<tspan x="769.7" dy="0">K even+1</tspan>
+<tspan x="769.7" dy="14">0..3</tspan>
+</text></g>
+<clipPath id="event-clip-14"><rect x="1002.4" y="299" width="85.9" height="48" rx="1"/></clipPath>
+<g><title>K odd+1 0..3</title><rect x="999.4" y="296" width="91.9" height="54" rx="3" fill="#c9e6f5" stroke="#222" stroke-width="1.2"/>
+<text x="1045.3" y="318.0" text-anchor="middle" font-size="12px" clip-path="url(#event-clip-14)">
+<tspan x="1045.3" dy="0">K odd+1</tspan>
+<tspan x="1045.3" dy="14">0..3</tspan>
+</text></g>
+<text x="210" y="409" text-anchor="end" class="label">TMA issued by WG1</text>
+<line x1="225" y1="414" x2="1380" y2="414" stroke="#dedede"/>
+<clipPath id="event-clip-15"><rect x="844.9" y="381" width="85.9" height="48" rx="1"/></clipPath>
+<g><title>K odd+1 4..8</title><rect x="841.9" y="378" width="91.9" height="54" rx="3" fill="#c9e6f5" stroke="#222" stroke-width="1.2"/>
+<text x="887.8" y="400.0" text-anchor="middle" font-size="12px" clip-path="url(#event-clip-15)">
+<tspan x="887.8" dy="0">K odd+1</tspan>
+<tspan x="887.8" dy="14">4..8</tspan>
+</text></g>
+<clipPath id="event-clip-16"><rect x="936.8" y="381" width="85.9" height="48" rx="1"/></clipPath>
+<g><title>K even+1 4..8</title><rect x="933.8" y="378" width="91.9" height="54" rx="3" fill="#c9e6f5" stroke="#222" stroke-width="1.2"/>
+<text x="979.7" y="400.0" text-anchor="middle" font-size="12px" clip-path="url(#event-clip-16)">
+<tspan x="979.7" dy="0">K even+1</tspan>
+<tspan x="979.7" dy="14">4..8</tspan>
+</text></g>
+<line x1="225" y1="475" x2="1392" y2="475" stroke="#111" stroke-width="1.5" marker-end="url(#arrow)"/>
+<text x="802.5" y="506" text-anchor="middle" class="label">logical source order; current QK is issued at the preceding loop tail (not measured cycles)</text>
 </svg>
