@@ -1,0 +1,155 @@
+{
+  "quick": {
+    "default": {
+      "iters": [
+        256
+      ],
+      "warmup": [
+        1
+      ],
+      "samples": [
+        3
+      ],
+      "blocks": [
+        1
+      ]
+    },
+    "benchmarks": {
+      "st_shared_u32": {
+        "threads": [
+          256
+        ],
+        "producers": [
+          64
+        ],
+        "topology": [
+          "contiguous"
+        ],
+        "working-set-words": [
+          4096
+        ]
+      },
+      "st_shared_v2_u32_stride520": {
+        "warpgroups": [
+          2
+        ],
+        "stores-per-thread": [
+          64
+        ],
+        "invalid-tokens": [
+          8
+        ]
+      },
+      "st_shared_u64_sw128": {
+        "warpgroups": [
+          1
+        ],
+        "stores-per-thread": [
+          64
+        ],
+        "invalid-tokens": [
+          8
+        ]
+      }
+    }
+  },
+  "full": {
+    "default": {
+      "iters": [
+        4096
+      ],
+      "warmup": [
+        3
+      ],
+      "samples": [
+        20
+      ],
+      "blocks": [
+        1,
+        2,
+        4,
+        8,
+        16,
+        32,
+        66,
+        132,
+        264,
+        528
+      ]
+    },
+    "benchmarks": {
+      "st_shared_u32": {
+        "cases": [
+          {
+            "threads": [
+              32
+            ],
+            "producers": [
+              1,
+              8,
+              32
+            ],
+            "topology": [
+              "contiguous"
+            ],
+            "working-set-words": [
+              32,
+              256,
+              4096,
+              32768
+            ]
+          },
+          {
+            "threads": [
+              256
+            ],
+            "producers": [
+              1,
+              8,
+              32,
+              64,
+              128,
+              256
+            ],
+            "topology": [
+              "contiguous"
+            ],
+            "working-set-words": [
+              256,
+              4096,
+              32768
+            ]
+          }
+        ]
+      },
+      "st_shared_v2_u32_stride520": {
+        "warpgroups": [
+          1,
+          2
+        ],
+        "stores-per-thread": [
+          1,
+          16,
+          64
+        ],
+        "invalid-tokens": [
+          1
+        ]
+      },
+      "st_shared_u64_sw128": {
+        "warpgroups": [
+          1
+        ],
+        "stores-per-thread": [
+          1
+        ],
+        "invalid-tokens": [
+          1,
+          8,
+          32,
+          64
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "quick": {
+    "default": {
+      "iters": [
+        256
+      ],
+      "warmup": [
+        1
+      ],
+      "samples": [
+        3
+      ],
+      "blocks": [
+        1
+      ]
+    },
+    "benchmarks": {
+      "wgmma_mixed_shape_mode": {
+        "actors": [
+          1,
+          2
+        ]
+      },
+      "wgmma_sfu_shared_interference": {
+        "actors": [
+          1,
+          2
+        ]
+      },
+      "wgmma_tma_interference": {
+        "working-set-pages": [
+          64
+        ],
+        "actors": [
+          1,
+          2
+        ]
+      }
+    }
+  },
+  "full": {
+    "default": {
+      "iters": [
+        4096
+      ],
+      "warmup": [
+        3
+      ],
+      "samples": [
+        20
+      ],
+      "blocks": [
+        1,
+        2,
+        4,
+        8,
+        16,
+        32,
+        66,
+        132,
+        264,
+        528
+      ]
+    },
+    "benchmarks": {
+      "wgmma_mixed_shape_mode": {
+        "actors": [
+          1,
+          2
+        ]
+      },
+      "wgmma_sfu_shared_interference": {
+        "actors": [
+          1,
+          2
+        ]
+      },
+      "wgmma_tma_interference": {
+        "working-set-pages": [
+          1,
+          64,
+          1024,
+          8192
+        ],
+        "actors": [
+          1,
+          2
+        ]
+      }
+    }
+  }
+}

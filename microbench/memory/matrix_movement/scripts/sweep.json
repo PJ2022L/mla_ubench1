@@ -1,0 +1,80 @@
+{
+  "quick": {
+    "default": {
+      "iters": [
+        256
+      ],
+      "warmup": [
+        1
+      ],
+      "samples": [
+        3
+      ],
+      "blocks": [
+        1
+      ]
+    },
+    "benchmarks": {
+      "ldmatrix_m64n64_b16_x4": {
+        "warpgroups": [
+          1
+        ]
+      },
+      "stmatrix_m64n256_b16_x4": {
+        "warpgroups": [
+          1
+        ]
+      },
+      "stmatrix_m64n64_b16_x4": {
+        "warpgroups": [
+          1
+        ]
+      }
+    }
+  },
+  "full": {
+    "default": {
+      "iters": [
+        4096
+      ],
+      "warmup": [
+        3
+      ],
+      "samples": [
+        20
+      ],
+      "blocks": [
+        1,
+        2,
+        4,
+        8,
+        16,
+        32,
+        66,
+        132,
+        264,
+        528
+      ]
+    },
+    "benchmarks": {
+      "ldmatrix_m64n64_b16_x4": {
+        "warpgroups": [
+          1,
+          2
+        ]
+      },
+      "stmatrix_m64n256_b16_x4": {
+        "warpgroups": [
+          1,
+          2
+        ]
+      },
+      "stmatrix_m64n64_b16_x4": {
+        "warpgroups": [
+          1,
+          2
+        ]
+      }
+    }
+  }
+}

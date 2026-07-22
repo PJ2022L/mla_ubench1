@@ -123,16 +123,21 @@ python -c 'import flash_mla; print(flash_mla)'
 先完成静态门禁，再按 [HANDOFF.md](HANDOFF.md) 的任务顺序执行：
 
 ```bash
-make -C microbench -j8 everything
+make -C microbench validate
+make -C microbench dry-build
+make -C microbench build
 make -C microbench static
-make -C microbench static-calibration
 
-run_id="$(date +%Y%m%d-%H%M%S)-$(hostname)"
-python3 microbench/scan.py --kind atom --preset quick \
-  --output-dir "microbench/results/${run_id}/quick/atoms"
+make -C operators/flash_mla/paths/dense_decode_bf16_sm90_mqa/calibration check
+make -C operators/flash_mla/paths/dense_decode_bf16_sm90_mqa/calibration build
+
+python3 microbench/scripts/run_all.py --mode quick --device 0
+python3 microbench/scripts/run_all.py --mode full --device 0
 ```
 
-正式输出为 `results.jsonl`，args、命令和 wall time 在同目录 `run.log`。
+每个 family 的正式输出是其 `result.csv`。只有完整成功的 full sweep 会原子替换
+该文件；完整 args、命令、wall time、失败信息和原始六键 JSON 保存在同一 family 的
+`build/logs/` 与 `build/raw/`。
 
 ## 7. 运行 dense e2e
 

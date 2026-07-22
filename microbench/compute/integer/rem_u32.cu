@@ -1,0 +1,6 @@
+#include "common/harness.cuh"
+
+int main(int argc, char** argv) {
+    return microbench::scalar_atomic::run<microbench::scalar_atomic::RemU32>(
+        argc, argv);
+}

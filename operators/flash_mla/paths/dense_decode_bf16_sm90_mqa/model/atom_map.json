@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "roles": {
+    "metadata_load": "ld_global_nc_u32",
+    "metadata_div": "div_u32",
+    "metadata_iadd": "iadd3_u32",
+    "metadata_imad": "imad_lo_u32",
+    "metadata_compare": "isetp_lt_u32",
+    "metadata_shuffle": "shfl_sync_bfly_b32",
+    "metadata_shared_store": "st_shared_u32",
+    "metadata_shared_load": "ld_shared_u32_patterns",
+    "metadata_warp_sync": "warp_sync",
+    "metadata_store": "st_global_v4_u32_32b",
+    "metadata_split_store": "st_global_u32",
+    "scheduler_record_load": "ld_global_v4_u32_32b",
+    "request_length_load": "ld_global_nc_u32",
+    "block_table_load": "ld_global_nc_u32",
+    "mbarrier_init": "mbarrier_init",
+    "descriptor_prefetch": "prefetch_tensormap_rank4",
+    "q_tma": {
+      "bf16": "tensor_4d_64x576_bf16",
+      "fp16": "tensor_4d_64x576_fp16"
+    },
+    "q8_ldmatrix": "ldmatrix_m64n64_b16_x4",
+    "k_tma": {
+      "bf16": "tensor_4d_64x64_bf16",
+      "fp16": "tensor_4d_64x64_fp16"
+    },
+    "qk_ss": "m64n64k16_ss_{dtype}",
+    "qk_rs": "m64n64k16_rs_{dtype}",
+    "pv_ss": "m64n256k16_ss_{dtype}",
+    "pv_rs": "m64n256k16_rs_{dtype}",
+    "softmax_compare": "fsetp_lt_ftz_f32",
+    "softmax_token_compare": "isetp_lt_u32",
+    "softmax_max": "max_ftz_f32",
+    "softmax_select": "fsel_f32",
+    "softmax_mul": "fmul_rn_ftz_f32",
+    "softmax_ffma": "ffma_rn_ftz_f32",
+    "softmax_add": "fadd_rn_ftz_f32",
+    "softmax_exp2": "ex2_approx_ftz_f32",
+    "shuffle": "shfl_sync_bfly_b32",
+    "probability_convert": {
+      "bf16": "cvt_rn_bf16_f32",
+      "fp16": "cvt_rn_f16_f32"
+    },
+    "p_stmatrix": "stmatrix_m64n64_b16_x4",
+    "o_stmatrix": "stmatrix_m64n256_b16_x4",
+    "split_shared_store": "st_shared_v2_u32_stride520",
+    "tail_v_store": "st_shared_u64_sw128",
+    "shared_store_u32": "st_shared_u32",
+    "shared_load_u32": "ld_shared_u32_patterns",
+    "warp_sync": "warp_sync",
+    "proxy_fence": "fence_proxy_async_shared_cta",
+    "barrier_2wg": "bar_arrive_2wg",
+    "barrier_sync": "bar_sync_256",
+    "barrier_sync_128": "bar_sync_128",
+    "l_reduction": "fadd_rn_ftz_f32",
+    "normalize": "rcp_approx_ftz_f32",
+    "lse": "lg2_approx_ftz_f32",
+    "partial_output_store": "cp_async_bulk_s2g_64x512_f32",
+    "output_store": {
+      "bf16": "tensor_4d_64x512_bf16",
+      "fp16": "tensor_4d_64x512_fp16"
+    },
+    "lse_store": "st_global_f32",
+    "pdl_launch": "griddepcontrol_launch_dependents",
+    "pdl_wait": "griddepcontrol_wait",
+    "combine_dispatch": "isetp_lt_u32",
+    "combine_split_load": "ld_global_nc_u32",
+    "combine_split_sub": "iadd3_u32",
+    "combine_lse_load": "ld_global_f32_strided",
+    "combine_output_load": "ld_global_v4_f32",
+    "combine_ffma": "ffma_rn_ftz_f32",
+    "output_convert": {
+      "bf16": "cvt_rn_bf16_f32",
+      "fp16": "cvt_rn_f16_f32"
+    },
+    "combine_output_store": "st_global_u64"
+  }
+}

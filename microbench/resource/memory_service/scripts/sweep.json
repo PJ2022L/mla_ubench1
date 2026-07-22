@@ -1,0 +1,143 @@
+{
+  "quick": {
+    "default": {
+      "iters": [
+        256
+      ],
+      "warmup": [
+        1
+      ],
+      "samples": [
+        3
+      ],
+      "blocks": [
+        1
+      ]
+    },
+    "benchmarks": {
+      "ld_global_u64_saturation": {
+        "working-set-bytes": [
+          52428800
+        ],
+        "pattern": [
+          "sequential"
+        ],
+        "cache-mode": [
+          "hbm_stream"
+        ],
+        "outstanding-depth": [
+          4
+        ],
+        "threads": [
+          256
+        ]
+      },
+      "st_global_u64_saturation": {
+        "working-set-bytes": [
+          52428800
+        ],
+        "pattern": [
+          "sequential"
+        ],
+        "cache-mode": [
+          "hbm_stream"
+        ],
+        "outstanding-depth": [
+          4
+        ],
+        "threads": [
+          256
+        ]
+      }
+    }
+  },
+  "full": {
+    "default": {
+      "iters": [
+        4096
+      ],
+      "warmup": [
+        3
+      ],
+      "samples": [
+        20
+      ],
+      "blocks": [
+        1,
+        2,
+        4,
+        8,
+        16,
+        32,
+        66,
+        132,
+        264,
+        528
+      ]
+    },
+    "benchmarks": {
+      "ld_global_u64_saturation": {
+        "working-set-bytes": [
+          13107200,
+          26214400,
+          52428800,
+          104857600,
+          209715200,
+          419430400
+        ],
+        "pattern": [
+          "local",
+          "sequential",
+          "random",
+          "reuse"
+        ],
+        "cache-mode": [
+          "l2_hot",
+          "hbm_stream"
+        ],
+        "outstanding-depth": [
+          1,
+          2,
+          4,
+          8,
+          16
+        ],
+        "threads": [
+          128,
+          256
+        ]
+      },
+      "st_global_u64_saturation": {
+        "working-set-bytes": [
+          13107200,
+          26214400,
+          52428800,
+          104857600,
+          209715200,
+          419430400
+        ],
+        "pattern": [
+          "local",
+          "sequential",
+          "random",
+          "reuse"
+        ],
+        "cache-mode": [
+          "l2_hot",
+          "hbm_stream"
+        ],
+        "outstanding-depth": [
+          1,
+          2,
+          4,
+          8,
+          16
+        ],
+        "threads": [
+          128,
+          256
+        ]
+      }
+    }
+  }
+}

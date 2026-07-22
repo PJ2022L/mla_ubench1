@@ -1,0 +1,26 @@
+{
+  "quick": {
+    "defaults": {"iters": 2, "warmup": 1, "samples": 3, "blocks": 1, "device": 0},
+    "cases": {
+      "combine_stage_bf16": [{"iters": 1, "num-splits": 2}],
+      "combine_stage_fp16": [{"iters": 1, "num-splits": 2}],
+      "metadata_stage": [{"batch": 1, "num-sm-parts": 1, "seqlen-min": 64, "seqlen-max": 64, "seqlen-distribution": "uniform", "seed": 20260722}],
+      "pdl_overlap": [{"iters": 1, "blocks": 1, "producer-blocks": 1, "consumer-blocks": 1, "prefix-iters": 64, "tail-iters": 64, "consumer-iters": 64}]
+    }
+  },
+  "full": {
+    "defaults": {"iters": 64, "warmup": 10, "samples": 50, "blocks": 132, "device": 0},
+    "cases": {
+      "first_score_bf16": [{"working-set-pages": 1024}],
+      "first_score_fp16": [{"working-set-pages": 1024}],
+      "steady_score_bf16": [{"working-set-pages": 1024}],
+      "steady_score_fp16": [{"working-set-pages": 1024}],
+      "nosplit_store_protocol_b16": [{"working-set-tiles": 512, "pattern": "sequential"}, {"working-set-tiles": 512, "pattern": "random"}],
+      "split_store_protocol_f32": [{"working-set-tiles": 512, "pattern": "sequential"}, {"working-set-tiles": 512, "pattern": "random"}],
+      "combine_stage_bf16": [{"iters": 1, "num-splits": 2}, {"iters": 1, "num-splits": 8}, {"iters": 1, "num-splits": 32}, {"iters": 1, "num-splits": 96}, {"iters": 1, "num-splits": 160}],
+      "combine_stage_fp16": [{"iters": 1, "num-splits": 2}, {"iters": 1, "num-splits": 8}, {"iters": 1, "num-splits": 32}, {"iters": 1, "num-splits": 96}, {"iters": 1, "num-splits": 160}],
+      "metadata_stage": [{"batch": 1, "num-sm-parts": 1, "seqlen-min": 0, "seqlen-max": 64, "seqlen-distribution": "uniform", "seed": 20260722}, {"batch": 145, "num-sm-parts": 132, "seqlen-min": 64, "seqlen-max": 8192, "seqlen-distribution": "skewed", "seed": 20260722}],
+      "pdl_overlap": [{"iters": 1, "producer-blocks": 132, "consumer-blocks": 132, "prefix-iters": 4096, "tail-iters": 4096, "consumer-iters": 4096}]
+    }
+  }
+}

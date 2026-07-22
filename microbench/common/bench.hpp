@@ -203,6 +203,16 @@ inline cudaDeviceProp require_sm90(int device = 0) {
     return properties;
 }
 
+inline int device_clock_khz(int device) {
+    int clock_khz = 0;
+    CUDA_CHECK(cudaDeviceGetAttribute(
+        &clock_khz, cudaDevAttrClockRate, device));
+    if (clock_khz <= 0) {
+        throw std::runtime_error("device SM clock rate is unavailable");
+    }
+    return clock_khz;
+}
+
 inline int resolve_blocks(int requested,
                           const cudaDeviceProp& properties,
                           int blocks_per_sm = 4) {
@@ -360,6 +370,40 @@ std::vector<double> measure_event_ms(int warmup,
     return elapsed;
 }
 
+template <typename Prepare, typename Launch>
+std::vector<double> measure_event_ms_prepared(int warmup,
+                                              int samples,
+                                              Prepare&& prepare,
+                                              Launch&& launch) {
+    for (int index = 0; index < warmup; ++index) {
+        prepare();
+        CUDA_CHECK(cudaDeviceSynchronize());
+        launch();
+        CUDA_CHECK(cudaGetLastError());
+        CUDA_CHECK(cudaDeviceSynchronize());
+    }
+    CudaEvent start;
+    CudaEvent stop;
+    std::vector<double> elapsed;
+    elapsed.reserve(samples);
+    for (int index = 0; index < samples; ++index) {
+        prepare();
+        CUDA_CHECK(cudaDeviceSynchronize());
+        CUDA_CHECK(cudaEventRecord(start));
+        launch();
+        CUDA_CHECK(cudaGetLastError());
+        CUDA_CHECK(cudaEventRecord(stop));
+        CUDA_CHECK(cudaEventSynchronize(stop));
+        float milliseconds = 0.0f;
+        CUDA_CHECK(cudaEventElapsedTime(&milliseconds, start, stop));
+        if (!(milliseconds > 0.0f)) {
+            throw std::runtime_error("CUDA event measured a non-positive time");
+        }
+        elapsed.push_back(static_cast<double>(milliseconds));
+    }
+    return elapsed;
+}
+
 template <typename Launch>
 std::vector<double> measure_clock_cycles(int warmup,
                                          int samples,
@@ -379,6 +423,148 @@ std::vector<double> measure_clock_cycles(int warmup,
     cycles.reserve(samples);
     std::vector<uint64_t> host_cycles(cycle_count);
     for (int index = 0; index < samples; ++index) {
+        launch();
+        CUDA_CHECK(cudaGetLastError());
+        CUDA_CHECK(cudaDeviceSynchronize());
+        CUDA_CHECK(cudaMemcpy(host_cycles.data(), device_cycles,
+                              cycle_count * sizeof(uint64_t),
+                              cudaMemcpyDeviceToHost));
+        const uint64_t max_cycles =
+            *std::max_element(host_cycles.begin(), host_cycles.end());
+        if (max_cycles == 0) {
+            throw std::runtime_error("clock64 measured zero cycles");
+        }
+        cycles.push_back(static_cast<double>(max_cycles));
+    }
+    return cycles;
+}
+
+struct PairedClockSamples {
+    std::vector<double> target;
+    std::vector<double> baseline;
+};
+
+template <typename Launch>
+PairedClockSamples measure_paired_clock_cycles(
+        int warmup,
+        int samples,
+        uint64_t* device_target_cycles,
+        uint64_t* device_baseline_cycles,
+        std::size_t cycle_count,
+        Launch&& launch) {
+    if (cycle_count == 0) {
+        throw std::invalid_argument("clock64 cycle_count must be positive");
+    }
+    for (int index = 0; index < warmup; ++index) {
+        launch();
+        CUDA_CHECK(cudaGetLastError());
+    }
+    CUDA_CHECK(cudaDeviceSynchronize());
+
+    PairedClockSamples result;
+    result.target.reserve(samples);
+    result.baseline.reserve(samples);
+    std::vector<uint64_t> target(cycle_count);
+    std::vector<uint64_t> baseline(cycle_count);
+    for (int index = 0; index < samples; ++index) {
+        launch();
+        CUDA_CHECK(cudaGetLastError());
+        CUDA_CHECK(cudaDeviceSynchronize());
+        CUDA_CHECK(cudaMemcpy(
+            target.data(), device_target_cycles,
+            cycle_count * sizeof(uint64_t), cudaMemcpyDeviceToHost));
+        CUDA_CHECK(cudaMemcpy(
+            baseline.data(), device_baseline_cycles,
+            cycle_count * sizeof(uint64_t), cudaMemcpyDeviceToHost));
+        const uint64_t target_max =
+            *std::max_element(target.begin(), target.end());
+        const uint64_t baseline_max =
+            *std::max_element(baseline.begin(), baseline.end());
+        if (target_max <= baseline_max || baseline_max == 0) {
+            throw std::runtime_error(
+                "target clock must exceed its matched loop baseline");
+        }
+        result.target.push_back(static_cast<double>(target_max));
+        result.baseline.push_back(static_cast<double>(baseline_max));
+    }
+    return result;
+}
+
+template <typename Prepare, typename Launch>
+PairedClockSamples measure_paired_clock_cycles_prepared(
+        int warmup,
+        int samples,
+        uint64_t* device_target_cycles,
+        uint64_t* device_baseline_cycles,
+        std::size_t cycle_count,
+        Prepare&& prepare,
+        Launch&& launch) {
+    if (cycle_count == 0) {
+        throw std::invalid_argument("clock64 cycle_count must be positive");
+    }
+    for (int index = 0; index < warmup; ++index) {
+        prepare();
+        CUDA_CHECK(cudaDeviceSynchronize());
+        launch();
+        CUDA_CHECK(cudaGetLastError());
+    }
+    CUDA_CHECK(cudaDeviceSynchronize());
+
+    PairedClockSamples result;
+    result.target.reserve(samples);
+    result.baseline.reserve(samples);
+    std::vector<uint64_t> target(cycle_count);
+    std::vector<uint64_t> baseline(cycle_count);
+    for (int index = 0; index < samples; ++index) {
+        prepare();
+        CUDA_CHECK(cudaDeviceSynchronize());
+        launch();
+        CUDA_CHECK(cudaGetLastError());
+        CUDA_CHECK(cudaDeviceSynchronize());
+        CUDA_CHECK(cudaMemcpy(
+            target.data(), device_target_cycles,
+            cycle_count * sizeof(uint64_t), cudaMemcpyDeviceToHost));
+        CUDA_CHECK(cudaMemcpy(
+            baseline.data(), device_baseline_cycles,
+            cycle_count * sizeof(uint64_t), cudaMemcpyDeviceToHost));
+        const uint64_t target_max =
+            *std::max_element(target.begin(), target.end());
+        const uint64_t baseline_max =
+            *std::max_element(baseline.begin(), baseline.end());
+        if (target_max <= baseline_max || baseline_max == 0) {
+            throw std::runtime_error(
+                "target clock must exceed its matched loop baseline");
+        }
+        result.target.push_back(static_cast<double>(target_max));
+        result.baseline.push_back(static_cast<double>(baseline_max));
+    }
+    return result;
+}
+
+template <typename Prepare, typename Launch>
+std::vector<double> measure_clock_cycles_prepared(
+        int warmup,
+        int samples,
+        uint64_t* device_cycles,
+        Prepare&& prepare,
+        Launch&& launch,
+        std::size_t cycle_count = 1) {
+    if (cycle_count == 0) {
+        throw std::invalid_argument("clock64 cycle_count must be positive");
+    }
+    for (int index = 0; index < warmup; ++index) {
+        prepare();
+        CUDA_CHECK(cudaDeviceSynchronize());
+        launch();
+        CUDA_CHECK(cudaGetLastError());
+        CUDA_CHECK(cudaDeviceSynchronize());
+    }
+    std::vector<double> cycles;
+    std::vector<uint64_t> host_cycles(cycle_count);
+    cycles.reserve(samples);
+    for (int index = 0; index < samples; ++index) {
+        prepare();
+        CUDA_CHECK(cudaDeviceSynchronize());
         launch();
         CUDA_CHECK(cudaGetLastError());
         CUDA_CHECK(cudaDeviceSynchronize());

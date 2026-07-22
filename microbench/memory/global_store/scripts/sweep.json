@@ -1,0 +1,159 @@
+{
+  "quick": {
+    "default": {
+      "iters": [
+        256
+      ],
+      "warmup": [
+        1
+      ],
+      "samples": [
+        3
+      ],
+      "blocks": [
+        1
+      ]
+    },
+    "benchmarks": {
+      "st_global_f32": {
+        "lane-mode": [
+          "width64"
+        ],
+        "working-set-records": [
+          64
+        ],
+        "pattern": [
+          "sequential"
+        ]
+      },
+      "st_global_v4_u32_32b": {
+        "working-set-records": [
+          64
+        ],
+        "pattern": [
+          "sequential"
+        ]
+      },
+      "st_global_u32": {
+        "producers": [
+          32
+        ],
+        "working-set-records": [
+          64
+        ],
+        "pattern": [
+          "sequential"
+        ]
+      },
+      "st_global_u64": {
+        "dtype": [
+          "bf16"
+        ],
+        "warps": [
+          8
+        ],
+        "vectors-per-thread": [
+          4
+        ],
+        "working-set-records": [
+          64
+        ],
+        "pattern": [
+          "sequential"
+        ]
+      }
+    }
+  },
+  "full": {
+    "default": {
+      "iters": [
+        4096
+      ],
+      "warmup": [
+        3
+      ],
+      "samples": [
+        20
+      ],
+      "blocks": [
+        1,
+        2,
+        4,
+        8,
+        16,
+        32,
+        66,
+        132,
+        264,
+        528
+      ]
+    },
+    "benchmarks": {
+      "st_global_f32": {
+        "lane-mode": [
+          "width64",
+          "width8"
+        ],
+        "working-set-records": [
+          1,
+          64
+        ],
+        "pattern": [
+          "local",
+          "sequential",
+          "random"
+        ]
+      },
+      "st_global_v4_u32_32b": {
+        "working-set-records": [
+          64,
+          1024
+        ],
+        "pattern": [
+          "local",
+          "sequential",
+          "random"
+        ]
+      },
+      "st_global_u32": {
+        "producers": [
+          1,
+          8,
+          32
+        ],
+        "working-set-records": [
+          64,
+          1024
+        ],
+        "pattern": [
+          "local",
+          "sequential",
+          "random"
+        ]
+      },
+      "st_global_u64": {
+        "dtype": [
+          "bf16",
+          "fp16"
+        ],
+        "warps": [
+          1,
+          8
+        ],
+        "vectors-per-thread": [
+          1,
+          4
+        ],
+        "working-set-records": [
+          1,
+          8
+        ],
+        "pattern": [
+          "local",
+          "sequential",
+          "random"
+        ]
+      }
+    }
+  }
+}

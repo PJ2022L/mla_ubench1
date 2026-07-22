@@ -1,0 +1,1 @@
+name,params_json,gpu_uuid,sm_clock_mhz,memory_clock_mhz,latency_value,latency_unit,initiation_interval_cycles,throughput_value,throughput_unit,memory_bandwidth_value,memory_bandwidth_unit,hardware_utilization,p10,p50,p90,sample_count,source_sha256,sass_sha256,blocks

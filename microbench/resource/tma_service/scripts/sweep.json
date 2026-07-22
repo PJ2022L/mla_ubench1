@@ -1,0 +1,87 @@
+{
+  "quick": {
+    "default": {
+      "iters": [
+        256
+      ],
+      "warmup": [
+        1
+      ],
+      "samples": [
+        3
+      ],
+      "blocks": [
+        1
+      ]
+    },
+    "benchmarks": {
+      "tma_load_4d_service": {
+        "depth": [
+          1
+        ],
+        "working-set-pages": [
+          711
+        ],
+        "pattern": [
+          "sequential"
+        ],
+        "cache-mode": [
+          "hbm_stream"
+        ]
+      }
+    }
+  },
+  "full": {
+    "default": {
+      "iters": [
+        4096
+      ],
+      "warmup": [
+        3
+      ],
+      "samples": [
+        20
+      ],
+      "blocks": [
+        1,
+        2,
+        4,
+        8,
+        16,
+        32,
+        66,
+        132,
+        264,
+        528
+      ]
+    },
+    "benchmarks": {
+      "tma_load_4d_service": {
+        "depth": [
+          1,
+          2,
+          4,
+          8
+        ],
+        "working-set-pages": [
+          178,
+          356,
+          711,
+          1422,
+          2844,
+          5689
+        ],
+        "pattern": [
+          "local",
+          "sequential",
+          "random",
+          "reuse"
+        ],
+        "cache-mode": [
+          "l2_hot",
+          "hbm_stream"
+        ]
+      }
+    }
+  }
+}

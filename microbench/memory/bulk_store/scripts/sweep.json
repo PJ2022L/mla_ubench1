@@ -1,0 +1,67 @@
+{
+  "quick": {
+    "default": {
+      "iters": [
+        256
+      ],
+      "warmup": [
+        1
+      ],
+      "samples": [
+        3
+      ],
+      "blocks": [
+        1
+      ]
+    },
+    "benchmarks": {
+      "cp_async_bulk_s2g_64x512_f32": {
+        "working-set-tiles": [
+          8
+        ],
+        "pattern": [
+          "sequential"
+        ]
+      }
+    }
+  },
+  "full": {
+    "default": {
+      "iters": [
+        4096
+      ],
+      "warmup": [
+        3
+      ],
+      "samples": [
+        20
+      ],
+      "blocks": [
+        1,
+        2,
+        4,
+        8,
+        16,
+        32,
+        66,
+        132,
+        264,
+        528
+      ]
+    },
+    "benchmarks": {
+      "cp_async_bulk_s2g_64x512_f32": {
+        "working-set-tiles": [
+          1,
+          64,
+          1024
+        ],
+        "pattern": [
+          "local",
+          "sequential",
+          "random"
+        ]
+      }
+    }
+  }
+}

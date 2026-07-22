@@ -1,0 +1,18 @@
+{
+  "note": "Planning example only. Remote prediction must replace register/shared values with the inspected main/combine cubin resources.",
+  "sm_count": 132,
+  "sm_clock_mhz": 1620.0,
+  "l2_bytes": 52428800,
+  "main_registers_per_thread": 232,
+  "main_shared_bytes": 230400,
+  "main_threads": 256,
+  "main_min_blocks_per_sm": 1,
+  "combine_registers_per_thread": 64,
+  "combine_shared_bytes": 0,
+  "combine_threads": 256,
+  "combine_min_blocks_per_sm": 0,
+  "registers_per_sm": 65536,
+  "shared_bytes_per_sm": 232448,
+  "max_threads_per_sm": 2048,
+  "max_ctas_per_sm": 16
+}

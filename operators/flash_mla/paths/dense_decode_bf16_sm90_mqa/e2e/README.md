@@ -1,37 +1,75 @@
-# Dense decode e2e benchmark
+# Dense decode held-out E2E
 
-测量公开 `flash_mla_with_kvcache` 的稳态 GPU 区间。API 每次都会 launch dense main 和 combine grid；split request 的 combine 做实际 reduction，no-split CTA 会提前 return。计时不包含第一次调用的 metadata 生成和 tensor 初始化。
+`benchmark.py` measures the public `flash_mla_with_kvcache` path on the remote
+H800. It captures one API invocation in a CUDA graph before timing, so replay
+contains GPU work without Python, allocator, or per-launch host gaps.
 
-默认 shape：`b=128,s_q=1,h_q=128,h_kv=1,d=576,d_v=512,s_k=4096,page=64`。建议扫描 `s_q∈{1,2}`、`s_k∈{4096,8192,16384,32768}`，并加入非 64 整倍数的 tail。`s_q=1` 时上游 C++ 强制关闭 causal，所以该 case 不应把 `--causal` 记作有效 variant。
+- `--metadata-mode generate` captures metadata + persistent main + combine.
+- `--metadata-mode reuse` initializes metadata before capture and measures main
+  + combine only.
+- `--cache-mode l2_hot` performs an untimed graph replay immediately before the
+  sample.
+- `--cache-mode hbm_stream` performs an untimed 128 MiB eviction write before a
+  single timed replay.
+- BF16/FP16, exact per-request sequence lengths, causal, contiguous/random/reuse
+  block tables, zero/tail pages, and different Q/KV head counts are supported.
+
+Local argument checks do not import Torch or execute CUDA:
 
 ```bash
-repo_root="$(pwd)"
-test -f "$repo_root/HANDOFF.md"
-e2e_dir="$repo_root/operators/flash_mla/paths/dense_decode_bf16_sm90_mqa/e2e"
-
-# CPU-only argument check; does not import torch or FlashMLA.
-python "$e2e_dir/benchmark.py" --validate-only --batch 128 --s-q 1 --s-k 4097 --causal
-
-# Run only in the FlashMLA environment on the remote H800 host.
-run_id="$(date +%Y%m%d-%H%M%S)-$(hostname)"
-run_dir="$e2e_dir/result/runs/$run_id"
-mkdir -p "$run_dir"
-/usr/bin/time -f 'command=%C\nwall_seconds=%e\nexit_status=%x' \
-  python "$e2e_dir/benchmark.py" --batch 128 --s-q 1 --s-k 4096 --iters 100 \
-  >"$run_dir/results.jsonl" 2>"$run_dir/run.log"
+python3 operators/flash_mla/paths/dense_decode_bf16_sm90_mqa/e2e/benchmark.py \
+  --validate-only --batch 3 --seqlens-k 0,65,4097 --dtype fp16 \
+  --s-q 2 --h-q 128 --h-kv 2 --causal --metadata-mode generate \
+  --block-pattern random --cache-mode hbm_stream
 ```
 
-前置条件：在 H800/SM90a、CUDA 12.8+ 环境中，从仓库根目录执行 `git -C "$repo_root/operators/flash_mla/target" submodule update --init --recursive` 和 `python -m pip install -v "$repo_root/operators/flash_mla/target"`。
+Run formal cases only after all microbenchmark full sweeps and predictions are
+frozen. Use one result directory per case; command, full args, wall time and
+errors stay in `run.log`, while stdout is the single JSON record. A nonzero run
+may still write `result.jsonl`; that file is diagnostic evidence, not an
+accepted result.
 
-输出 JSON 包含平均 e2e latency、effective TFLOPS/GB/s、请求和实际生效的 causal 状态、page 数及完整 shape。这里的 FLOPS/bytes 是算法最小工作量，不含 scheduler metadata、split partial traffic 和 combine traffic，不能当作实测硬件流量。若需要拆分 main/combine 时间，使用上游 Kineto test 或 ncu，不能把单 main-kernel 时间称为 e2e。
+```bash
+e2e=operators/flash_mla/paths/dense_decode_bf16_sm90_mqa/e2e
+run_id="$(date +%Y%m%d-%H%M%S)-bf16-generate-tail"
+run_dir="$e2e/result/runs/$run_id"
+mkdir -p "$run_dir"
+started_utc="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+printf 'started_utc=%s\n' "$started_utc" >"$run_dir/run.log"
+/usr/bin/time -a -o "$run_dir/run.log" \
+  -f 'command=%C\nwall_seconds=%e\nexit_status=%x' \
+  python3 "$e2e/benchmark.py" \
+    --case-id bf16-generate-tail --dtype bf16 --batch 128 --s-q 1 \
+    --s-k 4097 --metadata-mode generate --block-pattern contiguous \
+    --cache-mode hbm_stream --samples 20 --check-correctness \
+    >"$run_dir/result.jsonl" 2>>"$run_dir/run.log"
+status=$?
+printf 'ended_utc=%s\nreturncode=%s\n' \
+  "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$status" >>"$run_dir/run.log"
+test "$status" -eq 0
+```
 
-## H800 Results
+An accepted matrix must cover both dtypes, metadata generate/reuse,
+`N_page=0/1/even/odd`, non-64 tails, short/long and skewed batches, causal
+queries, split/no-split, all block-table patterns, both cache modes, and several
+head configurations. Formal runs must pass `--check-correctness`; an unchecked
+run is rejected. `correctness.passed` and `acceptance_gate.passed` must both be
+true. The record includes
+actual `num_splits`, p10/p50/p90 CUDA-event latency, GPU UUID/clocks/power and
+the exact case. It compares GPU `tile_scheduler_metadata` row by row and the
+complete `num_splits` prefix against `model/scheduler.py`. A metadata/split
+mismatch or an upstream `source_defined=false` result makes
+`scheduler_validation.passed=false`. Any of those scheduler failures, an
+unchecked correctness result, or a correctness mismatch makes
+`acceptance_gate.passed=false`, returns status 2, and cannot be used as an
+accepted held-out case. `acceptance_gate.rejection_reasons` states the exact
+gate(s); keep such output only as diagnostic evidence.
 
-| Accepted run | Full shape | Correctness | Latency (ms) | Effective TFLOPS / GB/s | Main / combine boundary |
-|---|---|---|---:|---|---|
-| 尚无 accepted H800 run | - | - | - | - | - |
+Held-out results validate the atom-DAG model only. They must never be used to
+fit atom latency, resource slowdown, offsets, multipliers, or overlap credits.
 
-完整结果保存在本目录 `result/runs/<run_id>/`：`results.jsonl` 只保留正式
-correctness/latency 结果，`run.log` 保留 args、命令、wall time 和错误。accepted
-run 必须链接到本表，并记录 requested/effective causal、page/tail、实际
-`num_splits`、output/LSE correctness，以及 profiler 确认的 main/combine 边界。
+## Accepted H800 Results
+
+| Run | Case | Correct | P50 us | Metadata mode | Split distribution |
+|---|---|---:|---:|---|---|
+| No accepted H800 run yet | - | - | - | - | - |

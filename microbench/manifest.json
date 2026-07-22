@@ -1,143 +1,2129 @@
 {
-  "schema_version": 1,
-  "target": "FlashMLA public dense decode on SM90a",
+  "schema_version": 2,
+  "target": {
+    "gpu": "NVIDIA H800",
+    "architecture": "sm_90a"
+  },
+  "identity_rule": "id == source stem == binary == JSON name",
+  "result_policy": "latest complete accepted full sweep; atomic replacement",
   "benchmarks": [
-    {"binary":"wgmma_qk_ss_bf16","source":"compute/wgmma/qk_ss_bf16/benchmark.cu","result_name":"dense_decode.wgmma_qk_ss_bf16","category":"compute","family":"wgmma","variant":"qk_ss_bf16","scan_family":"wgmma","peak_kind":"bf16","ptx_patterns":["wgmma\\.mma_async.*m64n64k16\\.f32\\.bf16\\.bf16"],"sass_patterns":["HGMMA\\.64x64x16\\.F32\\.BF16"],"source_anchors":["dense/traits.h:TiledMMA_QK_sQ"]},
-    {"binary":"wgmma_qk_rs_bf16","source":"compute/wgmma/qk_rs_bf16/benchmark.cu","result_name":"dense_decode.wgmma_qk_rs_bf16","category":"compute","family":"wgmma","variant":"qk_rs_bf16","scan_family":"wgmma","peak_kind":"bf16","ptx_patterns":["wgmma\\.mma_async.*m64n64k16\\.f32\\.bf16\\.bf16"],"sass_patterns":["HGMMA\\.64x64x16\\.F32\\.BF16"],"source_anchors":["dense/traits.h:TiledMMA_QK_rQ"]},
-    {"binary":"wgmma_pv_ss_bf16","source":"compute/wgmma/pv_ss_bf16/benchmark.cu","result_name":"dense_decode.wgmma_pv_ss_bf16","category":"compute","family":"wgmma","variant":"pv_ss_bf16","scan_family":"wgmma","peak_kind":"bf16","ptx_patterns":["wgmma\\.mma_async.*m64n256k16\\.f32\\.bf16\\.bf16"],"sass_patterns":["HGMMA\\.64x256x16\\.F32\\.BF16"],"source_anchors":["dense/traits.h:TiledMMA_PV_RemoteP"]},
-    {"binary":"wgmma_pv_rs_bf16","source":"compute/wgmma/pv_rs_bf16/benchmark.cu","result_name":"dense_decode.wgmma_pv_rs_bf16","category":"compute","family":"wgmma","variant":"pv_rs_bf16","scan_family":"wgmma","peak_kind":"bf16","ptx_patterns":["wgmma\\.mma_async.*m64n256k16\\.f32\\.bf16\\.bf16"],"sass_patterns":["HGMMA\\.64x256x16\\.F32\\.BF16"],"source_anchors":["dense/traits.h:TiledMMA_PV_LocalP"]},
-    {"binary":"wgmma_qk_ss_fp16","source":"compute/wgmma/qk_ss_fp16/benchmark.cu","result_name":"dense_decode.wgmma_qk_ss_fp16","category":"compute","family":"wgmma","variant":"qk_ss_fp16","scan_family":"wgmma","peak_kind":"bf16","ptx_patterns":["wgmma\\.mma_async.*m64n64k16\\.f32\\.f16\\.f16"],"sass_patterns":["HGMMA\\.64x64x16\\.F32(?!\\.BF16)"],"source_anchors":["dense/instantiations/fp16.cu"]},
-    {"binary":"wgmma_qk_rs_fp16","source":"compute/wgmma/qk_rs_fp16/benchmark.cu","result_name":"dense_decode.wgmma_qk_rs_fp16","category":"compute","family":"wgmma","variant":"qk_rs_fp16","scan_family":"wgmma","peak_kind":"bf16","ptx_patterns":["wgmma\\.mma_async.*m64n64k16\\.f32\\.f16\\.f16"],"sass_patterns":["HGMMA\\.64x64x16\\.F32(?!\\.BF16)"],"source_anchors":["dense/instantiations/fp16.cu"]},
-    {"binary":"wgmma_pv_ss_fp16","source":"compute/wgmma/pv_ss_fp16/benchmark.cu","result_name":"dense_decode.wgmma_pv_ss_fp16","category":"compute","family":"wgmma","variant":"pv_ss_fp16","scan_family":"wgmma","peak_kind":"bf16","ptx_patterns":["wgmma\\.mma_async.*m64n256k16\\.f32\\.f16\\.f16"],"sass_patterns":["HGMMA\\.64x256x16\\.F32(?!\\.BF16)"],"source_anchors":["dense/instantiations/fp16.cu"]},
-    {"binary":"wgmma_pv_rs_fp16","source":"compute/wgmma/pv_rs_fp16/benchmark.cu","result_name":"dense_decode.wgmma_pv_rs_fp16","category":"compute","family":"wgmma","variant":"pv_rs_fp16","scan_family":"wgmma","peak_kind":"bf16","ptx_patterns":["wgmma\\.mma_async.*m64n256k16\\.f32\\.f16\\.f16"],"sass_patterns":["HGMMA\\.64x256x16\\.F32(?!\\.BF16)"],"source_anchors":["dense/instantiations/fp16.cu"]},
-
-    {"binary":"exp2_f32","source":"compute/sfu/ex2/benchmark.cu","result_name":"dense_decode.exp2_approx_ftz_f32","category":"compute","family":"sfu","variant":"ex2_f32","scan_family":"scalar","peak_kind":null,"ptx_patterns":["ex2\\.approx\\.ftz\\.f32"],"sass_patterns":["MUFU\\.EX2"],"source_anchors":["dense/splitkv_mla.cuh:exp2f","combine/combine.cu:exp2f"]},
-    {"binary":"lg2_f32","source":"compute/sfu/lg2/benchmark.cu","result_name":"dense_decode.lg2_approx_ftz_f32","category":"compute","family":"sfu","variant":"lg2_f32","scan_family":"scalar","peak_kind":null,"ptx_patterns":["lg2\\.approx\\.ftz\\.f32"],"sass_patterns":["MUFU\\.LG2"],"source_anchors":["dense/splitkv_mla.cuh:logf/log2f","combine/combine.cu:log2f"]},
-    {"binary":"rcp_f32","source":"compute/sfu/rcp/benchmark.cu","result_name":"dense_decode.rcp_approx_ftz_f32","category":"compute","family":"sfu","variant":"rcp_f32","scan_family":"scalar","peak_kind":null,"ptx_patterns":["rcp\\.approx\\.ftz\\.f32"],"sass_patterns":["MUFU\\.RCP"],"source_anchors":["dense/splitkv_mla.cuh:output normalization"]},
-    {"binary":"ffma_f32","source":"compute/fp32_alu/ffma/benchmark.cu","result_name":"dense_decode.ffma_rn_ftz_f32","category":"compute","family":"fp32_alu","variant":"ffma","scan_family":"scalar","peak_kind":null,"ptx_patterns":["fma\\.rn\\.ftz\\.f32"],"sass_patterns":["FFMA"],"source_anchors":["dense softmax/rescale","combine weighted accumulation"]},
-    {"binary":"fadd_f32","source":"compute/fp32_alu/fadd/benchmark.cu","result_name":"dense_decode.fadd_rn_ftz_f32","category":"compute","family":"fp32_alu","variant":"fadd","scan_family":"scalar","peak_kind":null,"ptx_patterns":["add\\.rn\\.ftz\\.f32"],"sass_patterns":["FADD"],"source_anchors":["dense L reduction","combine LSE reduction"]},
-    {"binary":"fmul_f32","source":"compute/fp32_alu/fmul/benchmark.cu","result_name":"dense_decode.fmul_rn_ftz_f32","category":"compute","family":"fp32_alu","variant":"fmul","scan_family":"scalar","peak_kind":null,"ptx_patterns":["mul\\.rn\\.ftz\\.f32"],"sass_patterns":["FMUL"],"source_anchors":["dense rescale"]},
-    {"binary":"fsetp_f32","source":"compute/fp32_alu/fsetp/benchmark.cu","result_name":"dense_decode.fsetp_lt_ftz_f32","category":"compute","family":"fp32_alu","variant":"fsetp","scan_family":"scalar","peak_kind":null,"ptx_patterns":["setp\\.lt\\.ftz\\.f32"],"sass_patterns":["FSETP"],"source_anchors":["dense max/mask","combine max"]},
-    {"binary":"fsel_f32","source":"compute/fp32_alu/fsel/benchmark.cu","result_name":"dense_decode.fsel_f32","category":"compute","family":"fp32_alu","variant":"fsel","scan_family":"scalar","peak_kind":null,"ptx_patterns":["selp\\.f32"],"sass_patterns":["FSEL"],"source_anchors":["dense max/mask","combine conditionals"]},
-    {"binary":"cvt_fp32_bf16","source":"compute/convert/fp32_to_bf16/benchmark.cu","result_name":"dense_decode.cvt_fp32_to_bf16","category":"compute","family":"convert","variant":"fp32_to_bf16","scan_family":"scalar","peak_kind":null,"ptx_patterns":["cvt\\.rn\\.bf16\\.f32"],"sass_patterns":["F2F(P)?\\.BF16\\.F32"],"source_anchors":["dense P/output conversion","combine BF16 output"]},
-    {"binary":"cvt_fp32_fp16","source":"compute/convert/fp32_to_fp16/benchmark.cu","result_name":"dense_decode.cvt_fp32_to_fp16","category":"compute","family":"convert","variant":"fp32_to_fp16","scan_family":"scalar","peak_kind":null,"ptx_patterns":["cvt\\.rn\\.f16\\.f32"],"sass_patterns":["F2FP\\.F16\\.F32"],"source_anchors":["dense FP16 P/output conversion","combine FP16 output"]},
-    {"binary":"shfl_bfly_b32","source":"compute/shuffle/shfl_bfly/benchmark.cu","result_name":"dense_decode.shfl_sync_bfly_b32","category":"compute","family":"shuffle","variant":"bfly_b32","scan_family":"shuffle","peak_kind":null,"ptx_patterns":["shfl\\.sync\\.bfly\\.b32"],"sass_patterns":["SHFL\\.BFLY"],"source_anchors":["dense max/L reduction","metadata/combine warp reduction"]},
-    {"binary":"iadd3_u32","source":"compute/integer/iadd3/benchmark.cu","result_name":"dense_decode.iadd3_u32","category":"compute","family":"integer","variant":"iadd3","scan_family":"scalar","peak_kind":null,"ptx_patterns":["add\\.u32"],"sass_patterns":["IADD3"],"source_anchors":["metadata scheduler/address arithmetic"]},
-    {"binary":"imad_u32","source":"compute/integer/imad/benchmark.cu","result_name":"dense_decode.imad_lo_u32","category":"compute","family":"integer","variant":"imad","scan_family":"scalar","peak_kind":null,"ptx_patterns":["mad\\.lo\\.u32"],"sass_patterns":["IMAD"],"source_anchors":["metadata scheduler/address arithmetic"]},
-    {"binary":"isetp_u32","source":"compute/integer/isetp/benchmark.cu","result_name":"dense_decode.isetp_lt_u32","category":"compute","family":"integer","variant":"isetp","scan_family":"scalar","peak_kind":null,"ptx_patterns":["setp\\.lt\\.u32"],"sass_patterns":["ISETP"],"source_anchors":["metadata scheduler/control"]},
-
-    {"binary":"bar_sync_128","source":"compute/synchronization/bar_sync_128/benchmark.cu","result_name":"dense_decode.bar_sync_128","category":"compute","family":"synchronization","variant":"bar_sync_128","scan_family":"sync","peak_kind":null,"ptx_patterns":["bar\\.sync.*128"],"sass_patterns":["BAR\\.SYNC"],"source_anchors":["dense sMInitialized"]},
-    {"binary":"bar_sync_256","source":"compute/synchronization/bar_sync_256/benchmark.cu","result_name":"dense_decode.bar_sync_256","category":"compute","family":"synchronization","variant":"bar_sync_256","scan_family":"sync","peak_kind":null,"ptx_patterns":["bar\\.sync.*256"],"sass_patterns":["BAR\\.SYNC"],"source_anchors":["dense CTA barriers/named handoff consumer"]},
-    {"binary":"bar_arrive_2wg","source":"compute/synchronization/bar_arrive/benchmark.cu","result_name":"dense_decode.bar_arrive_asymmetric_2wg","category":"compute","family":"synchronization","variant":"bar_arrive_2wg","scan_family":"sync","peak_kind":null,"ptx_patterns":["bar\\.arrive"],"sass_patterns":["BAR\\.ARV"],"source_anchors":["dense sScale/sP/rO handoff"]},
-    {"binary":"warp_sync","source":"compute/synchronization/warp_sync/benchmark.cu","result_name":"dense_decode.bar_warp_sync","category":"compute","family":"synchronization","variant":"warp_sync_sass_elided","scan_family":"sync","peak_kind":null,"ptx_patterns":["bar\\.warp\\.sync"],"sass_patterns":[],"sass_elided":true,"source_anchors":["dense __syncwarp","metadata/combine __syncwarp"]},
-    {"binary":"mbarrier_init","source":"compute/synchronization/mbarrier_init/benchmark.cu","result_name":"dense_decode.mbarrier_init","category":"compute","family":"synchronization","variant":"mbarrier_init","scan_family":"sync","peak_kind":null,"ptx_patterns":["mbarrier\\.init"],"sass_patterns":["SYNCS\\.(EXCH|CCTL)"],"source_anchors":["dense Q/K barrier initialization"]},
-    {"binary":"mbarrier_expect_tx","source":"compute/synchronization/mbarrier_expect_tx/benchmark.cu","result_name":"dense_decode.mbarrier_expect_tx","category":"compute","family":"synchronization","variant":"mbarrier_expect_tx","scan_family":"sync","peak_kind":null,"ptx_patterns":["mbarrier\\.expect_tx"],"sass_patterns":["SYNCS"],"source_anchors":["dense Q/K arrive_and_expect_tx"]},
-    {"binary":"mbarrier_wait_128","source":"compute/synchronization/mbarrier_wait_128/benchmark.cu","result_name":"dense_decode.mbarrier_try_wait_ready_128","category":"compute","family":"synchronization","variant":"mbarrier_wait_128","scan_family":"sync","peak_kind":null,"ptx_patterns":["mbarrier\\.try_wait\\.parity"],"sass_patterns":["SYNCS\\.PHASECHK.*TRYWAIT"],"source_anchors":["dense K waiters"]},
-    {"binary":"mbarrier_wait_256","source":"compute/synchronization/mbarrier_wait_256/benchmark.cu","result_name":"dense_decode.mbarrier_try_wait_ready_256","category":"compute","family":"synchronization","variant":"mbarrier_wait_256","scan_family":"sync","peak_kind":null,"ptx_patterns":["mbarrier\\.try_wait\\.parity"],"sass_patterns":["SYNCS\\.PHASECHK.*TRYWAIT"],"source_anchors":["dense Q waiters"]},
-    {"binary":"proxy_fence_async_shared","source":"compute/ordering/proxy_fence/benchmark.cu","result_name":"dense_decode.fence_proxy_async_shared_cta","category":"compute","family":"ordering","variant":"proxy_async_shared_cta","scan_family":"sync","peak_kind":null,"ptx_patterns":["fence\\.proxy\\.async\\.shared::cta"],"sass_patterns":["FENCE\\.VIEW\\.ASYNC"],"source_anchors":["dense STSM/STS/TMA/WGMMA visibility"]},
-
-    {"binary":"tma_load_k_bf16_rank4","source":"memory/tma_load/k_bf16_rank4/benchmark.cu","result_name":"dense_decode.tma_load_k_64x64_bf16_rank4","category":"memory","family":"tma_load","variant":"k_64x64_bf16_rank4","scan_family":"tma_load_k","peak_kind":"memory","ptx_patterns":["cp\\.async\\.bulk\\.tensor\\.4d.*shared::cluster\\.global"],"sass_patterns":["UTMALDG\\.4D"],"source_anchors":["dense launch_kv_tiles_copy_tma"]},
-    {"binary":"tma_load_q_bf16_rank4","source":"memory/tma_load/q_bf16_rank4/benchmark.cu","result_name":"dense_decode.tma_load_q_64x576_bf16_rank4","category":"memory","family":"tma_load","variant":"q_64x576_bf16_rank4","scan_family":"tma_load_q","peak_kind":"memory","ptx_patterns":["cp\\.async\\.bulk\\.tensor\\.4d.*shared::cluster\\.global"],"sass_patterns":["UTMALDG\\.4D"],"source_anchors":["dense launch_q_copy"]},
-    {"binary":"tma_store_o_bf16_rank4","source":"memory/tma_store/o_bf16_rank4/benchmark.cu","result_name":"dense_decode.tma_store_o_64x512_bf16_rank4","category":"memory","family":"tma_store","variant":"o_64x512_bf16_rank4","scan_family":"tma_store","peak_kind":"memory","ptx_patterns":["cp\\.async\\.bulk\\.tensor\\.4d.*global\\.shared::cta"],"sass_patterns":["UTMASTG\\.4D"],"source_anchors":["dense no-split store_o"]},
-    {"binary":"bulk_store_oaccum_f32","source":"memory/bulk_store/oaccum_f32/benchmark.cu","result_name":"dense_decode.bulk_store_oaccum_64x512_f32","category":"memory","family":"bulk_store","variant":"oaccum_64x512_f32","scan_family":"bulk_store","peak_kind":"memory","ptx_patterns":["cp\\.async\\.bulk\\.global\\.shared::cta"],"sass_patterns":["UBLKCP\\.G\\.S"],"source_anchors":["dense split store_o"]},
-    {"binary":"stmatrix_p_b16","source":"memory/stmatrix/p_b16/benchmark.cu","result_name":"dense_decode.stmatrix_p_b16","category":"memory","family":"stmatrix","variant":"p_64x64_b16","scan_family":"matrix","peak_kind":null,"ptx_patterns":["stmatrix\\.sync\\.aligned\\.x4"],"sass_patterns":["STSM\\.16\\.M88\\.4"],"source_anchors":["dense save_rPb_to_sP"]},
-    {"binary":"stmatrix_o_b16","source":"memory/stmatrix/o_b16/benchmark.cu","result_name":"dense_decode.stmatrix_o_b16","category":"memory","family":"stmatrix","variant":"o_64x256_b16","scan_family":"matrix","peak_kind":null,"ptx_patterns":["stmatrix\\.sync\\.aligned\\.x4"],"sass_patterns":["STSM\\.16\\.M88\\.4"],"source_anchors":["dense no-split output staging"]},
-    {"binary":"ldmatrix_p_b16","source":"memory/ldmatrix/p_b16/benchmark.cu","result_name":"dense_decode.ldmatrix_p_b16","category":"memory","family":"ldmatrix","variant":"p_q8_64x64_b16","scan_family":"matrix","peak_kind":null,"ptx_patterns":["ldmatrix\\.sync\\.aligned\\.x4"],"sass_patterns":["LDSM\\.16\\.M88\\.4"],"source_anchors":["dense retrieve_rP_from_sP/Q tile8"]},
-    {"binary":"shared_load_u32","source":"memory/shared_load/u32_patterns/benchmark.cu","result_name":"dense_decode.shared_load_u32","category":"memory","family":"shared_load","variant":"u32_patterns","scan_family":"shared_load","peak_kind":null,"ptx_patterns":["ld\\.shared\\.u32"],"sass_patterns":["LDS"],"source_anchors":["dense sM/sScale/L reduction","combine broadcast"]},
-    {"binary":"shared_store_u32","source":"memory/shared_store/u32_scalar/benchmark.cu","result_name":"dense_decode.shared_store_u32","category":"memory","family":"shared_store","variant":"u32_scalar","scan_family":"shared_store","peak_kind":null,"ptx_patterns":["st\\.shared\\.u32"],"sass_patterns":["STS"],"source_anchors":["metadata shared workspace","dense sM/sScale"]},
-    {"binary":"shared_store_u64_dense","source":"memory/shared_store/u64_dense/benchmark.cu","result_name":"dense_decode.shared_store_u64_dense","category":"memory","family":"shared_store","variant":"u64_dense_roles","scan_family":"shared_store","peak_kind":null,"ptx_patterns":["st\\.shared\\.(u64|v2\\.u32)"],"sass_patterns":["STS\\.64"],"source_anchors":["dense split float2 staging","dense tail V fill"]},
-    {"binary":"global_load_i32_cached","source":"memory/global_load/i32_cached/benchmark.cu","result_name":"dense_decode.global_load_i32_cached","category":"memory","family":"global_load","variant":"i32_cached","scan_family":"global_load","peak_kind":"memory","ptx_patterns":["ld\\.global\\.nc\\.u32"],"sass_patterns":["LDG.*CONSTANT"],"source_anchors":["dense seqlen/block-table __ldg","metadata seqlen"]},
-    {"binary":"global_load_i32_ordinary","source":"memory/global_load/i32_ordinary/benchmark.cu","result_name":"dense_decode.global_load_i32_ordinary","category":"memory","family":"global_load","variant":"i32_ordinary","scan_family":"global_load","peak_kind":"memory","ptx_patterns":["ld\\.global\\.u32"],"sass_patterns":["LDG(?!.*CONSTANT)"],"source_anchors":["dense PDL-sensitive num_splits load"]},
-    {"binary":"global_load_scheduler_record_32b","source":"memory/global_load/scheduler_record_32b/benchmark.cu","result_name":"dense_decode.global_load_scheduler_record_32b","category":"memory","family":"global_load","variant":"scheduler_record_32b","scan_family":"global_load","peak_kind":"memory","ptx_patterns":["ld\\.global\\.v4\\.u32"],"sass_patterns":["LDG"],"source_anchors":["dense DecodingSchedMeta load"]},
-    {"binary":"global_load_float4_oaccum","source":"memory/global_load/float4_oaccum/benchmark.cu","result_name":"dense_decode.global_load_float4_oaccum","category":"memory","family":"global_load","variant":"float4_oaccum","scan_family":"global_load_vector","peak_kind":"memory","ptx_patterns":["ld\\.global\\.v4\\.f32"],"sass_patterns":["LDG.*128"],"source_anchors":["combine OAccum load"]},
-    {"binary":"global_load_f32_lse_strided","source":"memory/global_load/f32_lse_strided/benchmark.cu","result_name":"dense_decode.global_load_f32_lse_strided","category":"memory","family":"global_load","variant":"f32_lse_strided","scan_family":"global_load_lse","peak_kind":"memory","ptx_patterns":["ld\\.global\\.f32"],"sass_patterns":["LDG"],"source_anchors":["combine LSEAccum load"]},
-    {"binary":"global_store_f32_lse","source":"memory/global_store/f32_lse/benchmark.cu","result_name":"dense_decode.global_store_f32_lse","category":"memory","family":"global_store","variant":"f32_lse","scan_family":"global_store","peak_kind":"memory","ptx_patterns":["st\\.global\\.f32"],"sass_patterns":["STG"],"source_anchors":["main/combine LSE output"]},
-    {"binary":"global_store_scheduler_record_32b","source":"memory/global_store/scheduler_record_32b/benchmark.cu","result_name":"dense_decode.global_store_scheduler_record_32b","category":"memory","family":"global_store","variant":"scheduler_record_32b","scan_family":"global_store","peak_kind":"memory","ptx_patterns":["st\\.global\\.v4\\.u32"],"sass_patterns":["STG.*128"],"source_anchors":["metadata scheduler record store"]},
-    {"binary":"global_store_u32_num_splits","source":"memory/global_store/u32_num_splits/benchmark.cu","result_name":"dense_decode.global_store_u32_num_splits","category":"memory","family":"global_store","variant":"u32_num_splits","scan_family":"global_store","peak_kind":"memory","ptx_patterns":["st\\.global\\.u32"],"sass_patterns":["STG"],"source_anchors":["metadata num_splits store"]},
-    {"binary":"global_store_u64_output","source":"memory/global_store/u64_output/benchmark.cu","result_name":"dense_decode.global_store_u64_output","category":"memory","family":"global_store","variant":"u64_b16x4_output","scan_family":"global_store_output","peak_kind":"memory","ptx_patterns":["st\\.global\\.u64"],"sass_patterns":["STG.*64"],"source_anchors":["combine BF16/FP16x4 output"]},
-    {"binary":"tensormap_prefetch_qko_rank4","source":"memory/tensormap_prefetch/qko_rank4/benchmark.cu","result_name":"dense_decode.tensormap_prefetch_qko_rank4","category":"memory","family":"tensormap_prefetch","variant":"qko_rank4","scan_family":"tensormap_prefetch","peak_kind":null,"ptx_patterns":["prefetch\\.tensormap"],"sass_patterns":["UTMACCTL\\.PF"],"source_anchors":["dense Q/K/O descriptor prefetch"]}
-  ],
-  "calibrations": [
-    {"binary":"kq_first_page_bf16","source":"model/calibration/kq/first_page_bf16/benchmark.cu","result_name":"dense_decode.calibration.kq_first_page_bf16","category":"calibration","family":"kq","variant":"first_page_bf16","scan_family":"kq_calibration","peak_kind":null,"ptx_patterns":["cp\\.async\\.bulk\\.tensor\\.4d","wgmma\\.mma_async.*m64n64k16\\.f32\\.bf16"],"sass_patterns":["UTMALDG\\.4D","HGMMA\\.64x64x16\\.F32\\.BF16"],"source_anchors":["dense warpgroup_cooperative_qkt_gemm_no_pipeline"]},
-    {"binary":"kq_first_page_fp16","source":"model/calibration/kq/first_page_fp16/benchmark.cu","result_name":"dense_decode.calibration.kq_first_page_fp16","category":"calibration","family":"kq","variant":"first_page_fp16","scan_family":"kq_calibration","peak_kind":null,"ptx_patterns":["cp\\.async\\.bulk\\.tensor\\.4d","wgmma\\.mma_async.*m64n64k16\\.f32\\.f16"],"sass_patterns":["UTMALDG\\.4D","HGMMA\\.64x64x16\\.F32(?!\\.BF16)"],"source_anchors":["dense warpgroup_cooperative_qkt_gemm_no_pipeline"]},
-    {"binary":"kq_steady_page_bf16","source":"model/calibration/kq/steady_page_bf16/benchmark.cu","result_name":"dense_decode.calibration.kq_steady_page_bf16","category":"calibration","family":"kq","variant":"steady_page_bf16","scan_family":"kq_calibration","peak_kind":null,"ptx_patterns":["cp\\.async\\.bulk\\.tensor\\.4d","wgmma\\.mma_async.*m64n64k16\\.f32\\.bf16"],"sass_patterns":["UTMALDG\\.4D","HGMMA\\.64x64x16\\.F32\\.BF16"],"source_anchors":["dense warpgroup_cooperative_qkt_gemm"]},
-    {"binary":"kq_steady_page_fp16","source":"model/calibration/kq/steady_page_fp16/benchmark.cu","result_name":"dense_decode.calibration.kq_steady_page_fp16","category":"calibration","family":"kq","variant":"steady_page_fp16","scan_family":"kq_calibration","peak_kind":null,"ptx_patterns":["cp\\.async\\.bulk\\.tensor\\.4d","wgmma\\.mma_async.*m64n64k16\\.f32\\.f16"],"sass_patterns":["UTMALDG\\.4D","HGMMA\\.64x64x16\\.F32(?!\\.BF16)"],"source_anchors":["dense warpgroup_cooperative_qkt_gemm"]},
-    {"binary":"page_pair_transition_bf16","source":"model/calibration/page_pair_transition_bf16/benchmark.cu","result_name":"dense_decode.page_pair_transition_bf16","category":"calibration","family":"page_pair","variant":"transition_bf16","scan_family":"page_pair_calibration","peak_kind":null,"ptx_patterns":["wgmma\\.mma_async.*m64n64k16\\.f32\\.bf16","wgmma\\.mma_async.*m64n256k16\\.f32\\.bf16","ex2\\.approx\\.ftz\\.f32","stmatrix\\.sync","ldmatrix\\.sync","bar\\.arrive","bar\\.sync"],"sass_patterns":["HGMMA\\.64x64x16\\.F32\\.BF16","HGMMA\\.64x256x16\\.F32\\.BF16","MUFU\\.EX2","STSM","LDSM","BAR\\.ARV"],"source_anchors":["dense two-WG steady page-pair transition"]},
-    {"binary":"page_pair_transition_fp16","source":"model/calibration/page_pair_transition_fp16/benchmark.cu","result_name":"dense_decode.page_pair_transition_fp16","category":"calibration","family":"page_pair","variant":"transition_fp16","scan_family":"page_pair_calibration","peak_kind":null,"ptx_patterns":["wgmma\\.mma_async.*m64n64k16\\.f32\\.f16","wgmma\\.mma_async.*m64n256k16\\.f32\\.f16","ex2\\.approx\\.ftz\\.f32","stmatrix\\.sync","ldmatrix\\.sync","bar\\.arrive","bar\\.sync"],"sass_patterns":["HGMMA\\.64x64x16\\.F32(?!\\.BF16)","HGMMA\\.64x256x16\\.F32(?!\\.BF16)","MUFU\\.EX2","STSM","LDSM","BAR\\.ARV"],"source_anchors":["dense two-WG steady page-pair transition"]},
-    {"binary":"metadata_stage","source":"model/calibration/metadata_stage/benchmark.cu","result_name":"dense_decode.calibration.metadata_stage","category":"calibration","family":"stage","variant":"metadata","scan_family":"metadata_calibration","peak_kind":null,"ptx_patterns":["ld\\.global\\.nc\\.u32","shfl\\.sync\\.bfly\\.b32","st\\.global"],"sass_patterns":["LDG","SHFL","STG"],"source_anchors":["get_mla_metadata_kernel"]},
-    {"binary":"combine_stage_bf16","source":"model/calibration/combine_stage_bf16/benchmark.cu","result_name":"dense_decode.calibration.combine_stage_bf16","category":"calibration","family":"stage","variant":"combine_bf16","scan_family":"combine_calibration","peak_kind":"memory","ptx_patterns":["griddepcontrol\\.wait","ld\\.global\\.v4\\.f32","cvt\\.rn\\.bf16\\.f32","st\\.global\\.u64"],"sass_patterns":["LDG.*128","FFMA","MUFU","F2F(P)?\\.BF16","STG.*64"],"source_anchors":["combine/combine.cu"]},
-    {"binary":"combine_stage_fp16","source":"model/calibration/combine_stage_fp16/benchmark.cu","result_name":"dense_decode.calibration.combine_stage_fp16","category":"calibration","family":"stage","variant":"combine_fp16","scan_family":"combine_calibration","peak_kind":"memory","ptx_patterns":["griddepcontrol\\.wait","ld\\.global\\.v4\\.f32","cvt\\.rn\\.f16\\.f32","st\\.global\\.u64"],"sass_patterns":["LDG.*128","FFMA","MUFU","F2FP\\.F16","STG.*64"],"source_anchors":["combine/combine.cu"]},
-    {"binary":"pdl_overlap","source":"model/calibration/pdl_overlap/benchmark.cu","result_name":"dense_decode.calibration.pdl_overlap","category":"calibration","family":"pdl","variant":"producer_consumer","scan_family":"pdl_calibration","peak_kind":null,"ptx_patterns":["griddepcontrol\\.launch_dependents","griddepcontrol\\.wait","%globaltimer"],"sass_patterns":["PREEXIT","ACQBULK"],"source_anchors":["dense main producer launch_dependents","combine consumer wait"]},
-    {"binary":"softmax_stage_bf16","source":"model/calibration/softmax_stage_bf16/benchmark.cu","result_name":"dense_decode.calibration.softmax_stage_bf16","category":"calibration","family":"stage","variant":"softmax_bf16","scan_family":"softmax_calibration","peak_kind":null,"ptx_patterns":["ex2\\.approx\\.ftz\\.f32","rcp\\.approx\\.ftz\\.f32","shfl\\.sync\\.bfly\\.b32","cvt\\.rn\\.bf16\\.f32"],"sass_patterns":["MUFU\\.EX2","MUFU\\.RCP","SHFL","F2F(P)?\\.BF16"],"source_anchors":["dense register-heavy online softmax"]},
-    {"binary":"softmax_stage_fp16","source":"model/calibration/softmax_stage_fp16/benchmark.cu","result_name":"dense_decode.calibration.softmax_stage_fp16","category":"calibration","family":"stage","variant":"softmax_fp16","scan_family":"softmax_calibration","peak_kind":null,"ptx_patterns":["ex2\\.approx\\.ftz\\.f32","rcp\\.approx\\.ftz\\.f32","shfl\\.sync\\.bfly\\.b32","cvt\\.rn\\.f16\\.f32"],"sass_patterns":["MUFU\\.EX2","MUFU\\.RCP","SHFL","F2F(P)?\\.F16"],"source_anchors":["dense register-heavy online softmax"]},
-    {"binary":"epilogue_nosplit_b16","source":"model/calibration/epilogue_nosplit_b16/benchmark.cu","result_name":"dense_decode.calibration.epilogue_nosplit_b16","category":"calibration","family":"epilogue","variant":"nosplit_b16","scan_family":"epilogue_calibration","peak_kind":"memory","ptx_patterns":["stmatrix\\.sync","fence\\.proxy\\.async\\.shared::cta","cp\\.async\\.bulk\\.tensor\\.4d\\.global\\.shared::cta"],"sass_patterns":["STSM","FENCE\\.VIEW\\.ASYNC","UTMASTG\\.4D"],"source_anchors":["dense no-split STSM+TMA epilogue"]},
-    {"binary":"epilogue_split_f32","source":"model/calibration/epilogue_split_f32/benchmark.cu","result_name":"dense_decode.calibration.epilogue_split_f32","category":"calibration","family":"epilogue","variant":"split_f32","scan_family":"epilogue_calibration","peak_kind":"memory","ptx_patterns":["st\\.shared\\.v2\\.u32","fence\\.proxy\\.async\\.shared::cta","cp\\.async\\.bulk\\.global\\.shared::cta"],"sass_patterns":["STS\\.64","FENCE\\.VIEW\\.ASYNC","UBLKCP\\.G\\.S"],"source_anchors":["dense split stride520+bulk-store epilogue"]}
-  ],
-  "groups": {
-    "wgmma": ["wgmma_qk_ss_bf16","wgmma_qk_rs_bf16","wgmma_pv_ss_bf16","wgmma_pv_rs_bf16","wgmma_qk_ss_fp16","wgmma_qk_rs_fp16","wgmma_pv_ss_fp16","wgmma_pv_rs_fp16"],
-    "matrix_copy": ["stmatrix_p_b16","stmatrix_o_b16","ldmatrix_p_b16"],
-    "tma_load": ["tma_load_k_bf16_rank4","tma_load_q_bf16_rank4"],
-    "tma_store": ["tma_store_o_bf16_rank4"],
-    "bulk_store": ["bulk_store_oaccum_f32"],
-    "exp2": ["exp2_f32"],
-    "shfl": ["shfl_bfly_b32"],
-    "named_barrier": ["bar_sync_128","bar_sync_256","bar_arrive_2wg"],
-    "scalar": ["exp2_f32","lg2_f32","rcp_f32","ffma_f32","fadd_f32","fmul_f32","fsetp_f32","fsel_f32","cvt_fp32_bf16","cvt_fp32_fp16","shfl_bfly_b32","iadd3_u32","imad_u32","isetp_u32"],
-    "synchronization": ["bar_sync_128","bar_sync_256","bar_arrive_2wg","warp_sync","mbarrier_init","mbarrier_expect_tx","mbarrier_wait_128","mbarrier_wait_256","proxy_fence_async_shared"],
-    "ordinary_global_load": ["global_load_i32_cached","global_load_i32_ordinary","global_load_scheduler_record_32b","global_load_float4_oaccum","global_load_f32_lse_strided"],
-    "kq_calibration": ["kq_first_page_bf16","kq_first_page_fp16","kq_steady_page_bf16","kq_steady_page_fp16"],
-    "page_pair_calibration": ["page_pair_transition_bf16","page_pair_transition_fp16"],
-    "stage_calibration": ["metadata_stage","softmax_stage_bf16","softmax_stage_fp16","epilogue_nosplit_b16","epilogue_split_f32","combine_stage_bf16","combine_stage_fp16"],
-    "pdl_calibration": ["pdl_overlap"],
-    "calibration": ["kq_first_page_bf16","kq_first_page_fp16","kq_steady_page_bf16","kq_steady_page_fp16","page_pair_transition_bf16","page_pair_transition_fp16","metadata_stage","softmax_stage_bf16","softmax_stage_fp16","epilogue_nosplit_b16","epilogue_split_f32","combine_stage_bf16","combine_stage_fp16","pdl_overlap"]
-  },
-  "protocol_ownership": {
-    "wgmma.fence/commit_group/wait_group": "Owned by each WGMMA atom or source-real page protocol; not reported as an independent latency.",
-    "cp.async.bulk.tensor mbarrier expect/wait": "Owned by the corresponding rank-4 TMA load protocol.",
-    "cp.async.bulk.tensor store commit_group/wait_group": "Owned by the rank-4 O TMA store protocol.",
-    "cp.async.bulk S2G commit_group/wait_group": "Owned by the split OAccum bulk-store protocol.",
-    "griddepcontrol launch_dependents/wait": "Owned by pdl_overlap and source-real combine calibration."
-  },
-  "scan_parameters": {
-    "common": ["device","iters","warmup","samples","blocks"],
-    "families": {
-      "wgmma": ["warpgroups","group_size","depth"],
-      "scalar": [],
-      "shuffle": ["delta"],
-      "sync": [],
-      "tma_load_k": ["depth","working_set_pages","pattern"],
-      "tma_load_q": ["depth","working_set_pages","pattern"],
-      "tma_store": ["depth","working_set_tiles"],
-      "bulk_store": ["working_set_tiles","pattern"],
-      "matrix": ["warpgroups"],
-      "shared_load": ["threads","pattern","working_set_words"],
-      "shared_store": [],
-      "global_load": [],
-      "global_load_vector": ["num_splits","rowsets","warps","vectors_per_thread","pattern"],
-      "global_load_lse": ["num_splits","split_stride","rowsets","warps","pattern"],
-      "global_store": [],
-      "global_store_output": ["dtype","warps","vectors_per_thread","working_set_records","pattern"],
-      "tensormap_prefetch": ["mode","working_pages","working_tiles"],
-      "kq_calibration": ["working_set_pages"],
-      "page_pair_calibration": [],
-      "metadata_calibration": ["batch","num_sm_parts","seqlen_distribution","seqlen_min","seqlen_max","seed"],
-      "combine_calibration": ["num_splits"],
-      "pdl_calibration": ["producer_blocks","consumer_blocks","prefix_iters","tail_iters","consumer_iters"],
-      "softmax_calibration": [],
-      "epilogue_calibration": ["working_set_tiles","pattern"]
+    {
+      "id": "cvt_rn_bf16_f32",
+      "kind": "operation",
+      "category": "compute",
+      "family": "convert",
+      "source": "compute/convert/cvt_rn_bf16_f32.cu",
+      "binary": "cvt_rn_bf16_f32",
+      "result_csv": "compute/convert/result.csv",
+      "parameters": [
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "cvt\\.rn\\.bf16\\.f32"
+      ],
+      "support_ptx_patterns": [],
+      "target_sass_patterns": [
+        "F2F(P)?\\.BF16\\.F32"
+      ],
+      "protocol": {
+        "latency_boundary": "defined by family harness"
+      }
     },
-    "bench_overrides": {
-      "shared_store_u32": ["threads","producers","topology","working_set_words"],
-      "shared_store_u64_dense": ["role","warpgroups","stores_per_thread","invalid_tokens"],
-      "global_load_i32_cached": ["threads","issuers","pattern","working_set_entries"],
-      "global_load_i32_ordinary": ["threads","issuers","pattern","working_set_entries"],
-      "global_load_scheduler_record_32b": ["threads","issuers","pattern","working_set_records"],
-      "global_store_f32_lse": ["role","working_set_records","pattern"],
-      "global_store_scheduler_record_32b": ["working_set_records","pattern"],
-      "global_store_u32_num_splits": ["producers","working_set_records","pattern"]
+    {
+      "id": "cvt_rn_f16_f32",
+      "kind": "operation",
+      "category": "compute",
+      "family": "convert",
+      "source": "compute/convert/cvt_rn_f16_f32.cu",
+      "binary": "cvt_rn_f16_f32",
+      "result_csv": "compute/convert/result.csv",
+      "parameters": [
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "cvt\\.rn\\.f16\\.f32"
+      ],
+      "support_ptx_patterns": [],
+      "target_sass_patterns": [
+        "F2FP\\.F16\\.F32"
+      ],
+      "protocol": {
+        "latency_boundary": "defined by family harness"
+      }
+    },
+    {
+      "id": "fadd_rn_ftz_f32",
+      "kind": "operation",
+      "category": "compute",
+      "family": "fp32_alu",
+      "source": "compute/fp32_alu/fadd_rn_ftz_f32.cu",
+      "binary": "fadd_rn_ftz_f32",
+      "result_csv": "compute/fp32_alu/result.csv",
+      "parameters": [
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "add\\.rn\\.ftz\\.f32"
+      ],
+      "support_ptx_patterns": [],
+      "target_sass_patterns": [
+        "FADD"
+      ],
+      "protocol": {
+        "latency_boundary": "defined by family harness"
+      }
+    },
+    {
+      "id": "ffma_rn_ftz_f32",
+      "kind": "operation",
+      "category": "compute",
+      "family": "fp32_alu",
+      "source": "compute/fp32_alu/ffma_rn_ftz_f32.cu",
+      "binary": "ffma_rn_ftz_f32",
+      "result_csv": "compute/fp32_alu/result.csv",
+      "parameters": [
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "fma\\.rn\\.ftz\\.f32"
+      ],
+      "support_ptx_patterns": [],
+      "target_sass_patterns": [
+        "FFMA"
+      ],
+      "protocol": {
+        "latency_boundary": "defined by family harness"
+      }
+    },
+    {
+      "id": "fmul_rn_ftz_f32",
+      "kind": "operation",
+      "category": "compute",
+      "family": "fp32_alu",
+      "source": "compute/fp32_alu/fmul_rn_ftz_f32.cu",
+      "binary": "fmul_rn_ftz_f32",
+      "result_csv": "compute/fp32_alu/result.csv",
+      "parameters": [
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "mul\\.rn\\.ftz\\.f32"
+      ],
+      "support_ptx_patterns": [],
+      "target_sass_patterns": [
+        "FMUL"
+      ],
+      "protocol": {
+        "latency_boundary": "defined by family harness"
+      }
+    },
+    {
+      "id": "fsel_f32",
+      "kind": "operation",
+      "category": "compute",
+      "family": "fp32_alu",
+      "source": "compute/fp32_alu/fsel_f32.cu",
+      "binary": "fsel_f32",
+      "result_csv": "compute/fp32_alu/result.csv",
+      "parameters": [
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "selp\\.f32"
+      ],
+      "support_ptx_patterns": [],
+      "target_sass_patterns": [
+        "FSEL"
+      ],
+      "protocol": {
+        "latency_boundary": "defined by family harness"
+      }
+    },
+    {
+      "id": "fsetp_lt_ftz_f32",
+      "kind": "operation",
+      "category": "compute",
+      "family": "fp32_alu",
+      "source": "compute/fp32_alu/fsetp_lt_ftz_f32.cu",
+      "binary": "fsetp_lt_ftz_f32",
+      "result_csv": "compute/fp32_alu/result.csv",
+      "parameters": [
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "setp\\.lt\\.ftz\\.f32"
+      ],
+      "support_ptx_patterns": [],
+      "target_sass_patterns": [
+        "FSETP"
+      ],
+      "protocol": {
+        "latency_boundary": "defined by family harness"
+      }
+    },
+    {
+      "id": "max_ftz_f32",
+      "kind": "operation",
+      "category": "compute",
+      "family": "fp32_alu",
+      "source": "compute/fp32_alu/max_ftz_f32.cu",
+      "binary": "max_ftz_f32",
+      "result_csv": "compute/fp32_alu/result.csv",
+      "parameters": [
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "max\\.ftz\\.f32"
+      ],
+      "support_ptx_patterns": [],
+      "target_sass_patterns": [
+        "FMNMX"
+      ],
+      "protocol": {
+        "latency_boundary": "defined by family harness"
+      }
+    },
+    {
+      "id": "div_u32",
+      "kind": "operation",
+      "category": "compute",
+      "family": "integer",
+      "source": "compute/integer/div_u32.cu",
+      "binary": "div_u32",
+      "result_csv": "compute/integer/result.csv",
+      "parameters": [
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "div\\.u32"
+      ],
+      "support_ptx_patterns": [],
+      "target_sass_patterns": [
+        "(MUFU|IMAD|IADD3)"
+      ],
+      "protocol": {
+        "latency_boundary": "defined by family harness"
+      }
+    },
+    {
+      "id": "iadd3_u32",
+      "kind": "operation",
+      "category": "compute",
+      "family": "integer",
+      "source": "compute/integer/iadd3_u32.cu",
+      "binary": "iadd3_u32",
+      "result_csv": "compute/integer/result.csv",
+      "parameters": [
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "add\\.u32"
+      ],
+      "support_ptx_patterns": [],
+      "target_sass_patterns": [
+        "IADD3"
+      ],
+      "protocol": {
+        "latency_boundary": "defined by family harness"
+      }
+    },
+    {
+      "id": "imad_lo_u32",
+      "kind": "operation",
+      "category": "compute",
+      "family": "integer",
+      "source": "compute/integer/imad_lo_u32.cu",
+      "binary": "imad_lo_u32",
+      "result_csv": "compute/integer/result.csv",
+      "parameters": [
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "mad\\.lo\\.u32"
+      ],
+      "support_ptx_patterns": [],
+      "target_sass_patterns": [
+        "IMAD"
+      ],
+      "protocol": {
+        "latency_boundary": "defined by family harness"
+      }
+    },
+    {
+      "id": "isetp_lt_u32",
+      "kind": "operation",
+      "category": "compute",
+      "family": "integer",
+      "source": "compute/integer/isetp_lt_u32.cu",
+      "binary": "isetp_lt_u32",
+      "result_csv": "compute/integer/result.csv",
+      "parameters": [
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "setp\\.lt\\.u32"
+      ],
+      "support_ptx_patterns": [],
+      "target_sass_patterns": [
+        "ISETP"
+      ],
+      "protocol": {
+        "latency_boundary": "defined by family harness"
+      }
+    },
+    {
+      "id": "rem_u32",
+      "kind": "operation",
+      "category": "compute",
+      "family": "integer",
+      "source": "compute/integer/rem_u32.cu",
+      "binary": "rem_u32",
+      "result_csv": "compute/integer/result.csv",
+      "parameters": [
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "rem\\.u32"
+      ],
+      "support_ptx_patterns": [],
+      "target_sass_patterns": [
+        "(MUFU|IMAD|IADD3)"
+      ],
+      "protocol": {
+        "latency_boundary": "defined by family harness"
+      }
+    },
+    {
+      "id": "fence_proxy_async_shared_cta",
+      "kind": "operation",
+      "category": "compute",
+      "family": "ordering",
+      "source": "compute/ordering/fence_proxy_async_shared_cta.cu",
+      "binary": "fence_proxy_async_shared_cta",
+      "result_csv": "compute/ordering/result.csv",
+      "parameters": [
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "fence\\.proxy\\.async\\.shared::cta"
+      ],
+      "support_ptx_patterns": [
+        "bar\\.sync"
+      ],
+      "target_sass_patterns": [
+        "FENCE\\.VIEW\\.ASYNC"
+      ],
+      "protocol": {
+        "latency_boundary": "one ordering fence; matched unroll and loop-control baseline subtracted",
+        "initiation_interval_boundary": "baseline-subtracted cycles per fence",
+        "support_opcode_accounting": "bar.sync instructions are outside the clock64 boundary"
+      }
+    },
+    {
+      "id": "ex2_approx_ftz_f32",
+      "kind": "operation",
+      "category": "compute",
+      "family": "sfu",
+      "source": "compute/sfu/ex2_approx_ftz_f32.cu",
+      "binary": "ex2_approx_ftz_f32",
+      "result_csv": "compute/sfu/result.csv",
+      "parameters": [
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "ex2\\.approx\\.ftz\\.f32"
+      ],
+      "support_ptx_patterns": [
+        "fma\\.rn\\.ftz\\.f32"
+      ],
+      "target_sass_patterns": [
+        "MUFU\\.EX2"
+      ],
+      "protocol": {
+        "latency_boundary": "defined by family harness",
+        "support_opcode_accounting": "FFMA stabilizer/baseline is excluded from target count"
+      }
+    },
+    {
+      "id": "lg2_approx_ftz_f32",
+      "kind": "operation",
+      "category": "compute",
+      "family": "sfu",
+      "source": "compute/sfu/lg2_approx_ftz_f32.cu",
+      "binary": "lg2_approx_ftz_f32",
+      "result_csv": "compute/sfu/result.csv",
+      "parameters": [
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "lg2\\.approx\\.ftz\\.f32"
+      ],
+      "support_ptx_patterns": [
+        "fma\\.rn\\.ftz\\.f32"
+      ],
+      "target_sass_patterns": [
+        "MUFU\\.LG2"
+      ],
+      "protocol": {
+        "latency_boundary": "defined by family harness",
+        "support_opcode_accounting": "FFMA stabilizer/baseline is excluded from target count"
+      }
+    },
+    {
+      "id": "rcp_approx_ftz_f32",
+      "kind": "operation",
+      "category": "compute",
+      "family": "sfu",
+      "source": "compute/sfu/rcp_approx_ftz_f32.cu",
+      "binary": "rcp_approx_ftz_f32",
+      "result_csv": "compute/sfu/result.csv",
+      "parameters": [
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "rcp\\.approx\\.ftz\\.f32"
+      ],
+      "support_ptx_patterns": [
+        "fma\\.rn\\.ftz\\.f32"
+      ],
+      "target_sass_patterns": [
+        "MUFU\\.RCP"
+      ],
+      "protocol": {
+        "latency_boundary": "defined by family harness",
+        "support_opcode_accounting": "FFMA stabilizer/baseline is excluded from target count"
+      }
+    },
+    {
+      "id": "shfl_sync_bfly_b32",
+      "kind": "operation",
+      "category": "compute",
+      "family": "shuffle",
+      "source": "compute/shuffle/shfl_sync_bfly_b32.cu",
+      "binary": "shfl_sync_bfly_b32",
+      "result_csv": "compute/shuffle/result.csv",
+      "parameters": [
+        "delta",
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "shfl\\.sync\\.bfly\\.b32"
+      ],
+      "support_ptx_patterns": [],
+      "target_sass_patterns": [
+        "SHFL\\.BFLY"
+      ],
+      "protocol": {
+        "latency_boundary": "defined by family harness"
+      }
+    },
+    {
+      "id": "bar_arrive_2wg",
+      "kind": "operation",
+      "category": "compute",
+      "family": "synchronization",
+      "source": "compute/synchronization/bar_arrive_2wg.cu",
+      "binary": "bar_arrive_2wg",
+      "result_csv": "compute/synchronization/result.csv",
+      "parameters": [
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "bar\\.arrive"
+      ],
+      "support_ptx_patterns": [
+        "bar\\.sync"
+      ],
+      "target_sass_patterns": [
+        "BAR\\.ARV"
+      ],
+      "protocol": {
+        "latency_boundary": "complete synchronization protocol; matched unroll and loop-control baseline subtracted",
+        "initiation_interval_boundary": "baseline-subtracted cycles per protocol operation",
+        "support_opcode_accounting": "arrive/complete/barrier instructions required for a valid generation remain in the target protocol"
+      }
+    },
+    {
+      "id": "bar_sync_128",
+      "kind": "operation",
+      "category": "compute",
+      "family": "synchronization",
+      "source": "compute/synchronization/bar_sync_128.cu",
+      "binary": "bar_sync_128",
+      "result_csv": "compute/synchronization/result.csv",
+      "parameters": [
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "bar\\.sync.*128"
+      ],
+      "support_ptx_patterns": [
+        "bar\\.sync"
+      ],
+      "target_sass_patterns": [
+        "BAR\\.SYNC"
+      ],
+      "protocol": {
+        "latency_boundary": "complete synchronization protocol; matched unroll and loop-control baseline subtracted",
+        "initiation_interval_boundary": "baseline-subtracted cycles per protocol operation",
+        "support_opcode_accounting": "arrive/complete/barrier instructions required for a valid generation remain in the target protocol"
+      }
+    },
+    {
+      "id": "bar_sync_256",
+      "kind": "operation",
+      "category": "compute",
+      "family": "synchronization",
+      "source": "compute/synchronization/bar_sync_256.cu",
+      "binary": "bar_sync_256",
+      "result_csv": "compute/synchronization/result.csv",
+      "parameters": [
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "bar\\.sync.*256"
+      ],
+      "support_ptx_patterns": [
+        "bar\\.sync"
+      ],
+      "target_sass_patterns": [
+        "BAR\\.SYNC"
+      ],
+      "protocol": {
+        "latency_boundary": "complete synchronization protocol; matched unroll and loop-control baseline subtracted",
+        "initiation_interval_boundary": "baseline-subtracted cycles per protocol operation",
+        "support_opcode_accounting": "arrive/complete/barrier instructions required for a valid generation remain in the target protocol"
+      }
+    },
+    {
+      "id": "mbarrier_expect_tx",
+      "kind": "operation",
+      "category": "compute",
+      "family": "synchronization",
+      "source": "compute/synchronization/mbarrier_expect_tx.cu",
+      "binary": "mbarrier_expect_tx",
+      "result_csv": "compute/synchronization/result.csv",
+      "parameters": [
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "mbarrier\\.expect_tx"
+      ],
+      "support_ptx_patterns": [
+        "bar\\.sync",
+        "mbarrier\\.init",
+        "mbarrier\\.complete_tx"
+      ],
+      "target_sass_patterns": [
+        "SYNCS"
+      ],
+      "protocol": {
+        "latency_boundary": "complete synchronization protocol; matched unroll and loop-control baseline subtracted",
+        "initiation_interval_boundary": "baseline-subtracted cycles per protocol operation",
+        "support_opcode_accounting": "arrive/complete/barrier instructions required for a valid generation remain in the target protocol"
+      }
+    },
+    {
+      "id": "mbarrier_init",
+      "kind": "operation",
+      "category": "compute",
+      "family": "synchronization",
+      "source": "compute/synchronization/mbarrier_init.cu",
+      "binary": "mbarrier_init",
+      "result_csv": "compute/synchronization/result.csv",
+      "parameters": [
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "mbarrier\\.init"
+      ],
+      "support_ptx_patterns": [
+        "bar\\.sync",
+        "mbarrier\\.inval"
+      ],
+      "target_sass_patterns": [
+        "SYNCS"
+      ],
+      "protocol": {
+        "latency_boundary": "complete synchronization protocol; matched unroll and loop-control baseline subtracted",
+        "initiation_interval_boundary": "baseline-subtracted cycles per protocol operation",
+        "support_opcode_accounting": "arrive/complete/barrier instructions required for a valid generation remain in the target protocol"
+      }
+    },
+    {
+      "id": "mbarrier_wait_128",
+      "kind": "operation",
+      "category": "compute",
+      "family": "synchronization",
+      "source": "compute/synchronization/mbarrier_wait_128.cu",
+      "binary": "mbarrier_wait_128",
+      "result_csv": "compute/synchronization/result.csv",
+      "parameters": [
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "mbarrier\\.try_wait"
+      ],
+      "support_ptx_patterns": [
+        "bar\\.sync",
+        "mbarrier\\.init",
+        "mbarrier\\.arrive"
+      ],
+      "target_sass_patterns": [
+        "SYNCS"
+      ],
+      "protocol": {
+        "latency_boundary": "complete synchronization protocol; matched unroll and loop-control baseline subtracted",
+        "initiation_interval_boundary": "baseline-subtracted cycles per protocol operation",
+        "support_opcode_accounting": "arrive/complete/barrier instructions required for a valid generation remain in the target protocol"
+      }
+    },
+    {
+      "id": "mbarrier_wait_256",
+      "kind": "operation",
+      "category": "compute",
+      "family": "synchronization",
+      "source": "compute/synchronization/mbarrier_wait_256.cu",
+      "binary": "mbarrier_wait_256",
+      "result_csv": "compute/synchronization/result.csv",
+      "parameters": [
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "mbarrier\\.try_wait"
+      ],
+      "support_ptx_patterns": [
+        "bar\\.sync",
+        "mbarrier\\.init",
+        "mbarrier\\.arrive"
+      ],
+      "target_sass_patterns": [
+        "SYNCS"
+      ],
+      "protocol": {
+        "latency_boundary": "complete synchronization protocol; matched unroll and loop-control baseline subtracted",
+        "initiation_interval_boundary": "baseline-subtracted cycles per protocol operation",
+        "support_opcode_accounting": "arrive/complete/barrier instructions required for a valid generation remain in the target protocol"
+      }
+    },
+    {
+      "id": "warp_sync",
+      "kind": "operation",
+      "category": "compute",
+      "family": "synchronization",
+      "source": "compute/synchronization/warp_sync.cu",
+      "binary": "warp_sync",
+      "result_csv": "compute/synchronization/result.csv",
+      "parameters": [
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "bar\\.warp\\.sync"
+      ],
+      "support_ptx_patterns": [
+        "bar\\.sync"
+      ],
+      "target_sass_patterns": [],
+      "protocol": {
+        "latency_boundary": "SM90a ptxas elides converged full-mask BAR.WARP.SYNC; formal executable cost is zero",
+        "initiation_interval_boundary": "baseline-subtracted cycles per protocol operation",
+        "support_opcode_accounting": "arrive/complete/barrier instructions required for a valid generation remain in the target protocol"
+      },
+      "sass_elided": true
+    },
+    {
+      "id": "m64n256k16_rs_bf16",
+      "kind": "operation",
+      "category": "compute",
+      "family": "wgmma",
+      "source": "compute/wgmma/m64n256k16_rs_bf16.cu",
+      "binary": "m64n256k16_rs_bf16",
+      "result_csv": "compute/wgmma/result.csv",
+      "parameters": [
+        "warpgroups",
+        "group_size",
+        "depth",
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "wgmma\\.mma_async[^\\n]*m64n256k16\\.f32\\.bf16\\.bf16[^\\n]*\\},\\s*\\{%r[0-9]+(?:,\\s*%r[0-9]+){3}\\},\\s*%rd[0-9]+,\\s*p"
+      ],
+      "support_ptx_patterns": [
+        "wgmma\\.fence",
+        "wgmma\\.commit_group",
+        "wgmma\\.wait_group",
+        "fence\\.proxy\\.async"
+      ],
+      "target_sass_patterns": [
+        "HGMMA\\.64x256x16\\.F32\\.BF16\\s+R[0-9]+,\\s*R[0-9]+,\\s*gdesc\\["
+      ],
+      "protocol": {
+        "latency_boundary": "selected group_size issue + commit_group + wait_group 0; dependency depth 1; matched inline-PTX loop control subtracted",
+        "initiation_interval_boundary": "cycles per committed group at selected group_size and depth; matched inline-PTX loop control subtracted",
+        "accumulator_dtype": "f32",
+        "a_major": "k",
+        "b_major": "transposed_k",
+        "swizzle": "128B",
+        "transpose": true,
+        "scale_modifier": "1x",
+        "source_mode": "rs",
+        "m": 64,
+        "n": 256,
+        "k": 16,
+        "input_dtype": "bf16",
+        "supported_group_sizes": [
+          1,
+          4
+        ],
+        "group_size_depth_constraints": {}
+      },
+      "source_mode": "rs",
+      "fixed_modifiers": {
+        "accumulator_dtype": "f32",
+        "a_major": "register",
+        "b_major": "transposed_k",
+        "swizzle": "128B",
+        "transpose_a": false,
+        "transpose_b": true,
+        "scale_a": 1,
+        "scale_b": 1,
+        "scale_d": "predicate"
+      }
+    },
+    {
+      "id": "m64n256k16_rs_fp16",
+      "kind": "operation",
+      "category": "compute",
+      "family": "wgmma",
+      "source": "compute/wgmma/m64n256k16_rs_fp16.cu",
+      "binary": "m64n256k16_rs_fp16",
+      "result_csv": "compute/wgmma/result.csv",
+      "parameters": [
+        "warpgroups",
+        "group_size",
+        "depth",
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "wgmma\\.mma_async[^\\n]*m64n256k16\\.f32\\.f16\\.f16[^\\n]*\\},\\s*\\{%r[0-9]+(?:,\\s*%r[0-9]+){3}\\},\\s*%rd[0-9]+,\\s*p"
+      ],
+      "support_ptx_patterns": [
+        "wgmma\\.fence",
+        "wgmma\\.commit_group",
+        "wgmma\\.wait_group",
+        "fence\\.proxy\\.async"
+      ],
+      "target_sass_patterns": [
+        "HGMMA\\.64x256x16\\.F32(?!\\.BF16)\\s+R[0-9]+,\\s*R[0-9]+,\\s*gdesc\\["
+      ],
+      "protocol": {
+        "latency_boundary": "selected group_size issue + commit_group + wait_group 0; dependency depth 1; matched inline-PTX loop control subtracted",
+        "initiation_interval_boundary": "cycles per committed group at selected group_size and depth; matched inline-PTX loop control subtracted",
+        "accumulator_dtype": "f32",
+        "a_major": "k",
+        "b_major": "transposed_k",
+        "swizzle": "128B",
+        "transpose": true,
+        "scale_modifier": "1x",
+        "source_mode": "rs",
+        "m": 64,
+        "n": 256,
+        "k": 16,
+        "input_dtype": "fp16",
+        "supported_group_sizes": [
+          1,
+          4
+        ],
+        "group_size_depth_constraints": {}
+      },
+      "source_mode": "rs",
+      "fixed_modifiers": {
+        "accumulator_dtype": "f32",
+        "a_major": "register",
+        "b_major": "transposed_k",
+        "swizzle": "128B",
+        "transpose_a": false,
+        "transpose_b": true,
+        "scale_a": 1,
+        "scale_b": 1,
+        "scale_d": "predicate"
+      }
+    },
+    {
+      "id": "m64n256k16_ss_bf16",
+      "kind": "operation",
+      "category": "compute",
+      "family": "wgmma",
+      "source": "compute/wgmma/m64n256k16_ss_bf16.cu",
+      "binary": "m64n256k16_ss_bf16",
+      "result_csv": "compute/wgmma/result.csv",
+      "parameters": [
+        "warpgroups",
+        "group_size",
+        "depth",
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "wgmma\\.mma_async[^\\n]*m64n256k16\\.f32\\.bf16\\.bf16[^\\n]*\\},\\s*%rd[0-9]+,\\s*%rd[0-9]+,\\s*p"
+      ],
+      "support_ptx_patterns": [
+        "wgmma\\.fence",
+        "wgmma\\.commit_group",
+        "wgmma\\.wait_group",
+        "fence\\.proxy\\.async"
+      ],
+      "target_sass_patterns": [
+        "HGMMA\\.64x256x16\\.F32\\.BF16\\s+R[0-9]+,\\s*gdesc\\["
+      ],
+      "protocol": {
+        "latency_boundary": "selected group_size issue + commit_group + wait_group 0; dependency depth 1; matched inline-PTX loop control subtracted",
+        "initiation_interval_boundary": "cycles per committed group at selected group_size and depth; matched inline-PTX loop control subtracted",
+        "accumulator_dtype": "f32",
+        "a_major": "k",
+        "b_major": "transposed_k",
+        "swizzle": "128B",
+        "transpose": true,
+        "scale_modifier": "1x",
+        "source_mode": "ss",
+        "m": 64,
+        "n": 256,
+        "k": 16,
+        "input_dtype": "bf16",
+        "supported_group_sizes": [
+          1,
+          4
+        ],
+        "group_size_depth_constraints": {}
+      },
+      "source_mode": "ss",
+      "fixed_modifiers": {
+        "accumulator_dtype": "f32",
+        "a_major": "k_major",
+        "b_major": "transposed_k",
+        "swizzle": "128B",
+        "transpose_a": false,
+        "transpose_b": true,
+        "scale_a": 1,
+        "scale_b": 1,
+        "scale_d": "predicate"
+      }
+    },
+    {
+      "id": "m64n256k16_ss_fp16",
+      "kind": "operation",
+      "category": "compute",
+      "family": "wgmma",
+      "source": "compute/wgmma/m64n256k16_ss_fp16.cu",
+      "binary": "m64n256k16_ss_fp16",
+      "result_csv": "compute/wgmma/result.csv",
+      "parameters": [
+        "warpgroups",
+        "group_size",
+        "depth",
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "wgmma\\.mma_async[^\\n]*m64n256k16\\.f32\\.f16\\.f16[^\\n]*\\},\\s*%rd[0-9]+,\\s*%rd[0-9]+,\\s*p"
+      ],
+      "support_ptx_patterns": [
+        "wgmma\\.fence",
+        "wgmma\\.commit_group",
+        "wgmma\\.wait_group",
+        "fence\\.proxy\\.async"
+      ],
+      "target_sass_patterns": [
+        "HGMMA\\.64x256x16\\.F32(?!\\.BF16)\\s+R[0-9]+,\\s*gdesc\\["
+      ],
+      "protocol": {
+        "latency_boundary": "selected group_size issue + commit_group + wait_group 0; dependency depth 1; matched inline-PTX loop control subtracted",
+        "initiation_interval_boundary": "cycles per committed group at selected group_size and depth; matched inline-PTX loop control subtracted",
+        "accumulator_dtype": "f32",
+        "a_major": "k",
+        "b_major": "transposed_k",
+        "swizzle": "128B",
+        "transpose": true,
+        "scale_modifier": "1x",
+        "source_mode": "ss",
+        "m": 64,
+        "n": 256,
+        "k": 16,
+        "input_dtype": "fp16",
+        "supported_group_sizes": [
+          1,
+          4
+        ],
+        "group_size_depth_constraints": {}
+      },
+      "source_mode": "ss",
+      "fixed_modifiers": {
+        "accumulator_dtype": "f32",
+        "a_major": "k_major",
+        "b_major": "transposed_k",
+        "swizzle": "128B",
+        "transpose_a": false,
+        "transpose_b": true,
+        "scale_a": 1,
+        "scale_b": 1,
+        "scale_d": "predicate"
+      }
+    },
+    {
+      "id": "m64n64k16_rs_bf16",
+      "kind": "operation",
+      "category": "compute",
+      "family": "wgmma",
+      "source": "compute/wgmma/m64n64k16_rs_bf16.cu",
+      "binary": "m64n64k16_rs_bf16",
+      "result_csv": "compute/wgmma/result.csv",
+      "parameters": [
+        "warpgroups",
+        "group_size",
+        "depth",
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "wgmma\\.mma_async[^\\n]*m64n64k16\\.f32\\.bf16\\.bf16[^\\n]*\\},\\s*\\{%r[0-9]+(?:,\\s*%r[0-9]+){3}\\},\\s*%rd[0-9]+,\\s*p"
+      ],
+      "support_ptx_patterns": [
+        "wgmma\\.fence",
+        "wgmma\\.commit_group",
+        "wgmma\\.wait_group",
+        "fence\\.proxy\\.async"
+      ],
+      "target_sass_patterns": [
+        "HGMMA\\.64x64x16\\.F32\\.BF16\\s+R[0-9]+,\\s*R[0-9]+,\\s*gdesc\\["
+      ],
+      "protocol": {
+        "latency_boundary": "selected group_size issue + commit_group + wait_group 0; dependency depth 1; matched inline-PTX loop control subtracted",
+        "initiation_interval_boundary": "cycles per committed group at selected group_size and depth; matched inline-PTX loop control subtracted",
+        "accumulator_dtype": "f32",
+        "a_major": "k",
+        "b_major": "k",
+        "swizzle": "128B",
+        "transpose": false,
+        "scale_modifier": "1x",
+        "source_mode": "rs",
+        "m": 64,
+        "n": 64,
+        "k": 16,
+        "input_dtype": "bf16",
+        "supported_group_sizes": [
+          1,
+          4
+        ],
+        "group_size_depth_constraints": {}
+      },
+      "source_mode": "rs",
+      "fixed_modifiers": {
+        "accumulator_dtype": "f32",
+        "a_major": "register",
+        "b_major": "k_major",
+        "swizzle": "128B",
+        "transpose_a": false,
+        "transpose_b": false,
+        "scale_a": 1,
+        "scale_b": 1,
+        "scale_d": "predicate"
+      }
+    },
+    {
+      "id": "m64n64k16_rs_fp16",
+      "kind": "operation",
+      "category": "compute",
+      "family": "wgmma",
+      "source": "compute/wgmma/m64n64k16_rs_fp16.cu",
+      "binary": "m64n64k16_rs_fp16",
+      "result_csv": "compute/wgmma/result.csv",
+      "parameters": [
+        "warpgroups",
+        "group_size",
+        "depth",
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "wgmma\\.mma_async[^\\n]*m64n64k16\\.f32\\.f16\\.f16[^\\n]*\\},\\s*\\{%r[0-9]+(?:,\\s*%r[0-9]+){3}\\},\\s*%rd[0-9]+,\\s*p"
+      ],
+      "support_ptx_patterns": [
+        "wgmma\\.fence",
+        "wgmma\\.commit_group",
+        "wgmma\\.wait_group",
+        "fence\\.proxy\\.async"
+      ],
+      "target_sass_patterns": [
+        "HGMMA\\.64x64x16\\.F32(?!\\.BF16)\\s+R[0-9]+,\\s*R[0-9]+,\\s*gdesc\\["
+      ],
+      "protocol": {
+        "latency_boundary": "selected group_size issue + commit_group + wait_group 0; dependency depth 1; matched inline-PTX loop control subtracted",
+        "initiation_interval_boundary": "cycles per committed group at selected group_size and depth; matched inline-PTX loop control subtracted",
+        "accumulator_dtype": "f32",
+        "a_major": "k",
+        "b_major": "k",
+        "swizzle": "128B",
+        "transpose": false,
+        "scale_modifier": "1x",
+        "source_mode": "rs",
+        "m": 64,
+        "n": 64,
+        "k": 16,
+        "input_dtype": "fp16",
+        "supported_group_sizes": [
+          1,
+          4
+        ],
+        "group_size_depth_constraints": {}
+      },
+      "source_mode": "rs",
+      "fixed_modifiers": {
+        "accumulator_dtype": "f32",
+        "a_major": "register",
+        "b_major": "k_major",
+        "swizzle": "128B",
+        "transpose_a": false,
+        "transpose_b": false,
+        "scale_a": 1,
+        "scale_b": 1,
+        "scale_d": "predicate"
+      }
+    },
+    {
+      "id": "m64n64k16_ss_bf16",
+      "kind": "operation",
+      "category": "compute",
+      "family": "wgmma",
+      "source": "compute/wgmma/m64n64k16_ss_bf16.cu",
+      "binary": "m64n64k16_ss_bf16",
+      "result_csv": "compute/wgmma/result.csv",
+      "parameters": [
+        "warpgroups",
+        "group_size",
+        "depth",
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "wgmma\\.mma_async[^\\n]*m64n64k16\\.f32\\.bf16\\.bf16[^\\n]*\\},\\s*%rd[0-9]+,\\s*%rd[0-9]+,\\s*p"
+      ],
+      "support_ptx_patterns": [
+        "wgmma\\.fence",
+        "wgmma\\.commit_group",
+        "wgmma\\.wait_group",
+        "fence\\.proxy\\.async"
+      ],
+      "target_sass_patterns": [
+        "HGMMA\\.64x64x16\\.F32\\.BF16\\s+R[0-9]+,\\s*gdesc\\["
+      ],
+      "protocol": {
+        "latency_boundary": "selected group_size issue + commit_group + wait_group 0; dependency depth 1; matched inline-PTX loop control subtracted",
+        "initiation_interval_boundary": "cycles per committed group at selected group_size and depth; matched inline-PTX loop control subtracted",
+        "accumulator_dtype": "f32",
+        "a_major": "k",
+        "b_major": "k",
+        "swizzle": "128B",
+        "transpose": false,
+        "scale_modifier": "1x",
+        "source_mode": "ss",
+        "m": 64,
+        "n": 64,
+        "k": 16,
+        "input_dtype": "bf16",
+        "supported_group_sizes": [
+          1,
+          4,
+          36
+        ],
+        "group_size_depth_constraints": {
+          "36": [
+            1
+          ]
+        }
+      },
+      "source_mode": "ss",
+      "fixed_modifiers": {
+        "accumulator_dtype": "f32",
+        "a_major": "k_major",
+        "b_major": "k_major",
+        "swizzle": "128B",
+        "transpose_a": false,
+        "transpose_b": false,
+        "scale_a": 1,
+        "scale_b": 1,
+        "scale_d": "predicate"
+      }
+    },
+    {
+      "id": "m64n64k16_ss_fp16",
+      "kind": "operation",
+      "category": "compute",
+      "family": "wgmma",
+      "source": "compute/wgmma/m64n64k16_ss_fp16.cu",
+      "binary": "m64n64k16_ss_fp16",
+      "result_csv": "compute/wgmma/result.csv",
+      "parameters": [
+        "warpgroups",
+        "group_size",
+        "depth",
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "wgmma\\.mma_async[^\\n]*m64n64k16\\.f32\\.f16\\.f16[^\\n]*\\},\\s*%rd[0-9]+,\\s*%rd[0-9]+,\\s*p"
+      ],
+      "support_ptx_patterns": [
+        "wgmma\\.fence",
+        "wgmma\\.commit_group",
+        "wgmma\\.wait_group",
+        "fence\\.proxy\\.async"
+      ],
+      "target_sass_patterns": [
+        "HGMMA\\.64x64x16\\.F32(?!\\.BF16)\\s+R[0-9]+,\\s*gdesc\\["
+      ],
+      "protocol": {
+        "latency_boundary": "selected group_size issue + commit_group + wait_group 0; dependency depth 1; matched inline-PTX loop control subtracted",
+        "initiation_interval_boundary": "cycles per committed group at selected group_size and depth; matched inline-PTX loop control subtracted",
+        "accumulator_dtype": "f32",
+        "a_major": "k",
+        "b_major": "k",
+        "swizzle": "128B",
+        "transpose": false,
+        "scale_modifier": "1x",
+        "source_mode": "ss",
+        "m": 64,
+        "n": 64,
+        "k": 16,
+        "input_dtype": "fp16",
+        "supported_group_sizes": [
+          1,
+          4,
+          36
+        ],
+        "group_size_depth_constraints": {
+          "36": [
+            1
+          ]
+        }
+      },
+      "source_mode": "ss",
+      "fixed_modifiers": {
+        "accumulator_dtype": "f32",
+        "a_major": "k_major",
+        "b_major": "k_major",
+        "swizzle": "128B",
+        "transpose_a": false,
+        "transpose_b": false,
+        "scale_a": 1,
+        "scale_b": 1,
+        "scale_d": "predicate"
+      }
+    },
+    {
+      "id": "cp_async_bulk_s2g_64x512_f32",
+      "kind": "operation",
+      "category": "memory",
+      "family": "bulk_store",
+      "source": "memory/bulk_store/cp_async_bulk_s2g_64x512_f32.cu",
+      "binary": "cp_async_bulk_s2g_64x512_f32",
+      "result_csv": "memory/bulk_store/result.csv",
+      "parameters": [
+        "working_set_tiles",
+        "pattern",
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "cp\\.async\\.bulk\\.global\\.shared::cta"
+      ],
+      "support_ptx_patterns": [
+        "fence\\.proxy\\.async\\.shared::cta",
+        "cp\\.async\\.bulk\\.commit_group",
+        "cp\\.async\\.bulk\\.wait_group"
+      ],
+      "target_sass_patterns": [
+        "UBLKCP\\.G\\.S"
+      ],
+      "protocol": {
+        "latency_boundary": "asynchronous store issue + commit_group + wait_group 0; matched address/loop/sink baseline subtracted",
+        "initiation_interval_boundary": "cycles per logical tile at selected depth/block count; matched non-store baseline subtracted",
+        "support_opcode_accounting": "commit/wait are timed protocol support; proxy fence is untimed source-visibility setup"
+      }
+    },
+    {
+      "id": "ld_global_f32_strided",
+      "kind": "operation",
+      "category": "memory",
+      "family": "global_load",
+      "source": "memory/global_load/ld_global_f32_strided.cu",
+      "binary": "ld_global_f32_strided",
+      "result_csv": "memory/global_load/result.csv",
+      "parameters": [
+        "segments",
+        "split_stride",
+        "rowsets",
+        "warps",
+        "pattern",
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "ld\\.global\\.f32"
+      ],
+      "support_ptx_patterns": [],
+      "target_sass_patterns": [
+        "LDG"
+      ],
+      "protocol": {
+        "latency_boundary": "target global-memory issue loop minus a separately compiled matched address/value/predicate/checksum/control baseline",
+        "throughput_boundary": "CUDA-event target specialization only; baseline is never launched inside the event interval",
+        "timed_kernel_marker": "global_load_f32_strided_kernel",
+        "baseline_required_sass_patterns": [
+          "BAR\\.SYNC",
+          "(IADD3|IMAD)"
+        ]
+      }
+    },
+    {
+      "id": "ld_global_nc_u32",
+      "kind": "operation",
+      "category": "memory",
+      "family": "global_load",
+      "source": "memory/global_load/ld_global_nc_u32.cu",
+      "binary": "ld_global_nc_u32",
+      "result_csv": "memory/global_load/result.csv",
+      "parameters": [
+        "threads",
+        "issuers",
+        "pattern",
+        "working_set_entries",
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "ld\\.global\\.nc\\.u32"
+      ],
+      "support_ptx_patterns": [],
+      "target_sass_patterns": [
+        "LDG"
+      ],
+      "protocol": {
+        "latency_boundary": "target global-memory issue loop minus a separately compiled matched address/value/predicate/checksum/control baseline",
+        "throughput_boundary": "CUDA-event target specialization only; baseline is never launched inside the event interval",
+        "timed_kernel_marker": "global_load_i32_cached_kernel",
+        "baseline_required_sass_patterns": [
+          "BAR\\.SYNC",
+          "(IADD3|IMAD)"
+        ]
+      }
+    },
+    {
+      "id": "ld_global_u32",
+      "kind": "operation",
+      "category": "memory",
+      "family": "global_load",
+      "source": "memory/global_load/ld_global_u32.cu",
+      "binary": "ld_global_u32",
+      "result_csv": "memory/global_load/result.csv",
+      "parameters": [
+        "threads",
+        "issuers",
+        "pattern",
+        "working_set_entries",
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "ld\\.global\\.u32"
+      ],
+      "support_ptx_patterns": [],
+      "target_sass_patterns": [
+        "LDG"
+      ],
+      "protocol": {
+        "latency_boundary": "target global-memory issue loop minus a separately compiled matched address/value/predicate/checksum/control baseline",
+        "throughput_boundary": "CUDA-event target specialization only; baseline is never launched inside the event interval",
+        "timed_kernel_marker": "global_load_i32_cached_kernel",
+        "baseline_required_sass_patterns": [
+          "BAR\\.SYNC",
+          "(IADD3|IMAD)"
+        ]
+      }
+    },
+    {
+      "id": "ld_global_v4_f32",
+      "kind": "operation",
+      "category": "memory",
+      "family": "global_load",
+      "source": "memory/global_load/ld_global_v4_f32.cu",
+      "binary": "ld_global_v4_f32",
+      "result_csv": "memory/global_load/result.csv",
+      "parameters": [
+        "segments",
+        "rowsets",
+        "warps",
+        "vectors_per_thread",
+        "pattern",
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "ld\\.global\\.v4\\.f32"
+      ],
+      "support_ptx_patterns": [],
+      "target_sass_patterns": [
+        "LDG"
+      ],
+      "protocol": {
+        "latency_boundary": "target global-memory issue loop minus a separately compiled matched address/value/predicate/checksum/control baseline",
+        "throughput_boundary": "CUDA-event target specialization only; baseline is never launched inside the event interval",
+        "timed_kernel_marker": "global_load_v4_f32_kernel",
+        "baseline_required_sass_patterns": [
+          "BAR\\.SYNC",
+          "(IADD3|IMAD)"
+        ]
+      }
+    },
+    {
+      "id": "ld_global_v4_u32_32b",
+      "kind": "operation",
+      "category": "memory",
+      "family": "global_load",
+      "source": "memory/global_load/ld_global_v4_u32_32b.cu",
+      "binary": "ld_global_v4_u32_32b",
+      "result_csv": "memory/global_load/result.csv",
+      "parameters": [
+        "threads",
+        "issuers",
+        "pattern",
+        "working_set_records",
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "ld\\.global\\.v4\\.u32"
+      ],
+      "support_ptx_patterns": [],
+      "target_sass_patterns": [
+        "LDG"
+      ],
+      "protocol": {
+        "latency_boundary": "target global-memory issue loop minus a separately compiled matched address/value/predicate/checksum/control baseline",
+        "throughput_boundary": "CUDA-event target specialization only; baseline is never launched inside the event interval",
+        "timed_kernel_marker": "global_load_record_32b_kernel",
+        "baseline_required_sass_patterns": [
+          "BAR\\.SYNC",
+          "(IADD3|IMAD)"
+        ]
+      }
+    },
+    {
+      "id": "st_global_f32",
+      "kind": "operation",
+      "category": "memory",
+      "family": "global_store",
+      "source": "memory/global_store/st_global_f32.cu",
+      "binary": "st_global_f32",
+      "result_csv": "memory/global_store/result.csv",
+      "parameters": [
+        "lane_mode",
+        "working_set_records",
+        "pattern",
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "st\\.global\\.f32"
+      ],
+      "support_ptx_patterns": [],
+      "target_sass_patterns": [
+        "STG"
+      ],
+      "protocol": {
+        "latency_boundary": "target global-memory issue loop minus a separately compiled matched address/value/predicate/checksum/control baseline",
+        "throughput_boundary": "CUDA-event target specialization only; baseline is never launched inside the event interval",
+        "timed_kernel_marker": "global_store_f32_kernel",
+        "baseline_required_sass_patterns": [
+          "BAR\\.SYNC",
+          "(IADD3|IMAD)"
+        ]
+      }
+    },
+    {
+      "id": "st_global_u32",
+      "kind": "operation",
+      "category": "memory",
+      "family": "global_store",
+      "source": "memory/global_store/st_global_u32.cu",
+      "binary": "st_global_u32",
+      "result_csv": "memory/global_store/result.csv",
+      "parameters": [
+        "producers",
+        "working_set_records",
+        "pattern",
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "st\\.global\\.u32"
+      ],
+      "support_ptx_patterns": [],
+      "target_sass_patterns": [
+        "STG"
+      ],
+      "protocol": {
+        "latency_boundary": "target global-memory issue loop minus a separately compiled matched address/value/predicate/checksum/control baseline",
+        "throughput_boundary": "CUDA-event target specialization only; baseline is never launched inside the event interval",
+        "timed_kernel_marker": "global_store_u32_kernel",
+        "baseline_required_sass_patterns": [
+          "BAR\\.SYNC",
+          "(IADD3|IMAD)"
+        ]
+      }
+    },
+    {
+      "id": "st_global_u64",
+      "kind": "operation",
+      "category": "memory",
+      "family": "global_store",
+      "source": "memory/global_store/st_global_u64.cu",
+      "binary": "st_global_u64",
+      "result_csv": "memory/global_store/result.csv",
+      "parameters": [
+        "dtype",
+        "warps",
+        "vectors_per_thread",
+        "working_set_records",
+        "pattern",
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "st\\.global\\.u64"
+      ],
+      "support_ptx_patterns": [],
+      "target_sass_patterns": [
+        "STG"
+      ],
+      "protocol": {
+        "latency_boundary": "target global-memory issue loop minus a separately compiled matched address/value/predicate/checksum/control baseline",
+        "throughput_boundary": "CUDA-event target specialization only; baseline is never launched inside the event interval",
+        "timed_kernel_marker": "global_store_u64_kernel",
+        "baseline_required_sass_patterns": [
+          "BAR\\.SYNC",
+          "(IADD3|IMAD)"
+        ]
+      }
+    },
+    {
+      "id": "st_global_v4_u32_32b",
+      "kind": "operation",
+      "category": "memory",
+      "family": "global_store",
+      "source": "memory/global_store/st_global_v4_u32_32b.cu",
+      "binary": "st_global_v4_u32_32b",
+      "result_csv": "memory/global_store/result.csv",
+      "parameters": [
+        "working_set_records",
+        "pattern",
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "st\\.global\\.v4\\.u32"
+      ],
+      "support_ptx_patterns": [],
+      "target_sass_patterns": [
+        "STG"
+      ],
+      "protocol": {
+        "latency_boundary": "target global-memory issue loop minus a separately compiled matched address/value/predicate/checksum/control baseline",
+        "throughput_boundary": "CUDA-event target specialization only; baseline is never launched inside the event interval",
+        "timed_kernel_marker": "global_store_record_32b_kernel",
+        "baseline_required_sass_patterns": [
+          "BAR\\.SYNC",
+          "(IADD3|IMAD)"
+        ]
+      }
+    },
+    {
+      "id": "ldmatrix_m64n64_b16_x4",
+      "kind": "operation",
+      "category": "memory",
+      "family": "matrix_movement",
+      "source": "memory/matrix_movement/ldmatrix_m64n64_b16_x4.cu",
+      "binary": "ldmatrix_m64n64_b16_x4",
+      "result_csv": "memory/matrix_movement/result.csv",
+      "parameters": [
+        "warpgroups",
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "ldmatrix\\.sync\\.aligned\\.x4"
+      ],
+      "support_ptx_patterns": [],
+      "target_sass_patterns": [
+        "LDSM"
+      ],
+      "protocol": {
+        "work_unit": "m64_tile",
+        "tile_m": 64,
+        "tile_n": 64,
+        "instructions_per_warp": 4,
+        "warp_instructions_per_tile": 16,
+        "latency_boundary": "complete m64 tile movement; LDSM uses dependency completion plus remaining issue span, STSM uses issue span and leaves visibility to the ordering atom",
+        "initiation_interval_boundary": "cycles per complete m64 tile with matched inline-PTX loop control subtracted"
+      }
+    },
+    {
+      "id": "stmatrix_m64n256_b16_x4",
+      "kind": "operation",
+      "category": "memory",
+      "family": "matrix_movement",
+      "source": "memory/matrix_movement/stmatrix_m64n256_b16_x4.cu",
+      "binary": "stmatrix_m64n256_b16_x4",
+      "result_csv": "memory/matrix_movement/result.csv",
+      "parameters": [
+        "warpgroups",
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "stmatrix\\.sync\\.aligned\\.x4"
+      ],
+      "support_ptx_patterns": [],
+      "target_sass_patterns": [
+        "STSM"
+      ],
+      "protocol": {
+        "work_unit": "m64_tile",
+        "tile_m": 64,
+        "tile_n": 256,
+        "instructions_per_warp": 16,
+        "warp_instructions_per_tile": 64,
+        "latency_boundary": "complete m64 tile movement; LDSM uses dependency completion plus remaining issue span, STSM uses issue span and leaves visibility to the ordering atom",
+        "initiation_interval_boundary": "cycles per complete m64 tile with matched inline-PTX loop control subtracted"
+      }
+    },
+    {
+      "id": "stmatrix_m64n64_b16_x4",
+      "kind": "operation",
+      "category": "memory",
+      "family": "matrix_movement",
+      "source": "memory/matrix_movement/stmatrix_m64n64_b16_x4.cu",
+      "binary": "stmatrix_m64n64_b16_x4",
+      "result_csv": "memory/matrix_movement/result.csv",
+      "parameters": [
+        "warpgroups",
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "stmatrix\\.sync\\.aligned\\.x4"
+      ],
+      "support_ptx_patterns": [],
+      "target_sass_patterns": [
+        "STSM"
+      ],
+      "protocol": {
+        "work_unit": "m64_tile",
+        "tile_m": 64,
+        "tile_n": 64,
+        "instructions_per_warp": 4,
+        "warp_instructions_per_tile": 16,
+        "latency_boundary": "complete m64 tile movement; LDSM uses dependency completion plus remaining issue span, STSM uses issue span and leaves visibility to the ordering atom",
+        "initiation_interval_boundary": "cycles per complete m64 tile with matched inline-PTX loop control subtracted"
+      }
+    },
+    {
+      "id": "ld_shared_u32_patterns",
+      "kind": "operation",
+      "category": "memory",
+      "family": "shared_load",
+      "source": "memory/shared_load/ld_shared_u32_patterns.cu",
+      "binary": "ld_shared_u32_patterns",
+      "result_csv": "memory/shared_load/result.csv",
+      "parameters": [
+        "threads",
+        "pattern",
+        "working_set_words",
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "ld\\.shared\\.u32"
+      ],
+      "support_ptx_patterns": [],
+      "target_sass_patterns": [
+        "LDS"
+      ],
+      "protocol": {
+        "latency_boundary": "target LDS loop minus a separately compiled matched address/pattern/checksum/control baseline",
+        "throughput_boundary": "CUDA-event target kernel only; baseline is never launched inside the event interval",
+        "latency_target_kernel": "shared_load_u32_target_kernel",
+        "latency_baseline_kernel": "shared_load_u32_baseline_kernel",
+        "throughput_target_kernel": "shared_load_u32_target_kernel",
+        "baseline_required_sass_patterns": [
+          "LOP3",
+          "BAR\\.SYNC"
+        ]
+      }
+    },
+    {
+      "id": "st_shared_u32",
+      "kind": "operation",
+      "category": "memory",
+      "family": "shared_store",
+      "source": "memory/shared_store/st_shared_u32.cu",
+      "binary": "st_shared_u32",
+      "result_csv": "memory/shared_store/result.csv",
+      "parameters": [
+        "threads",
+        "producers",
+        "topology",
+        "working_set_words",
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "st\\.shared\\.u32"
+      ],
+      "support_ptx_patterns": [],
+      "target_sass_patterns": [
+        "STS"
+      ],
+      "protocol": {
+        "latency_boundary": "target STS issue loop minus a separately compiled matched layout/address/value/predicate/control baseline",
+        "throughput_boundary": "CUDA-event target-only kernel with no baseline/checksum work in the timed grid",
+        "latency_target_kernel": "shared_store_u32_target_kernel",
+        "latency_baseline_kernel": "shared_store_u32_baseline_kernel",
+        "throughput_target_kernel": "shared_store_u32_throughput_kernel",
+        "baseline_required_sass_patterns": [
+          "LOP3",
+          "BAR\\.SYNC"
+        ]
+      }
+    },
+    {
+      "id": "st_shared_u64_sw128",
+      "kind": "operation",
+      "category": "memory",
+      "family": "shared_store",
+      "source": "memory/shared_store/st_shared_u64_sw128.cu",
+      "binary": "st_shared_u64_sw128",
+      "result_csv": "memory/shared_store/result.csv",
+      "parameters": [
+        "warpgroups",
+        "stores_per_thread",
+        "invalid_tokens",
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "st\\.shared\\.u64"
+      ],
+      "support_ptx_patterns": [],
+      "target_sass_patterns": [
+        "STS\\.64"
+      ],
+      "protocol": {
+        "latency_boundary": "target STS issue loop minus a separately compiled matched layout/address/value/predicate/control baseline",
+        "throughput_boundary": "CUDA-event target-only kernel with no baseline/checksum work in the timed grid",
+        "latency_target_kernel": "shared_store_8b_target_kernel",
+        "latency_baseline_kernel": "shared_store_8b_baseline_kernel",
+        "throughput_target_kernel": "shared_store_8b_throughput_kernel",
+        "baseline_required_sass_patterns": [
+          "LOP3",
+          "BAR\\.SYNC"
+        ],
+        "forbidden_target_ptx_patterns": [
+          "st\\.shared\\.v2\\.u32"
+        ]
+      }
+    },
+    {
+      "id": "st_shared_v2_u32_stride520",
+      "kind": "operation",
+      "category": "memory",
+      "family": "shared_store",
+      "source": "memory/shared_store/st_shared_v2_u32_stride520.cu",
+      "binary": "st_shared_v2_u32_stride520",
+      "result_csv": "memory/shared_store/result.csv",
+      "parameters": [
+        "warpgroups",
+        "stores_per_thread",
+        "invalid_tokens",
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "st\\.shared\\.v2\\.u32"
+      ],
+      "support_ptx_patterns": [],
+      "target_sass_patterns": [
+        "STS\\.64"
+      ],
+      "protocol": {
+        "latency_boundary": "target STS issue loop minus a separately compiled matched layout/address/value/predicate/control baseline",
+        "throughput_boundary": "CUDA-event target-only kernel with no baseline/checksum work in the timed grid",
+        "latency_target_kernel": "shared_store_8b_target_kernel",
+        "latency_baseline_kernel": "shared_store_8b_baseline_kernel",
+        "throughput_target_kernel": "shared_store_8b_throughput_kernel",
+        "baseline_required_sass_patterns": [
+          "LOP3",
+          "BAR\\.SYNC"
+        ],
+        "forbidden_target_ptx_patterns": [
+          "st\\.shared\\.u64"
+        ]
+      }
+    },
+    {
+      "id": "prefetch_tensormap_rank4",
+      "kind": "operation",
+      "category": "memory",
+      "family": "tensormap_prefetch",
+      "source": "memory/tensormap_prefetch/prefetch_tensormap_rank4.cu",
+      "binary": "prefetch_tensormap_rank4",
+      "result_csv": "memory/tensormap_prefetch/result.csv",
+      "parameters": [
+        "mode",
+        "working_pages",
+        "working_tiles",
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "prefetch\\.tensormap"
+      ],
+      "support_ptx_patterns": [],
+      "target_sass_patterns": [
+        "UTMACCTL\\.PF"
+      ],
+      "protocol": {
+        "latency_boundary": "selected descriptor-prefetch round; matched descriptor selection and loop baseline subtracted",
+        "initiation_interval_boundary": "baseline-subtracted cycles per selected prefetch round"
+      }
+    },
+    {
+      "id": "tensor_4d_64x576_bf16",
+      "kind": "operation",
+      "category": "memory",
+      "family": "tma_load",
+      "source": "memory/tma_load/tensor_4d_64x576_bf16.cu",
+      "binary": "tensor_4d_64x576_bf16",
+      "result_csv": "memory/tma_load/result.csv",
+      "parameters": [
+        "depth",
+        "working_set_pages",
+        "pattern",
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "cp\\.async\\.bulk\\.tensor\\.4d.*shared::cluster\\.global"
+      ],
+      "support_ptx_patterns": [
+        "mbarrier\\.init",
+        "mbarrier\\.arrive\\.expect_tx",
+        "mbarrier\\.try_wait"
+      ],
+      "target_sass_patterns": [
+        "UTMALDG\\.4D"
+      ],
+      "protocol": {
+        "latency_boundary": "TMA issue + expect_tx + completion wait; matched page/address selection, loop, shared-consume, and sink baseline subtracted",
+        "initiation_interval_boundary": "cycles per logical operation at selected depth and block count; matched non-TMA baseline subtracted",
+        "support_opcode_accounting": "mbarrier expect/wait belongs to the TMA load protocol",
+        "timed_kernel_marker": "tma_load_kernel"
+      }
+    },
+    {
+      "id": "tensor_4d_64x576_fp16",
+      "kind": "operation",
+      "category": "memory",
+      "family": "tma_load",
+      "source": "memory/tma_load/tensor_4d_64x576_fp16.cu",
+      "binary": "tensor_4d_64x576_fp16",
+      "result_csv": "memory/tma_load/result.csv",
+      "parameters": [
+        "depth",
+        "working_set_pages",
+        "pattern",
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "cp\\.async\\.bulk\\.tensor\\.4d.*shared::cluster\\.global"
+      ],
+      "support_ptx_patterns": [
+        "mbarrier\\.init",
+        "mbarrier\\.arrive\\.expect_tx",
+        "mbarrier\\.try_wait"
+      ],
+      "target_sass_patterns": [
+        "UTMALDG\\.4D"
+      ],
+      "protocol": {
+        "latency_boundary": "TMA issue + expect_tx + completion wait; matched page/address selection, loop, shared-consume, and sink baseline subtracted",
+        "initiation_interval_boundary": "cycles per logical operation at selected depth and block count; matched non-TMA baseline subtracted",
+        "support_opcode_accounting": "mbarrier expect/wait belongs to the TMA load protocol",
+        "timed_kernel_marker": "tma_load_kernel"
+      }
+    },
+    {
+      "id": "tensor_4d_64x64_bf16",
+      "kind": "operation",
+      "category": "memory",
+      "family": "tma_load",
+      "source": "memory/tma_load/tensor_4d_64x64_bf16.cu",
+      "binary": "tensor_4d_64x64_bf16",
+      "result_csv": "memory/tma_load/result.csv",
+      "parameters": [
+        "depth",
+        "working_set_pages",
+        "pattern",
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "cp\\.async\\.bulk\\.tensor\\.4d.*shared::cluster\\.global"
+      ],
+      "support_ptx_patterns": [
+        "mbarrier\\.init",
+        "mbarrier\\.arrive\\.expect_tx",
+        "mbarrier\\.try_wait"
+      ],
+      "target_sass_patterns": [
+        "UTMALDG\\.4D"
+      ],
+      "protocol": {
+        "latency_boundary": "TMA issue + expect_tx + completion wait; matched page/address selection, loop, shared-consume, and sink baseline subtracted",
+        "initiation_interval_boundary": "cycles per logical operation at selected depth and block count; matched non-TMA baseline subtracted",
+        "support_opcode_accounting": "mbarrier expect/wait belongs to the TMA load protocol",
+        "timed_kernel_marker": "tma_load_kernel"
+      }
+    },
+    {
+      "id": "tensor_4d_64x64_fp16",
+      "kind": "operation",
+      "category": "memory",
+      "family": "tma_load",
+      "source": "memory/tma_load/tensor_4d_64x64_fp16.cu",
+      "binary": "tensor_4d_64x64_fp16",
+      "result_csv": "memory/tma_load/result.csv",
+      "parameters": [
+        "depth",
+        "working_set_pages",
+        "pattern",
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "cp\\.async\\.bulk\\.tensor\\.4d.*shared::cluster\\.global"
+      ],
+      "support_ptx_patterns": [
+        "mbarrier\\.init",
+        "mbarrier\\.arrive\\.expect_tx",
+        "mbarrier\\.try_wait"
+      ],
+      "target_sass_patterns": [
+        "UTMALDG\\.4D"
+      ],
+      "protocol": {
+        "latency_boundary": "TMA issue + expect_tx + completion wait; matched page/address selection, loop, shared-consume, and sink baseline subtracted",
+        "initiation_interval_boundary": "cycles per logical operation at selected depth and block count; matched non-TMA baseline subtracted",
+        "support_opcode_accounting": "mbarrier expect/wait belongs to the TMA load protocol",
+        "timed_kernel_marker": "tma_load_kernel"
+      }
+    },
+    {
+      "id": "tensor_4d_64x512_bf16",
+      "kind": "operation",
+      "category": "memory",
+      "family": "tma_store",
+      "source": "memory/tma_store/tensor_4d_64x512_bf16.cu",
+      "binary": "tensor_4d_64x512_bf16",
+      "result_csv": "memory/tma_store/result.csv",
+      "parameters": [
+        "depth",
+        "working_set_tiles",
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "cp\\.async\\.bulk\\.tensor\\.4d.*global\\.shared::cta"
+      ],
+      "support_ptx_patterns": [
+        "fence\\.proxy\\.async\\.shared::cta",
+        "cp\\.async\\.bulk\\.commit_group",
+        "cp\\.async\\.bulk\\.wait_group"
+      ],
+      "target_sass_patterns": [
+        "UTMASTG\\.4D"
+      ],
+      "protocol": {
+        "latency_boundary": "asynchronous store issue + commit_group + wait_group 0; matched address/loop/sink baseline subtracted",
+        "initiation_interval_boundary": "cycles per logical tile at selected depth/block count; matched non-store baseline subtracted",
+        "support_opcode_accounting": "commit/wait are timed protocol support; proxy fence is untimed source-visibility setup"
+      }
+    },
+    {
+      "id": "tensor_4d_64x512_fp16",
+      "kind": "operation",
+      "category": "memory",
+      "family": "tma_store",
+      "source": "memory/tma_store/tensor_4d_64x512_fp16.cu",
+      "binary": "tensor_4d_64x512_fp16",
+      "result_csv": "memory/tma_store/result.csv",
+      "parameters": [
+        "depth",
+        "working_set_tiles",
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "cp\\.async\\.bulk\\.tensor\\.4d.*global\\.shared::cta"
+      ],
+      "support_ptx_patterns": [
+        "fence\\.proxy\\.async\\.shared::cta",
+        "cp\\.async\\.bulk\\.commit_group",
+        "cp\\.async\\.bulk\\.wait_group"
+      ],
+      "target_sass_patterns": [
+        "UTMASTG\\.4D"
+      ],
+      "protocol": {
+        "latency_boundary": "asynchronous store issue + commit_group + wait_group 0; matched address/loop/sink baseline subtracted",
+        "initiation_interval_boundary": "cycles per logical tile at selected depth/block count; matched non-store baseline subtracted",
+        "support_opcode_accounting": "commit/wait are timed protocol support; proxy fence is untimed source-visibility setup"
+      }
+    },
+    {
+      "id": "wgmma_mixed_shape_mode",
+      "kind": "resource_curve",
+      "category": "resource",
+      "family": "interference",
+      "source": "resource/interference/wgmma_mixed_shape_mode.cu",
+      "binary": "wgmma_mixed_shape_mode",
+      "result_csv": "resource/interference/result.csv",
+      "parameters": [
+        "actors",
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "wgmma\\.mma_async.*m64n64k16\\.f32\\.bf16",
+        "wgmma\\.mma_async.*m64n256k16\\.f32\\.bf16"
+      ],
+      "support_ptx_patterns": [],
+      "target_sass_patterns": [
+        "HGMMA\\.64x64x16\\.F32\\.BF16",
+        "HGMMA\\.64x256x16\\.F32\\.BF16"
+      ],
+      "protocol": {
+        "latency_boundary": "defined by family harness",
+        "timed_kernel_marker": "mixed_wgmma_kernel",
+        "matched_actor_footprint": "actors=1 and actors=2 use identical 256-thread and dynamic-shared-memory launch footprints"
+      }
+    },
+    {
+      "id": "wgmma_sfu_shared_interference",
+      "kind": "resource_curve",
+      "category": "resource",
+      "family": "interference",
+      "source": "resource/interference/wgmma_sfu_shared_interference.cu",
+      "binary": "wgmma_sfu_shared_interference",
+      "result_csv": "resource/interference/result.csv",
+      "parameters": [
+        "actors",
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "wgmma\\.mma_async.*m64n64k16\\.f32\\.bf16",
+        "ex2\\.approx\\.ftz\\.f32",
+        "ld\\.shared\\.u32"
+      ],
+      "support_ptx_patterns": [],
+      "target_sass_patterns": [
+        "HGMMA",
+        "MUFU\\.EX2",
+        "LDS"
+      ],
+      "protocol": {
+        "latency_boundary": "defined by family harness",
+        "timed_kernel_marker": "wgmma_sfu_shared_kernel",
+        "matched_actor_footprint": "actors=1 and actors=2 use identical 256-thread and dynamic-shared-memory launch footprints"
+      }
+    },
+    {
+      "id": "wgmma_tma_interference",
+      "kind": "resource_curve",
+      "category": "resource",
+      "family": "interference",
+      "source": "resource/interference/wgmma_tma_interference.cu",
+      "binary": "wgmma_tma_interference",
+      "result_csv": "resource/interference/result.csv",
+      "parameters": [
+        "actors",
+        "working_set_pages",
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "wgmma\\.mma_async.*m64n64k16\\.f32\\.bf16",
+        "cp\\.async\\.bulk\\.tensor\\.4d.*shared::cluster\\.global"
+      ],
+      "support_ptx_patterns": [],
+      "target_sass_patterns": [
+        "HGMMA",
+        "UTMALDG"
+      ],
+      "protocol": {
+        "latency_boundary": "defined by family harness",
+        "timed_kernel_marker": "wgmma_tma_kernel",
+        "matched_actor_footprint": "actors=1 and actors=2 use identical 256-thread and dynamic-shared-memory launch footprints"
+      }
+    },
+    {
+      "id": "ld_global_u64_saturation",
+      "kind": "resource_curve",
+      "category": "resource",
+      "family": "memory_service",
+      "source": "resource/memory_service/ld_global_u64_saturation.cu",
+      "binary": "ld_global_u64_saturation",
+      "result_csv": "resource/memory_service/result.csv",
+      "parameters": [
+        "working_set_bytes",
+        "pattern",
+        "cache_mode",
+        "outstanding_depth",
+        "threads",
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "ld\\.global\\.u64"
+      ],
+      "support_ptx_patterns": [],
+      "target_sass_patterns": [
+        "LDG"
+      ],
+      "protocol": {
+        "latency_boundary": "defined by family harness",
+        "timed_kernel_marker": "memory_service6kernel",
+        "resource_scope": "active_grid_memory_service"
+      }
+    },
+    {
+      "id": "st_global_u64_saturation",
+      "kind": "resource_curve",
+      "category": "resource",
+      "family": "memory_service",
+      "source": "resource/memory_service/st_global_u64_saturation.cu",
+      "binary": "st_global_u64_saturation",
+      "result_csv": "resource/memory_service/result.csv",
+      "parameters": [
+        "working_set_bytes",
+        "pattern",
+        "cache_mode",
+        "outstanding_depth",
+        "threads",
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "st\\.global\\.u64"
+      ],
+      "support_ptx_patterns": [],
+      "target_sass_patterns": [
+        "STG"
+      ],
+      "protocol": {
+        "latency_boundary": "defined by family harness",
+        "timed_kernel_marker": "memory_service6kernel",
+        "resource_scope": "active_grid_memory_service"
+      }
+    },
+    {
+      "id": "griddepcontrol_launch_dependents",
+      "kind": "operation",
+      "category": "resource",
+      "family": "pdl",
+      "source": "resource/pdl/griddepcontrol_launch_dependents.cu",
+      "binary": "griddepcontrol_launch_dependents",
+      "result_csv": "resource/pdl/result.csv",
+      "parameters": [
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "griddepcontrol\\.launch_dependents"
+      ],
+      "support_ptx_patterns": [],
+      "target_sass_patterns": [
+        "PREEXIT"
+      ],
+      "protocol": {
+        "latency_boundary": "ready-path griddepcontrol instruction; matched programmatic-launch loop baseline subtracted",
+        "initiation_interval_boundary": "baseline-subtracted cycles per instruction",
+        "timed_kernel_marker": "pdl_atomic6kernel"
+      }
+    },
+    {
+      "id": "griddepcontrol_producer_consumer",
+      "kind": "resource_curve",
+      "category": "resource",
+      "family": "pdl",
+      "source": "resource/pdl/griddepcontrol_producer_consumer.cu",
+      "binary": "griddepcontrol_producer_consumer",
+      "result_csv": "resource/pdl/result.csv",
+      "parameters": [
+        "producer_blocks",
+        "consumer_blocks",
+        "prefix_iters",
+        "suffix_iters",
+        "consumer_iters"
+      ],
+      "target_ptx_patterns": [
+        "griddepcontrol\\.launch_dependents",
+        "griddepcontrol\\.wait"
+      ],
+      "support_ptx_patterns": [],
+      "target_sass_patterns": [
+        "PREEXIT",
+        "ACQBULK"
+      ],
+      "protocol": {
+        "latency_boundary": "grid-level producer suffix / consumer wait overlap; resource curve only, not an operation latency",
+        "resource_scope": "producer_consumer_grid_pair",
+        "producer_kernel_marker": "producer_kernel",
+        "consumer_kernel_marker": "consumer_kernel"
+      }
+    },
+    {
+      "id": "griddepcontrol_wait",
+      "kind": "operation",
+      "category": "resource",
+      "family": "pdl",
+      "source": "resource/pdl/griddepcontrol_wait.cu",
+      "binary": "griddepcontrol_wait",
+      "result_csv": "resource/pdl/result.csv",
+      "parameters": [
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "griddepcontrol\\.wait"
+      ],
+      "support_ptx_patterns": [],
+      "target_sass_patterns": [
+        "ACQBULK"
+      ],
+      "protocol": {
+        "latency_boundary": "ready-path griddepcontrol instruction; matched programmatic-launch loop baseline subtracted",
+        "initiation_interval_boundary": "baseline-subtracted cycles per instruction",
+        "timed_kernel_marker": "pdl_atomic6kernel"
+      }
+    },
+    {
+      "id": "tma_load_4d_service",
+      "kind": "resource_curve",
+      "category": "resource",
+      "family": "tma_service",
+      "source": "resource/tma_service/tma_load_4d_service.cu",
+      "binary": "tma_load_4d_service",
+      "result_csv": "resource/tma_service/result.csv",
+      "parameters": [
+        "depth",
+        "working_set_pages",
+        "pattern",
+        "cache_mode",
+        "blocks"
+      ],
+      "target_ptx_patterns": [
+        "cp\\.async\\.bulk\\.tensor\\.4d.*shared::cluster\\.global"
+      ],
+      "support_ptx_patterns": [
+        "mbarrier\\.init",
+        "mbarrier\\.arrive\\.expect_tx",
+        "mbarrier\\.try_wait"
+      ],
+      "target_sass_patterns": [
+        "UTMALDG\\.4D"
+      ],
+      "protocol": {
+        "latency_boundary": "TMA issue + expect_tx + completion wait; matched page/address selection, loop, shared-consume, and sink baseline subtracted",
+        "initiation_interval_boundary": "cycles per logical operation at selected depth and block count; matched non-TMA baseline subtracted",
+        "support_opcode_accounting": "mbarrier expect/wait belongs to the TMA load protocol",
+        "timed_kernel_marker": "tma_load_kernel",
+        "source_page_bytes": 73728
+      }
     }
-  },
-  "coverage_rules": [
-    {"regex":"HGMMA\\.","owner":"wgmma"},{"regex":"MUFU\\.(EX2|LG2|RCP)","owner":"sfu"},{"regex":"(FFMA|FADD|FMUL|FSETP|FSEL)","owner":"fp32_alu"},{"regex":"F2F(P)?\\.","owner":"convert"},{"regex":"(IADD3|IMAD|ISETP)","owner":"integer"},{"regex":"SHFL\\.","owner":"shuffle"},{"regex":"(BAR\\.|SYNCS\\.)","owner":"synchronization"},{"regex":"FENCE\\.VIEW\\.ASYNC","owner":"ordering"},{"regex":"(UTMALDG|UTMASTG|UBLKCP|UTMACCTL)","owner":"tma"},{"regex":"(STSM|LDSM)","owner":"matrix_movement"},{"regex":"(LDG|STG|LDS|STS)","owner":"ordinary_memory"},{"regex":"(PREEXIT|ACQBULK)","owner":"pdl_calibration"}
   ]
 }

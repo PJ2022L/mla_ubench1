@@ -1,0 +1,165 @@
+{
+  "quick": {
+    "default": {
+      "iters": [
+        256
+      ],
+      "warmup": [
+        1
+      ],
+      "samples": [
+        3
+      ],
+      "blocks": [
+        1
+      ]
+    },
+    "benchmarks": {
+      "tensor_4d_64x576_bf16": {
+        "depth": [
+          1
+        ],
+        "working-set-pages": [
+          8
+        ],
+        "pattern": [
+          "sequential"
+        ]
+      },
+      "tensor_4d_64x576_fp16": {
+        "depth": [
+          1
+        ],
+        "working-set-pages": [
+          8
+        ],
+        "pattern": [
+          "sequential"
+        ]
+      },
+      "tensor_4d_64x64_bf16": {
+        "depth": [
+          1
+        ],
+        "working-set-pages": [
+          8
+        ],
+        "pattern": [
+          "sequential"
+        ]
+      },
+      "tensor_4d_64x64_fp16": {
+        "depth": [
+          1
+        ],
+        "working-set-pages": [
+          8
+        ],
+        "pattern": [
+          "sequential"
+        ]
+      }
+    }
+  },
+  "full": {
+    "default": {
+      "iters": [
+        4096
+      ],
+      "warmup": [
+        3
+      ],
+      "samples": [
+        20
+      ],
+      "blocks": [
+        1,
+        2,
+        4,
+        8,
+        16,
+        32,
+        66,
+        132,
+        264,
+        528
+      ]
+    },
+    "benchmarks": {
+      "tensor_4d_64x576_bf16": {
+        "depth": [
+          1,
+          2,
+          3
+        ],
+        "working-set-pages": [
+          1,
+          64,
+          1024
+        ],
+        "pattern": [
+          "local",
+          "sequential",
+          "random",
+          "reuse"
+        ]
+      },
+      "tensor_4d_64x576_fp16": {
+        "depth": [
+          1,
+          2,
+          3
+        ],
+        "working-set-pages": [
+          1,
+          64,
+          1024
+        ],
+        "pattern": [
+          "local",
+          "sequential",
+          "random",
+          "reuse"
+        ]
+      },
+      "tensor_4d_64x64_bf16": {
+        "depth": [
+          1,
+          2,
+          4,
+          8
+        ],
+        "working-set-pages": [
+          1,
+          64,
+          1024
+        ],
+        "pattern": [
+          "local",
+          "sequential",
+          "random",
+          "reuse"
+        ]
+      },
+      "tensor_4d_64x64_fp16": {
+        "depth": [
+          1,
+          2,
+          4,
+          8
+        ],
+        "working-set-pages": [
+          1,
+          64,
+          1024
+        ],
+        "pattern": [
+          "local",
+          "sequential",
+          "random",
+          "reuse"
+        ]
+      }
+    }
+  }
+}

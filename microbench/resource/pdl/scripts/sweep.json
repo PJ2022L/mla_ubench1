@@ -1,0 +1,121 @@
+{
+  "quick": {
+    "default": {
+      "iters": [
+        256
+      ],
+      "warmup": [
+        1
+      ],
+      "samples": [
+        3
+      ],
+      "blocks": [
+        1
+      ]
+    },
+    "benchmarks": {
+      "griddepcontrol_launch_dependents": {
+        "iters": [
+          256
+        ]
+      },
+      "griddepcontrol_wait": {
+        "iters": [
+          256
+        ]
+      },
+      "griddepcontrol_producer_consumer": {
+        "iters": [
+          1
+        ],
+        "producer-blocks": [
+          66
+        ],
+        "consumer-blocks": [
+          66
+        ],
+        "prefix-iters": [
+          1024
+        ],
+        "suffix-iters": [
+          1024
+        ],
+        "consumer-iters": [
+          1024
+        ]
+      }
+    }
+  },
+  "full": {
+    "default": {
+      "iters": [
+        4096
+      ],
+      "warmup": [
+        3
+      ],
+      "samples": [
+        20
+      ],
+      "blocks": [
+        1,
+        2,
+        4,
+        8,
+        16,
+        32,
+        66,
+        132,
+        264,
+        528
+      ]
+    },
+    "benchmarks": {
+      "griddepcontrol_launch_dependents": {
+        "iters": [
+          4096
+        ]
+      },
+      "griddepcontrol_wait": {
+        "iters": [
+          4096
+        ]
+      },
+      "griddepcontrol_producer_consumer": {
+        "iters": [
+          1
+        ],
+        "blocks": [
+          0
+        ],
+        "producer-blocks": [
+          1,
+          32,
+          66,
+          132,
+          264
+        ],
+        "consumer-blocks": [
+          1,
+          32,
+          66,
+          132,
+          264
+        ],
+        "prefix-iters": [
+          512,
+          4096
+        ],
+        "suffix-iters": [
+          512,
+          4096
+        ],
+        "consumer-iters": [
+          512,
+          4096
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,289 @@
+{
+  "quick": {
+    "default": {
+      "iters": [
+        256
+      ],
+      "warmup": [
+        1
+      ],
+      "samples": [
+        3
+      ],
+      "blocks": [
+        1
+      ]
+    },
+    "benchmarks": {
+      "ld_global_f32_strided": {
+        "segments": [
+          8
+        ],
+        "split-stride": [
+          128
+        ],
+        "rowsets": [
+          256
+        ],
+        "warps": [
+          8
+        ],
+        "pattern": [
+          "sequential"
+        ]
+      },
+      "ld_global_nc_u32": {
+        "threads": [
+          256
+        ],
+        "issuers": [
+          32
+        ],
+        "pattern": [
+          "sequential"
+        ],
+        "working-set-entries": [
+          32768
+        ]
+      },
+      "ld_global_u32": {
+        "threads": [
+          256
+        ],
+        "issuers": [
+          32
+        ],
+        "pattern": [
+          "sequential"
+        ],
+        "working-set-entries": [
+          32768
+        ]
+      },
+      "ld_global_v4_f32": {
+        "segments": [
+          8
+        ],
+        "rowsets": [
+          64
+        ],
+        "warps": [
+          8
+        ],
+        "vectors-per-thread": [
+          4
+        ],
+        "pattern": [
+          "sequential"
+        ]
+      },
+      "ld_global_v4_u32_32b": {
+        "threads": [
+          256
+        ],
+        "issuers": [
+          32
+        ],
+        "pattern": [
+          "sequential"
+        ],
+        "working-set-records": [
+          4096
+        ]
+      }
+    }
+  },
+  "full": {
+    "default": {
+      "iters": [
+        4096
+      ],
+      "warmup": [
+        3
+      ],
+      "samples": [
+        20
+      ],
+      "blocks": [
+        1,
+        2,
+        4,
+        8,
+        16,
+        32,
+        66,
+        132,
+        264,
+        528
+      ]
+    },
+    "benchmarks": {
+      "ld_global_f32_strided": {
+        "segments": [
+          2,
+          8,
+          32,
+          96,
+          160
+        ],
+        "split-stride": [
+          128,
+          1024
+        ],
+        "rowsets": [
+          256,
+          4096
+        ],
+        "warps": [
+          1,
+          8
+        ],
+        "pattern": [
+          "local",
+          "sequential",
+          "random"
+        ]
+      },
+      "ld_global_nc_u32": {
+        "cases": [
+          {
+            "threads": [
+              32
+            ],
+            "issuers": [
+              1,
+              32
+            ],
+            "pattern": [
+              "broadcast",
+              "local",
+              "sequential",
+              "random"
+            ],
+            "working-set-entries": [
+              32,
+              32768,
+              1048576
+            ]
+          },
+          {
+            "threads": [
+              256
+            ],
+            "issuers": [
+              1,
+              32,
+              128,
+              256
+            ],
+            "pattern": [
+              "broadcast",
+              "local",
+              "sequential",
+              "random"
+            ],
+            "working-set-entries": [
+              32,
+              32768,
+              1048576
+            ]
+          }
+        ]
+      },
+      "ld_global_u32": {
+        "cases": [
+          {
+            "threads": [
+              32
+            ],
+            "issuers": [
+              1,
+              32
+            ],
+            "pattern": [
+              "broadcast",
+              "local",
+              "sequential",
+              "random"
+            ],
+            "working-set-entries": [
+              32,
+              32768,
+              1048576
+            ]
+          },
+          {
+            "threads": [
+              256
+            ],
+            "issuers": [
+              1,
+              32,
+              128,
+              256
+            ],
+            "pattern": [
+              "broadcast",
+              "local",
+              "sequential",
+              "random"
+            ],
+            "working-set-entries": [
+              32,
+              32768,
+              1048576
+            ]
+          }
+        ]
+      },
+      "ld_global_v4_f32": {
+        "segments": [
+          2,
+          8,
+          32,
+          96,
+          160
+        ],
+        "rowsets": [
+          64,
+          1024
+        ],
+        "warps": [
+          1,
+          8
+        ],
+        "vectors-per-thread": [
+          1,
+          4
+        ],
+        "pattern": [
+          "local",
+          "sequential",
+          "random"
+        ]
+      },
+      "ld_global_v4_u32_32b": {
+        "threads": [
+          256
+        ],
+        "issuers": [
+          1,
+          32,
+          128,
+          256
+        ],
+        "pattern": [
+          "broadcast",
+          "local",
+          "sequential",
+          "random"
+        ],
+        "working-set-records": [
+          32,
+          4096,
+          1048576
+        ]
+      }
+    }
+  }
+}

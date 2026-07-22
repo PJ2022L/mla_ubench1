@@ -1,57 +1,63 @@
-# 02 — Instruction-level atom decomposition
+# 02 - Generic atom decomposition
 
-主循环计数粒度为一个 CTA 处理一个有效 64-token KV page；Q/output 则按该 CTA 的一次 request/split iteration 计数。只保留重复且可能进入关键路径的指令族；整数索引、少量 mask、一次性 descriptor prefetch 不单测。
+Dense decode 不再拥有一套以 QK、PV、scheduler 命名的私有 benchmark。所有正式
+cost 都来自 [`microbench/manifest.json`](../../../../microbench/manifest.json)
+登记的 kernel-agnostic operation；dense 角色到 generic atom 的映射集中在
+[`model/atom_map.json`](model/atom_map.json)。
 
-完整 registry 由 [`microbench/manifest.json`](../../../../microbench/manifest.json)
-维护。下表只列 dense main/combine 的核心重复工作；metadata、同步、地址控制和
-普通 global/shared 访存也已在 manifest 中分类，不按 dense 私有阶段复制 atom。
+例如：
 
-## Memory atoms
+| Dense source role | Generic atom |
+|---|---|
+| first/steady score shared-source group | `m64n64k16_ss_<dtype>` |
+| steady score register-source tile 8 | `m64n64k16_rs_<dtype>` |
+| local probability/value group | `m64n256k16_rs_<dtype>` |
+| remote probability/value group | `m64n256k16_ss_<dtype>` |
+| Q/K TMA load | `tensor_4d_64x576_<dtype>` / `tensor_4d_64x64_<dtype>` |
+| no-split output TMA store | `tensor_4d_64x512_<dtype>` |
+| split partial output bulk store | `cp_async_bulk_s2g_64x512_f32` |
 
-| ID | Operation | Dynamic work | Shared benchmark | Notes |
-|---|---|---:|---|---|
-| M0 | Q TMA load | iteration: `64×576×2=73,728 B` | [`q_bf16_rank4`](../../../../microbench/memory/tma_load/q_bf16_rank4/) | prologue；source tensor map rank=4 |
-| M1 | K TMA load | page: 9 tiles × `64×64×2=8,192 B/tile` = `73,728 B/page` | [`k_bf16_rank4`](../../../../microbench/memory/tma_load/k_bf16_rank4/) | dominant paged KV traffic；source tensor map rank=4 |
-| M2 | P stmatrix exchange | valid page: `[64,64]` BF16 = `8,192 B` | [`p_b16`](../../../../microbench/memory/stmatrix/p_b16/) | one P tile/page；enables remote PV |
-| M3 | no-split output staging + TMA store | two WG STSM `[64,256]`，then rank-4 TMA `[64,512]` B16 | [`o_b16`](../../../../microbench/memory/stmatrix/o_b16/) + [`o_bf16_rank4`](../../../../microbench/memory/tma_store/o_bf16_rank4/) | complete ordered protocol由 `epilogue_nosplit_b16` calibration测量 |
-| M4 | split FP32 partial store | stride-520 FP32 register→shared staging，then `131,072 B` bulk S2G | [`u64_dense`](../../../../microbench/memory/shared_store/u64_dense/) + [`oaccum_f32`](../../../../microbench/memory/bulk_store/oaccum_f32/) | complete ordered protocol由 `epilogue_split_f32` calibration测量 |
-| M5 | split combine | per output row reads `num_splits×(512 FP32 + LSE)` and writes B16 output/LSE | [`float4_oaccum`](../../../../microbench/memory/global_load/float4_oaccum/) + [`u64_output`](../../../../microbench/memory/global_store/u64_output/) | complete CTA由 BF16/FP16 combine calibration扫描 actual `num_splits` |
+## Atom families
 
-Q tile8 的 `ldmatrix` 是每 request 一次，为让 `sP1` 复用 `sQ` 空间；已由
-[`p_b16 LDSM`](../../../../microbench/memory/ldmatrix/p_b16/) leaf 覆盖。
+- `compute/wgmma`: 8 个固定 MNK/source-mode/dtype 组合。一个 DAG 节点表示一个
+  committed group，cost 边界包含 issue、commit 和所选 wait 协议，不再将结果
+  误当成裸 WGMMA latency 后乘指令数。
+- `compute/{sfu,fp32_alu,convert,shuffle,integer}`: softmax、LSE、归一化、地址与
+  metadata 控制所需的 inline-PTX 标量指令。
+- `compute/{synchronization,ordering}`: CTA/WG/named-barrier 开销与 async proxy
+  visibility fence。等待语义仍由 DAG completion edge 表达。
+- `memory/{tma_load,tma_store,bulk_store,matrix_movement}`: Q/K/O、P exchange、
+  split staging 的通用搬运协议。
+- `memory/{shared_load,shared_store,global_load,global_store,tensormap_prefetch}`:
+  metadata、block table、L reduction、combine 和 descriptor 操作。
+- `resource/*`: Tensor/TMA/L2/HBM/grid service 和低层 interference 曲线。这些是
+  正式预测输入，但仍保持 operator-agnostic。
 
-## Compute atoms
+每个源文件、binary、JSON `name` 和 manifest ID 完全一致。family 的
+`result.csv` 只保存 remote H800 最新一次完整 full sweep；quick、失败或部分扫描
+只进入 `build/logs` 与 `build/raw`。
 
-| ID | Operation | Dynamic count per page | Shared benchmark | Notes |
-|---|---|---:|---|---|
-| C0 | QK GMMA SS `m64n64k16` | first page: 36；every later valid page: 32 | [`qk_ss_bf16`](../../../../microbench/compute/wgmma/qk_ss_bf16/) | first page uses non-pipelined all-SS path |
-| C1 | QK GMMA RS `m64n64k16` | first page: 0；every later valid page: 4 | [`qk_rs_bf16`](../../../../microbench/compute/wgmma/qk_rs_bf16/) | Q tile8 lives in registers |
-| C2 | WG0 even shared-state softmax | one per even-role valid page | [`softmax_stage_bf16`](../../../../microbench/model/calibration/softmax_stage_bf16/) | max/exp/L update + probability conversion + O rescale interaction |
-| C3 | WG1 odd shared-state softmax | one per valid odd page；even-only tail still executes a masked control/rescale path | same benchmark, distinct dense-WG1 mode | `wg1_bunch_0` also consumes `sScale0` and rescales O/L |
-| C4 | post-odd even P/O rescale | P rescale before STSM once/even page；O/L rescale once/full pair | same benchmark, dense shared-state continuation | `wg0_scale_rP0` and `wg0_rescale_rO0` must not disappear into an unmeasured constant |
-| C5 | local PV GMMA RS `m64n256k16` | 4 per valid page | [`pv_rs_bf16`](../../../../microbench/compute/wgmma/pv_rs_bf16/) | owner page/output half |
-| C6 | remote PV GMMA SS `m64n256k16` | 4 per valid page | [`pv_ss_bf16`](../../../../microbench/compute/wgmma/pv_ss_bf16/) | exchanged P/other output half |
+## Dynamic DAG expansion
 
-## Pipeline-sensitive measurement
+模型按源码动态展开，而不是用固定的每页加法公式：
 
-独立原子只能给出吞吐诊断，不能直接决定 async pipeline 的 elapsed cycle。dense decode 至少需要以下组合扫描；它们是调度验证场景，不作为新的公共硬件原子登记：
+- first score 等待首 page 的 9 个 K TMA，然后按源码以一个包含 36 次 SS
+  WGMMA 的 committed group 发射；steady score 才是 9 个四指令 group。
+- 后续 score 为 8 个 SS group 加 tile 8 的 1 个 RS group，保留逐 tile TMA-ready
+  和真实 `wait_group<4/1/0>` 约束。
+- 每个有效 page 建 local/remote PV group、P STSM、proxy fence 和两个 WG 的
+  named-barrier rendezvous。
+- `N_page=0/1/even/odd`、causal tail、pair drain、single drain、split/no-split
+  epilogue 分别走源码对应分支。
+- metadata、persistent CTA 跨 request、PDL 和 combine 与 main 位于同一张 DAG。
 
-1. **First-page KQ**：9 个 K TMA 全部 barrier-ready 后，一次发射 36 SS QK，复刻 `warpgroup_cooperative_qkt_gemm_no_pipeline`。
-2. **Steady-page KQ**：9 个 per-tile barrier wait，每 tile 发射 4 个 QK，其中 tile8 为 RS：
+Phase 只是节点标签。节点之间只有源码支持的 program/data/barrier/TMA/WGMMA/
+buffer-reuse/grid-dependency 边，phase 边界不会自动增加 barrier。
 
-```text
-for tile in 0..8:
-    wait TMA[tile]
-    issue 4 × WGMMA[tile]
-```
+## Calibration boundary
 
-3. **Two-WG page-pair transition**：从当前 `rP0/rP1 ready` 到下一 pair `rP0/rP1 ready`，保留 named barriers、P exchange、half-buffer overwrite、`wait_group<1/4/0>` 和真实 compile-time tail flags。
-
-报告 standalone TMA/WGMMA/softmax/STSM、first/steady KQ、page-pair transition 三层结果。只有 combined 测量能给出实际 overlap；不能从 source issue 顺序直接假设 `max(T_TMA,T_WGMMA)`，也不能把两个 WG 的 WGMMA standalone cycle 直接取 `max`。
-
-## Exclusions
-
-- `block_table` 的一次 32-bit load/page 与页地址计算；保留在 TMA setup，不单测。
-- NamedBarrier arrive/wait bookkeeping；等待和资源干扰由 page-pair transition/e2e 标定。
-- causal mask 只影响最后两页的谓词与填零；作为 tail correction，不建稳态原子。
-- 最终 L reduction 和 LSE 写只发生一次 request/split iteration；保留在 epilogue correction。
+[`calibration/`](calibration/) 中的 first score、steady score、page-pair、softmax、
+store、combine 和 PDL probe 可以覆盖同一 DAG 子图，因此不能相加，也不能成为
+正式 cost。每个 probe 有自己的 `probe_dag`，只用于比较 atom-only prediction 与
+实测边界的 residual。Residual 只能推动源码 DAG、动态计数或 generic benchmark
+coverage 修正，不能生成 correction factor、offset、倍率或 overlap credit。

@@ -1,2 +1,1 @@
-"""Standalone FlashMLA dense-decode microbenchmarks and performance model."""
-
+"""Kernel-agnostic SM90a inline-PTX microbenchmarks."""

@@ -1,6 +1,8 @@
 __pycache__/
 *.py[cod]
 microbench/build/
+microbench/**/build/
+operators/flash_mla/paths/dense_decode_bf16_sm90_mqa/calibration/build/
 
 **/result/**/*.ptx
 **/result/**/*.cubin

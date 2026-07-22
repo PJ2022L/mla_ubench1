@@ -1,155 +1,21 @@
 {
-  "schema_version": 2,
-  "target": {
-    "gpu": "NVIDIA H800 SXM5",
-    "compute_capability": "9.0",
-    "cuda_arch": "sm_90a"
+  "gpu": "NVIDIA H800",
+  "architecture": "sm_90a",
+  "expected_sm_count": 132,
+  "expected_l2_bytes": 52428800,
+  "clock_policy": {
+    "require_locked_clocks": true,
+    "record_gpu_uuid": true,
+    "record_sm_clock_mhz": true,
+    "record_memory_clock_mhz": true
   },
-  "peaks": {
-    "bf16_tflops": 990.0,
-    "memory_gbps": 3350.0,
-    "note": "Nominal planning values. Record the locked clocks and measured sustainable peaks in the remote run metadata."
-  },
-  "hardware": {
-    "sm_count": 132,
-    "sm_clock_mhz": 1980.0,
-    "l2_bytes": 52428800,
-    "l2_gbps": 6700.0,
-    "registers_per_sm": 65536,
-    "shared_memory_per_sm": 233472,
-    "max_warps_per_sm": 64,
-    "max_ctas_per_sm": 32,
-    "main_threads": 256,
-    "main_registers_per_thread": 0,
-    "main_shared_memory_bytes": 0,
-    "combine_threads": 256,
-    "combine_registers_per_thread": 0,
-    "combine_shared_memory_bytes": 0,
-    "note": "Replace zero main/combine resource fields from remote cuobjdump before building the formal profile."
-  },
-  "defaults": {
-    "device": [0]
-  },
-  "presets": {
-    "quick": {
-      "description": "Protocol smoke sweep. It is intentionally small and is not the formal H800 profile.",
-      "timeout_seconds": 180,
-      "common": {
-        "iters": [256],
-        "warmup": [3],
-        "samples": [10],
-        "blocks": [1]
-      },
-      "family_defaults": {
-        "wgmma": {"warpgroups": [1, 2], "group_size": [1, 4], "depth": [1, 4]},
-        "scalar": {},
-        "shuffle": {"delta": [1, 2, 4, 8, 16]},
-        "sync": {},
-        "tma_load_k": {"depth": [1, 9], "working_set_pages": [64, 1024], "pattern": ["local", "sequential"]},
-        "tma_load_q": {"depth": [1, 2], "working_set_pages": [64, 1024], "pattern": ["local", "sequential"]},
-        "tma_store": {"depth": [1, 2], "working_set_tiles": [64, 4096]},
-        "bulk_store": {"working_set_tiles": [16, 512], "pattern": ["local", "sequential"]},
-        "matrix": {"warpgroups": [1, 2]},
-        "shared_load": {"threads": [128, 256], "pattern": ["unique", "quad_broadcast", "warp_broadcast"], "working_set_words": [4096]},
-        "shared_store": {},
-        "global_load": {},
-        "global_load_vector": {"num_splits": [2, 8, 32], "rowsets": [64], "warps": [8], "vectors_per_thread": [4], "pattern": ["local", "sequential"]},
-        "global_load_lse": {"num_splits": [2, 8, 32], "split_stride": [128], "rowsets": [256], "warps": [8], "pattern": ["local", "sequential"]},
-        "global_store": {},
-        "global_store_output": {"dtype": ["bf16", "fp16"], "warps": [8], "vectors_per_thread": [4], "working_set_records": [64], "pattern": ["local", "sequential"]},
-        "tensormap_prefetch": {"mode": ["q", "k", "o", "qko"], "working_pages": [64], "working_tiles": [64]},
-        "kq_calibration": {"working_set_pages": [64, 1024]},
-        "page_pair_calibration": {},
-        "metadata_calibration": {},
-        "combine_calibration": {"num_splits": [2, 8, 32, 96, 160]},
-        "pdl_calibration": {"producer_blocks": [132], "consumer_blocks": [132], "prefix_iters": [4096], "tail_iters": [4096], "consumer_iters": [4096]},
-        "softmax_calibration": {},
-        "epilogue_calibration": {"working_set_tiles": [64, 512], "pattern": ["local", "sequential"]}
-      },
-      "benches": {
-        "shared_store_u32": {"threads": [256], "working_set_words": [4096], "cases": [{"producers": [8, 64], "topology": ["contiguous"]}, {"producers": [8, 64], "topology": ["quad_leaders"]}, {"producers": [1, 8], "topology": ["warp_leaders"]}]},
-        "shared_store_u64_dense": {"role": ["stride520", "tail_zero"], "warpgroups": [2], "stores_per_thread": [64], "invalid_tokens": [8]},
-        "global_load_i32_cached": {"threads": [256], "issuers": [1, 32, 256], "pattern": ["broadcast", "sequential"], "working_set_entries": [32768]},
-        "global_load_i32_ordinary": {"threads": [256], "issuers": [1, 32, 256], "pattern": ["broadcast", "sequential"], "working_set_entries": [32768]},
-        "global_load_scheduler_record_32b": {"threads": [256], "issuers": [1, 32, 256], "pattern": ["broadcast", "sequential"], "working_set_records": [4096]},
-        "global_store_f32_lse": {"role": ["main", "combine"], "working_set_records": [64], "pattern": ["local", "sequential"]},
-        "global_store_scheduler_record_32b": {"working_set_records": [64], "pattern": ["local", "sequential"]},
-        "global_store_u32_num_splits": {"producers": [1, 32], "working_set_records": [64], "pattern": ["local", "sequential"]},
-        "kq_first_page_bf16": {"iters": [32]},
-        "kq_first_page_fp16": {"iters": [32]},
-        "kq_steady_page_bf16": {"iters": [32]},
-        "kq_steady_page_fp16": {"iters": [32]},
-        "page_pair_transition_bf16": {"iters": [16]},
-        "page_pair_transition_fp16": {"iters": [16]},
-        "metadata_stage": {"iters": [64], "blocks": [1], "cases": [{"batch": [1], "num_sm_parts": [1], "seqlen_distribution": ["uniform"], "seqlen_min": [64], "seqlen_max": [64], "seed": [20260719]}, {"batch": [32], "num_sm_parts": [16], "seqlen_distribution": ["ramp"], "seqlen_min": [64], "seqlen_max": [8192], "seed": [20260719]}, {"batch": [128], "num_sm_parts": [16], "seqlen_distribution": ["skewed"], "seqlen_min": [64], "seqlen_max": [8192], "seed": [20260719]}]},
-        "combine_stage_bf16": {"iters": [1]},
-        "combine_stage_fp16": {"iters": [1]},
-        "pdl_overlap": {"iters": [1], "blocks": [0]},
-        "softmax_stage_bf16": {"iters": [32]},
-        "softmax_stage_fp16": {"iters": [32]},
-        "epilogue_nosplit_b16": {"iters": [16]},
-        "epilogue_split_f32": {"iters": [16]}
-      }
-    },
-    "full": {
-      "description": "Formal atom and interaction sweep for a clock-locked H800 SM90a.",
-      "timeout_seconds": 600,
-      "common": {
-        "iters": [4096],
-        "warmup": [5],
-        "samples": [30],
-        "blocks": [1, 132, 264, 0]
-      },
-      "family_defaults": {
-        "wgmma": {"warpgroups": [1, 2], "group_size": [1, 4], "depth": [1, 2, 4]},
-        "scalar": {},
-        "shuffle": {"delta": [1, 2, 4, 8, 16]},
-        "sync": {},
-        "tma_load_k": {"depth": [1, 2, 4, 8, 9], "working_set_pages": [64, 1024, 8192], "pattern": ["local", "sequential", "random"]},
-        "tma_load_q": {"depth": [1, 2], "working_set_pages": [64, 1024, 8192], "pattern": ["local", "sequential", "random"]},
-        "tma_store": {"depth": [1, 2], "working_set_tiles": [4096, 32768]},
-        "bulk_store": {"working_set_tiles": [512, 4096], "pattern": ["local", "sequential", "random"]},
-        "matrix": {"warpgroups": [1, 2]},
-        "shared_load": {"threads": [128, 256], "pattern": ["unique", "quad_broadcast", "warp_broadcast"], "working_set_words": [1024, 4096, 16384]},
-        "shared_store": {},
-        "global_load": {},
-        "global_load_vector": {"num_splits": [2, 4, 8, 16, 32, 64, 96, 128, 160], "rowsets": [64, 1024], "warps": [1, 8], "vectors_per_thread": [1, 4], "pattern": ["local", "sequential", "random"]},
-        "global_load_lse": {"num_splits": [2, 4, 8, 16, 32, 64, 96, 128, 160], "split_stride": [128, 1024], "rowsets": [256, 4096], "warps": [1, 8], "pattern": ["local", "sequential", "random"]},
-        "global_store": {},
-        "global_store_output": {"dtype": ["bf16", "fp16"], "warps": [1, 8], "vectors_per_thread": [1, 4], "working_set_records": [64, 1024], "pattern": ["local", "sequential", "random"]},
-        "tensormap_prefetch": {"mode": ["q", "k", "o", "qko"], "working_pages": [64, 1024, 8192], "working_tiles": [64, 1024, 8192]},
-        "kq_calibration": {"working_set_pages": [64, 1024, 8192]},
-        "page_pair_calibration": {},
-        "metadata_calibration": {},
-        "combine_calibration": {"num_splits": [2, 4, 8, 16, 32, 64, 96, 128, 160]},
-        "pdl_calibration": {"producer_blocks": [1, 132, 264], "consumer_blocks": [1, 132, 264], "prefix_iters": [1024, 4096], "tail_iters": [1024, 4096, 16384], "consumer_iters": [1024, 4096, 16384]},
-        "softmax_calibration": {},
-        "epilogue_calibration": {"working_set_tiles": [512, 4096], "pattern": ["local", "sequential", "random"]}
-      },
-      "benches": {
-        "shared_store_u32": {"threads": [256], "working_set_words": [1024, 4096, 16384], "cases": [{"producers": [1, 8, 32, 64, 256], "topology": ["contiguous"]}, {"producers": [1, 8, 32, 64], "topology": ["quad_leaders"]}, {"producers": [1, 8], "topology": ["warp_leaders"]}]},
-        "shared_store_u64_dense": {"role": ["stride520", "tail_zero"], "warpgroups": [1, 2], "stores_per_thread": [1, 16, 64], "invalid_tokens": [1, 8, 32, 64]},
-        "global_load_i32_cached": {"threads": [256], "issuers": [1, 8, 32, 128, 256], "pattern": ["broadcast", "local", "sequential", "random"], "working_set_entries": [32, 131072, 16777216]},
-        "global_load_i32_ordinary": {"threads": [256], "issuers": [1, 8, 32, 128, 256], "pattern": ["broadcast", "local", "sequential", "random"], "working_set_entries": [32, 131072, 16777216]},
-        "global_load_scheduler_record_32b": {"threads": [256], "issuers": [1, 8, 32, 128, 256], "pattern": ["broadcast", "local", "sequential", "random"], "working_set_records": [32, 4096, 1048576]},
-        "global_store_f32_lse": {"role": ["main", "combine"], "working_set_records": [64, 1024], "pattern": ["local", "sequential", "random"]},
-        "global_store_scheduler_record_32b": {"working_set_records": [64, 1024], "pattern": ["local", "sequential", "random"]},
-        "global_store_u32_num_splits": {"producers": [1, 8, 32], "working_set_records": [64, 1024], "pattern": ["local", "sequential", "random"]},
-        "kq_first_page_bf16": {"iters": [64], "blocks": [1, 132]},
-        "kq_first_page_fp16": {"iters": [64], "blocks": [1, 132]},
-        "kq_steady_page_bf16": {"iters": [64], "blocks": [1, 132]},
-        "kq_steady_page_fp16": {"iters": [64], "blocks": [1, 132]},
-        "page_pair_transition_bf16": {"iters": [32], "blocks": [1, 132]},
-        "page_pair_transition_fp16": {"iters": [32], "blocks": [1, 132]},
-        "metadata_stage": {"iters": [256], "blocks": [1], "cases": [{"batch": [1], "num_sm_parts": [1], "seqlen_distribution": ["uniform"], "seqlen_min": [0], "seqlen_max": [64], "seed": [20260719]}, {"batch": [1], "num_sm_parts": [8], "seqlen_distribution": ["uniform"], "seqlen_min": [8192], "seqlen_max": [8192], "seed": [20260719]}, {"batch": [1], "num_sm_parts": [16], "seqlen_distribution": ["uniform"], "seqlen_min": [65536], "seqlen_max": [65536], "seed": [20260719]}, {"batch": [8], "num_sm_parts": [8], "seqlen_distribution": ["ramp"], "seqlen_min": [64], "seqlen_max": [8192], "seed": [20260719]}, {"batch": [8], "num_sm_parts": [33], "seqlen_distribution": ["random"], "seqlen_min": [64], "seqlen_max": [65536], "seed": [20260719]}, {"batch": [32], "num_sm_parts": [16], "seqlen_distribution": ["uniform"], "seqlen_min": [8192], "seqlen_max": [8192], "seed": [20260719]}, {"batch": [32], "num_sm_parts": [33], "seqlen_distribution": ["skewed"], "seqlen_min": [64], "seqlen_max": [65536], "seed": [20260719]}, {"batch": [32], "num_sm_parts": [66], "seqlen_distribution": ["random"], "seqlen_min": [64], "seqlen_max": [65536], "seed": [20260719]}, {"batch": [128], "num_sm_parts": [64], "seqlen_distribution": ["uniform"], "seqlen_min": [64], "seqlen_max": [64], "seed": [20260719]}, {"batch": [128], "num_sm_parts": [66], "seqlen_distribution": ["ramp"], "seqlen_min": [0], "seqlen_max": [8192], "seed": [20260719]}, {"batch": [128], "num_sm_parts": [128], "seqlen_distribution": ["skewed"], "seqlen_min": [64], "seqlen_max": [65536], "seed": [20260719]}, {"batch": [512], "num_sm_parts": [132], "seqlen_distribution": ["random"], "seqlen_min": [0], "seqlen_max": [8192], "seed": [20260719]}, {"batch": [2048], "num_sm_parts": [132], "seqlen_distribution": ["skewed"], "seqlen_min": [0], "seqlen_max": [8192], "seed": [20260719]}]},
-        "combine_stage_bf16": {"iters": [1], "blocks": [1, 132, 264]},
-        "combine_stage_fp16": {"iters": [1], "blocks": [1, 132, 264]},
-        "pdl_overlap": {"iters": [1], "blocks": [0]},
-        "softmax_stage_bf16": {"iters": [64], "blocks": [1, 132]},
-        "softmax_stage_fp16": {"iters": [64], "blocks": [1, 132]},
-        "epilogue_nosplit_b16": {"iters": [32], "blocks": [1, 132, 264]},
-        "epilogue_split_f32": {"iters": [32], "blocks": [1, 132, 264]}
-      }
-    }
-  }
+  "canonical_block_counts": [1, 2, 4, 8, 16, 32, 66, 132, 264, 528],
+  "l2_working_set_multipliers": [0.25, 0.5, 1.0, 2.0, 4.0, 8.0],
+  "access_patterns": ["local", "sequential", "random", "reuse"],
+  "cache_modes": ["l2_hot", "hbm_stream"],
+  "notes": [
+    "Family-local scripts/sweep.json files are authoritative parameter grids.",
+    "Do not execute CUDA binaries on the local machine.",
+    "Accepted result.csv files must come from a complete remote H800 full sweep."
+  ]
 }

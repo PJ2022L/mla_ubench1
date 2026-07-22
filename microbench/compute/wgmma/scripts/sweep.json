@@ -1,0 +1,289 @@
+{
+  "quick": {
+    "default": {
+      "iters": [
+        256
+      ],
+      "warmup": [
+        1
+      ],
+      "samples": [
+        3
+      ],
+      "blocks": [
+        1
+      ]
+    },
+    "benchmarks": {
+      "m64n256k16_rs_bf16": {
+        "warpgroups": [
+          1
+        ],
+        "group-size": [
+          4
+        ],
+        "depth": [
+          1
+        ]
+      },
+      "m64n256k16_rs_fp16": {
+        "warpgroups": [
+          1
+        ],
+        "group-size": [
+          4
+        ],
+        "depth": [
+          1
+        ]
+      },
+      "m64n256k16_ss_bf16": {
+        "warpgroups": [
+          1
+        ],
+        "group-size": [
+          4
+        ],
+        "depth": [
+          1
+        ]
+      },
+      "m64n256k16_ss_fp16": {
+        "warpgroups": [
+          1
+        ],
+        "group-size": [
+          4
+        ],
+        "depth": [
+          1
+        ]
+      },
+      "m64n64k16_rs_bf16": {
+        "warpgroups": [
+          1
+        ],
+        "group-size": [
+          4
+        ],
+        "depth": [
+          1
+        ]
+      },
+      "m64n64k16_rs_fp16": {
+        "warpgroups": [
+          1
+        ],
+        "group-size": [
+          4
+        ],
+        "depth": [
+          1
+        ]
+      },
+      "m64n64k16_ss_bf16": {
+        "warpgroups": [
+          1
+        ],
+        "group-size": [
+          4,
+          36
+        ],
+        "depth": [
+          1
+        ]
+      },
+      "m64n64k16_ss_fp16": {
+        "warpgroups": [
+          1
+        ],
+        "group-size": [
+          4,
+          36
+        ],
+        "depth": [
+          1
+        ]
+      }
+    }
+  },
+  "full": {
+    "default": {
+      "iters": [
+        4096
+      ],
+      "warmup": [
+        3
+      ],
+      "samples": [
+        20
+      ],
+      "blocks": [
+        1,
+        2,
+        4,
+        8,
+        16,
+        32,
+        66,
+        132,
+        264,
+        528
+      ]
+    },
+    "benchmarks": {
+      "m64n256k16_rs_bf16": {
+        "warpgroups": [
+          1,
+          2
+        ],
+        "group-size": [
+          1,
+          4
+        ],
+        "depth": [
+          1,
+          2,
+          4
+        ]
+      },
+      "m64n256k16_rs_fp16": {
+        "warpgroups": [
+          1,
+          2
+        ],
+        "group-size": [
+          1,
+          4
+        ],
+        "depth": [
+          1,
+          2,
+          4
+        ]
+      },
+      "m64n256k16_ss_bf16": {
+        "warpgroups": [
+          1,
+          2
+        ],
+        "group-size": [
+          1,
+          4
+        ],
+        "depth": [
+          1,
+          2,
+          4
+        ]
+      },
+      "m64n256k16_ss_fp16": {
+        "warpgroups": [
+          1,
+          2
+        ],
+        "group-size": [
+          1,
+          4
+        ],
+        "depth": [
+          1,
+          2,
+          4
+        ]
+      },
+      "m64n64k16_rs_bf16": {
+        "warpgroups": [
+          1,
+          2
+        ],
+        "group-size": [
+          1,
+          4
+        ],
+        "depth": [
+          1,
+          2,
+          4
+        ]
+      },
+      "m64n64k16_rs_fp16": {
+        "warpgroups": [
+          1,
+          2
+        ],
+        "group-size": [
+          1,
+          4
+        ],
+        "depth": [
+          1,
+          2,
+          4
+        ]
+      },
+      "m64n64k16_ss_bf16": {
+        "cases": [
+          {
+            "warpgroups": [
+              1,
+              2
+            ],
+            "group-size": [
+              1,
+              4
+            ],
+            "depth": [
+              1,
+              2,
+              4
+            ]
+          },
+          {
+            "warpgroups": [
+              1,
+              2
+            ],
+            "group-size": [
+              36
+            ],
+            "depth": [
+              1
+            ]
+          }
+        ]
+      },
+      "m64n64k16_ss_fp16": {
+        "cases": [
+          {
+            "warpgroups": [
+              1,
+              2
+            ],
+            "group-size": [
+              1,
+              4
+            ],
+            "depth": [
+              1,
+              2,
+              4
+            ]
+          },
+          {
+            "warpgroups": [
+              1,
+              2
+            ],
+            "group-size": [
+              36
+            ],
+            "depth": [
+              1
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

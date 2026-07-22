@@ -1,88 +1,31 @@
-# FlashMLA Dense Decode Microbench
+# SM90a Microbenchmarks
 
-SM90a/H800 专用 benchmark 与 E2E 模型。只使用基础 CUDA、Driver API 和
-inline PTX，不依赖 CUTLASS/CUTE。
+This directory contains kernel-agnostic CUDA + inline-PTX microbenchmarks. It contains no dense-decode model or operator calibration code. The remote NVIDIA H800 is the only supported execution target; local work is limited to schema checks, dry-runs, compilation, PTX/SASS inspection, and CPU-side tests.
 
-## Contents
+Each family owns its concrete opcode helpers and harness under `common/`, one source per generic benchmark ID, family-local build/sweep scripts, generated artifacts under `build/`, a formal `result.csv`, and a concise README. Root `common/bench.hpp` contains only shared CLI, CUDA error handling, timing, statistics, and six-key JSON utilities.
 
-```text
-compute/             31 compute atom leaves
-memory/              20 memory atom leaves
-model/calibration/   14 interaction calibration leaves
-model/dense_decode/  scheduler 与离散事件 E2E 模型
-common/              PTX、计时、JSON、tensor-map 公共代码
-config/h800.json     quick/full 扫参
-manifest.json        binary、参数、PTX/SASS 和源码归属
-scan.py              统一 remote runner
-scripts/             Makefile/静态检查内部依赖
-```
+Identity is strict: manifest `id`, source stem, binary, and JSON `name` are identical. `manifest.json` registers generic operations and resource curves only. Operator roles and source anchors belong in the operator model's mapping file.
 
-每个 atom leaf 是一个独立 binary。51 是 31 compute + 20 memory 的独立测量
-配置数，不是 51 个不同 PTX mnemonic。
+The current manifest contains 67 entries across 21 families: 60 operations and 7 resource curves. This count is descriptive, not a compatibility target. The M64N64 shared/shared WGMMA family includes a generic `group_size=36, depth=1` dependency protocol in addition to the ordinary group-size 1/4 curves.
 
-## Build
+Formal results use the latest complete accepted full sweep. A quick or failed run never replaces `result.csv`; commands, complete arguments, durations, failures, and raw samples stay in family-local `build/logs` and `build/raw`.
+All checked-in `result.csv` files are currently header-only, so no local timing is accepted. Generated `build/`, `__pycache__`, and `.pyc` content is ignored and may be removed after local verification. On the remote H800, retain the accepted full log/raw pair and matching SASS/resource evidence.
 
-以下命令只编译和反汇编，不运行 GPU：
+Local checks:
 
 ```bash
-make -C microbench -j8 everything
+make -C microbench validate
 make -C microbench static
-make -C microbench static-calibration
+make -C microbench dry-build
+make -C microbench dry-run
 ```
 
-## Scan
-
-先查看命令空间：
+Remote H800 flow:
 
 ```bash
-python3 microbench/scan.py --kind all --preset quick --dry-run
-python3 microbench/scan.py --kind atom --preset full --dry-run
-python3 microbench/scan.py --kind calibration --preset full --dry-run
+make -C microbench build
+make -C microbench quick
+make -C microbench run
 ```
 
-只在 remote H800 运行：
-
-```bash
-python3 microbench/scan.py --kind atom --preset quick \
-  --output-dir microbench/results/<run-id>/quick/atoms
-
-python3 microbench/scan.py --kind atom --preset full \
-  --output-dir microbench/results/<run-id>/profile/atoms
-```
-
-## Output
-
-每个扫描目录最多有：
-
-```text
-results.jsonl   正式六键结果
-run.log         JSONL：runner args、每个 case 的 command 和 duration
-failures.jsonl  仅失败时生成
-```
-
-正式结果顶层固定为：
-
-```text
-name, params, latency, throughput, memory_bandwidth, hardware_utilization
-```
-
-`results.jsonl` 不存 runner 时间戳、wall time 或命令。metric 内的 raw samples
-属于正式性能数据，需要保留给 bootstrap。`run.log` 开头只记录一次 GPU 环境，
-避免每条结果重复环境快照。
-
-## Model
-
-```bash
-python3 -m microbench.model.dense_decode build-profile \
-  --microbench-results microbench/results/<run-id>/profile \
-  --static-artifacts microbench/results/<run-id>/static \
-  --output microbench/results/<run-id>/h800-profile.json
-
-python3 -m microbench.model.dense_decode predict \
-  --profile microbench/results/<run-id>/h800-profile.json \
-  --workload microbench/model/dense_decode/workload.example.json \
-  --bootstrap 1000 --output prediction.json
-```
-
-quick、失败和 held-out E2E 结果不得作为 profile 输入。完整 remote 执行顺序见
-根目录 `HANDOFF.md`。
+`resource/memory_service` covers active-grid, working-set, cache-mode, access-pattern, and outstanding-depth curves for global memory. `resource/tma_service` provides TMA service curves. `resource/interference` measures mixed WGMMA shape/source mode, WGMMA+TMA, and WGMMA+SFU/shared competition. `resource/pdl` contains standalone PDL instruction atoms plus the producer-consumer grid dependency curve.
